@@ -7,22 +7,73 @@ import java.util.List;
 
 class DomainEntityTest {
 
-    // --- ProductLocation ---
+    // --- ProductSpec ---
 
     @Test
-    void productLocationStoresAreaShelfRowQty() {
-        ProductLocation loc = new ProductLocation(Area.STORE, 2, 3, 50);
-        assertEquals(Area.STORE, loc.getArea());
-        assertEquals(2, loc.getShelfNumber());
-        assertEquals(3, loc.getRowNumber());
-        assertEquals(50, loc.getQuantity());
+    void productSpecStoresTypeFields() {
+        Category cat = new Category("Dairy");
+        ProductSpec spec = new ProductSpec("Milk 1L", "Tnuva", cat, 4.5, 6.9, 15);
+        assertEquals("Milk 1L", spec.getName());
+        assertEquals("Tnuva", spec.getManufacturer());
+        assertEquals(cat, spec.getCategory());
+        assertEquals(4.5, spec.getCostPrice(), 0.01);
+        assertEquals(6.9, spec.getSellPrice(), 0.01);
+        assertEquals(15, spec.getMinStockThreshold());
+    }
+
+    // --- Product ---
+
+    @Test
+    void productHasIdAndSpec() {
+        Category cat = new Category("Dairy");
+        ProductSpec spec = new ProductSpec("Milk 1L", "Tnuva", cat, 4.5, 6.9, 15);
+        Product product = new Product(1, spec);
+        assertEquals(1, product.getId());
+        assertSame(spec, product.getSpec());
+    }
+
+    // --- StockItem ---
+
+    @Test
+    void stockItemStoresSpecAndLocation() {
+        Category cat = new Category("Test");
+        ProductSpec spec = new ProductSpec("Item", "Mfg", cat, 5.0, 10.0, 10);
+        StockItem item = new StockItem(spec, Area.STORE, 2, 3, 50, null);
+        assertSame(spec, item.getSpec());
+        assertEquals(Area.STORE, item.getArea());
+        assertEquals(2, item.getShelfNumber());
+        assertEquals(3, item.getRowNumber());
+        assertEquals(50, item.getQuantity());
+        assertNull(item.getExpiryDate());
     }
 
     @Test
-    void productLocationQuantityCanBeUpdated() {
-        ProductLocation loc = new ProductLocation(Area.WAREHOUSE, 1, 1, 10);
-        loc.setQuantity(25);
-        assertEquals(25, loc.getQuantity());
+    void stockItemTracksExpiryPerBatch() {
+        Category cat = new Category("Test");
+        ProductSpec spec = new ProductSpec("Milk", "Tnuva", cat, 4.5, 6.9, 15);
+        LocalDate expiry = LocalDate.of(2026, 7, 1);
+        StockItem item = new StockItem(spec, Area.WAREHOUSE, 1, 3, 50, expiry);
+        assertEquals(expiry, item.getExpiryDate());
+    }
+
+    @Test
+    void stockItemQuantityCanBeUpdated() {
+        Category cat = new Category("Test");
+        ProductSpec spec = new ProductSpec("Item", "Mfg", cat, 5.0, 10.0, 10);
+        StockItem item = new StockItem(spec, Area.WAREHOUSE, 1, 1, 10, null);
+        item.setQuantity(25);
+        assertEquals(25, item.getQuantity());
+    }
+
+    @Test
+    void stockItemsForSameSpecAtDifferentLocations() {
+        Category cat = new Category("Test");
+        ProductSpec spec = new ProductSpec("Item", "Mfg", cat, 5.0, 10.0, 10);
+        StockItem s1 = new StockItem(spec, Area.STORE, 1, 1, 20, null);
+        StockItem s2 = new StockItem(spec, Area.WAREHOUSE, 1, 1, 30, null);
+        assertSame(s1.getSpec(), s2.getSpec());
+        int total = s1.getQuantity() + s2.getQuantity();
+        assertEquals(50, total);
     }
 
     // --- Category ---
@@ -43,61 +94,18 @@ class DomainEntityTest {
     }
 
     @Test
-    void categoryGetAllProductsRecursive() {
+    void categoryGetAllProductSpecsRecursive() {
         Category root = new Category("Dairy");
         Category milk = new Category("Milk", root);
         Category bySize = new Category("By Size", milk);
 
-        Product p1 = new Product(1, "Milk 1L", "Tnuva", bySize, 4.5, 6.9, 15,
-                LocalDate.of(2026, 6, 1));
-        Product p2 = new Product(2, "Milk 500ml", "Tnuva", bySize, 3.0, 4.9, 10,
-                LocalDate.of(2026, 6, 1));
+        ProductSpec s1 = new ProductSpec("Milk 1L", "Tnuva", bySize, 4.5, 6.9, 15);
+        ProductSpec s2 = new ProductSpec("Milk 500ml", "Tnuva", bySize, 3.0, 4.9, 10);
 
-        List<Product> all = root.getAllProducts();
+        List<ProductSpec> all = root.getAllProducts();
         assertEquals(2, all.size());
-        assertTrue(all.contains(p1));
-        assertTrue(all.contains(p2));
-    }
-
-    // --- Product ---
-
-    @Test
-    void productTotalQuantityAcrossLocations() {
-        Category cat = new Category("Test");
-        Product p = new Product(1, "Item", "Mfg", cat, 5.0, 10.0, 10,
-                LocalDate.of(2026, 12, 1));
-        p.addLocation(new ProductLocation(Area.STORE, 1, 1, 20));
-        p.addLocation(new ProductLocation(Area.WAREHOUSE, 1, 1, 30));
-        assertEquals(50, p.getTotalQuantity());
-    }
-
-    @Test
-    void productStoreAndWarehouseQuantitySeparate() {
-        Category cat = new Category("Test");
-        Product p = new Product(1, "Item", "Mfg", cat, 5.0, 10.0, 10,
-                LocalDate.of(2026, 12, 1));
-        p.addLocation(new ProductLocation(Area.STORE, 1, 1, 15));
-        p.addLocation(new ProductLocation(Area.WAREHOUSE, 2, 1, 40));
-        assertEquals(15, p.getStoreQuantity());
-        assertEquals(40, p.getWarehouseQuantity());
-    }
-
-    @Test
-    void productBelowMinStock() {
-        Category cat = new Category("Test");
-        Product p = new Product(1, "Item", "Mfg", cat, 5.0, 10.0, 20,
-                LocalDate.of(2026, 12, 1));
-        p.addLocation(new ProductLocation(Area.STORE, 1, 1, 5));
-        assertTrue(p.isBelowMinStock());
-    }
-
-    @Test
-    void productAboveMinStockNotFlagged() {
-        Category cat = new Category("Test");
-        Product p = new Product(1, "Item", "Mfg", cat, 5.0, 10.0, 10,
-                LocalDate.of(2026, 12, 1));
-        p.addLocation(new ProductLocation(Area.STORE, 1, 1, 15));
-        assertFalse(p.isBelowMinStock());
+        assertTrue(all.contains(s1));
+        assertTrue(all.contains(s2));
     }
 
     // --- Promotion ---
@@ -105,31 +113,28 @@ class DomainEntityTest {
     @Test
     void promotionIsActiveWithinDateRange() {
         Category cat = new Category("Test");
-        Product p = new Product(1, "Item", "Mfg", cat, 5.0, 10.0, 10,
-                LocalDate.of(2026, 12, 1));
+        ProductSpec spec = new ProductSpec("Item", "Mfg", cat, 5.0, 10.0, 10);
         Promotion promo = new Promotion(10.0, LocalDate.of(2026, 1, 1),
-                LocalDate.of(2026, 12, 31), p, null);
+                LocalDate.of(2026, 12, 31), spec, null);
         assertTrue(promo.isActive());
     }
 
     @Test
     void promotionExpiredIsNotActive() {
         Category cat = new Category("Test");
-        Product p = new Product(1, "Item", "Mfg", cat, 5.0, 10.0, 10,
-                LocalDate.of(2026, 12, 1));
+        ProductSpec spec = new ProductSpec("Item", "Mfg", cat, 5.0, 10.0, 10);
         Promotion promo = new Promotion(10.0, LocalDate.of(2025, 1, 1),
-                LocalDate.of(2025, 6, 30), p, null);
+                LocalDate.of(2025, 6, 30), spec, null);
         assertFalse(promo.isActive());
     }
 
     @Test
     void promotionEffectivePriceWhenActive() {
         Category cat = new Category("Test");
-        Product p = new Product(1, "Item", "Mfg", cat, 5.0, 100.0, 10,
-                LocalDate.of(2026, 12, 1));
+        ProductSpec spec = new ProductSpec("Item", "Mfg", cat, 5.0, 100.0, 10);
         Promotion promo = new Promotion(10.0, LocalDate.of(2026, 1, 1),
-                LocalDate.of(2026, 12, 31), p, null);
-        assertEquals(90.0, promo.getEffectivePrice(p), 0.01);
+                LocalDate.of(2026, 12, 31), spec, null);
+        assertEquals(90.0, promo.getEffectivePrice(spec), 0.01);
     }
 
     // --- DefectiveReport ---
