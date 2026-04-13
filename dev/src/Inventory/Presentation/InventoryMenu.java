@@ -167,7 +167,8 @@ public class InventoryMenu {
         for (Product p : low) {
             ProductSpec spec = p.getSpec();
             List<StockItem> stock = controller.getStockForProduct(p.getId());
-            int total = stock.stream().mapToInt(StockItem::getQuantity).sum();
+            int total = 0;
+            for (StockItem si : stock) { total += si.getQuantity(); }
             System.out.printf("  [ID=%d] %s (%s) — total=%d, min=%d%n",
                     p.getId(), spec.getName(), spec.getManufacturer(),
                     total, spec.getMinStockThreshold());
@@ -333,10 +334,12 @@ public class InventoryMenu {
         for (Product p : report.getItems()) {
             ProductSpec spec = p.getSpec();
             List<StockItem> stock = controller.getStockForProduct(p.getId());
-            int storeQty = stock.stream().filter(si -> si.getArea() == Area.STORE)
-                    .mapToInt(StockItem::getQuantity).sum();
-            int warehouseQty = stock.stream().filter(si -> si.getArea() == Area.WAREHOUSE)
-                    .mapToInt(StockItem::getQuantity).sum();
+            int storeQty = 0;
+            int warehouseQty = 0;
+            for (StockItem si : stock) {
+                if (si.getArea() == Area.STORE) storeQty += si.getQuantity();
+                else warehouseQty += si.getQuantity();
+            }
             int total = storeQty + warehouseQty;
             String status = total == 0 ? "OUT" : total < spec.getMinStockThreshold() ? "LOW" : "OK";
             System.out.printf("  [ID=%d] %s (%s) — store=%d warehouse=%d total=%d [%s]%n",

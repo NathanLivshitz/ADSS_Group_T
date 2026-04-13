@@ -2,7 +2,6 @@ package Inventory.Domain;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class InventoryController {
     private final Map<Integer, Product> catalog;
@@ -58,8 +57,13 @@ public class InventoryController {
     public void addStockItem(StockItem item) {
         if (item == null)
             throw new IllegalArgumentException("StockItem must not be null");
-        boolean specInCatalog = catalog.values().stream()
-                .anyMatch(p -> p.getSpec() == item.getSpec());
+        boolean specInCatalog = false;
+        for (Product p : catalog.values()) {
+            if (p.getSpec() == item.getSpec()) {
+                specInCatalog = true;
+                break;
+            }
+        }
         if (!specInCatalog)
             throw new IllegalArgumentException("StockItem's spec does not belong to any product in the catalog");
         stockItems.add(item);
@@ -73,9 +77,13 @@ public class InventoryController {
      */
     public List<StockItem> getStockForProduct(int productId) {
         ProductSpec spec = getProduct(productId).getSpec();
-        return stockItems.stream()
-                .filter(si -> si.getSpec() == spec)
-                .collect(Collectors.toList());
+        List<StockItem> result = new ArrayList<>();
+        for (StockItem si : stockItems) {
+            if (si.getSpec() == spec) {
+                result.add(si);
+            }
+        }
+        return result;
     }
 
     /**
@@ -88,18 +96,20 @@ public class InventoryController {
         if (area == null)
             throw new IllegalArgumentException("Area must not be null");
         ProductSpec spec = getProduct(productId).getSpec();
-        StockItem item = stockItems.stream()
-                .filter(si -> si.getSpec() == spec
-                        && si.getArea() == area
-                        && si.getShelfNumber() == shelf
-                        && si.getRowNumber() == row)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Location not found for product " + productId));
-        int newQty = item.getQuantity() + delta;
+        StockItem found = null;
+        for (StockItem si : stockItems) {
+            if (si.getSpec() == spec && si.getArea() == area
+                    && si.getShelfNumber() == shelf && si.getRowNumber() == row) {
+                found = si;
+                break;
+            }
+        }
+        if (found == null)
+            throw new IllegalArgumentException("Location not found for product " + productId);
+        int newQty = found.getQuantity() + delta;
         if (newQty < 0)
-            throw new IllegalArgumentException("Not enough stock. Available: " + item.getQuantity());
-        item.setQuantity(newQty);
+            throw new IllegalArgumentException("Not enough stock. Available: " + found.getQuantity());
+        found.setQuantity(newQty);
     }
 
     // ── ALERTS ───────────────────────────────────────────────
@@ -110,9 +120,13 @@ public class InventoryController {
      * Returns: products where total quantity across all StockItems < minStockThreshold.
      */
     public List<Product> getLowStockProducts() {
-        return catalog.values().stream()
-                .filter(p -> getTotalQuantity(p.getId()) < p.getSpec().getMinStockThreshold())
-                .collect(Collectors.toList());
+        List<Product> result = new ArrayList<>();
+        for (Product p : catalog.values()) {
+            if (getTotalQuantity(p.getId()) < p.getSpec().getMinStockThreshold()) {
+                result.add(p);
+            }
+        }
+        return result;
     }
 
     // ── CATEGORIES ───────────────────────────────────────────
@@ -155,9 +169,13 @@ public class InventoryController {
      * INV-5: Returns all promotions where today is within [startDate, endDate].
      */
     public List<Promotion> getActivePromotions() {
-        return promotions.stream()
-                .filter(Promotion::isActive)
-                .collect(Collectors.toList());
+        List<Promotion> active = new ArrayList<>();
+        for (Promotion p : promotions) {
+            if (p.isActive()) {
+                active.add(p);
+            }
+        }
+        return active;
     }
 
     /**
@@ -168,11 +186,12 @@ public class InventoryController {
      */
     public double getEffectivePrice(int productId) {
         ProductSpec spec = getProduct(productId).getSpec();
-        return promotions.stream()
-                .filter(p -> p.isActive() && p.appliesTo(spec))
-                .findFirst()
-                .map(p -> p.getEffectivePrice(spec))
-                .orElse(spec.getSellPrice());
+        for (Promotion p : promotions) {
+            if (p.isActive() && p.appliesTo(spec)) {
+                return p.getEffectivePrice(spec);
+            }
+        }
+        return spec.getSellPrice();
     }
 
     // ── DEFECTIVES ───────────────────────────────────────────
@@ -193,7 +212,7 @@ public class InventoryController {
     /**
      * Menu 11: Locate defective items
      * INV-7: Maps each defective product ID to its current stock locations.
-     * Returns: productId -> List<StockItem> for products that have been reported defective.
+     * Returns: productId to List of StockItem for products that have been reported defective.
      */
     public Map<Integer, List<StockItem>> getDefectiveItemsWithLocations() {
         Map<Integer, List<StockItem>> result = new HashMap<>();
@@ -209,16 +228,20 @@ public class InventoryController {
      * Menu 12: Defective report by dates
      * INV-8: Periodic defect reports filtered by date range.
      * Input: from date, to date (inclusive)
-     * Throws: if dates null or from > to.
+     * Throws: if dates null or from after to.
      */
     public List<DefectiveReport> getDefectiveReports(LocalDate from, LocalDate to) {
         if (from == null || to == null)
             throw new IllegalArgumentException("Date range cannot be null");
         if (from.isAfter(to))
             throw new IllegalArgumentException("From date must be before or equal to to date");
-        return defectiveReports.stream()
-                .filter(r -> !r.getReportDate().isBefore(from) && !r.getReportDate().isAfter(to))
-                .collect(Collectors.toList());
+        List<DefectiveReport> result = new ArrayList<>();
+        for (DefectiveReport r : defectiveReports) {
+            if (!r.getReportDate().isBefore(from) && !r.getReportDate().isAfter(to)) {
+                result.add(r);
+            }
+        }
+        return result;
     }
 
     // ── REPORTS ──────────────────────────────────────────────
@@ -234,28 +257,45 @@ public class InventoryController {
         if (categoriesFilter == null || categoriesFilter.isEmpty()) {
             items = new ArrayList<>(catalog.values());
         } else {
-            Set<ProductSpec> specSet = categoriesFilter.stream()
-                    .flatMap(c -> c.getAllProducts().stream())
-                    .collect(Collectors.toSet());
-            items = catalog.values().stream()
-                    .filter(p -> specSet.contains(p.getSpec()))
-                    .collect(Collectors.toList());
+            Set<ProductSpec> specSet = new HashSet<>();
+            for (Category c : categoriesFilter) {
+                specSet.addAll(c.getAllProducts());
+            }
+            items = new ArrayList<>();
+            for (Product p : catalog.values()) {
+                if (specSet.contains(p.getSpec())) {
+                    items.add(p);
+                }
+            }
         }
         return new InventoryReport(reportDate,
-                categoriesFilter != null ? categoriesFilter : List.of(), items);
+                categoriesFilter != null ? categoriesFilter : new ArrayList<>(), items);
     }
 
     // ── INTERNAL ─────────────────────────────────────────────
 
     private int getTotalQuantity(int productId) {
-        return getStockForProduct(productId).stream()
-                .mapToInt(StockItem::getQuantity).sum();
+        int total = 0;
+        for (StockItem si : getStockForProduct(productId)) {
+            total += si.getQuantity();
+        }
+        return total;
     }
 
     private void removeStock(int productId, int quantity) {
-        List<StockItem> sorted = getStockForProduct(productId).stream()
-                .sorted(Comparator.comparing(si -> si.getArea() == Area.STORE ? 0 : 1))
-                .collect(Collectors.toList());
+        List<StockItem> storeItems = new ArrayList<>();
+        List<StockItem> warehouseItems = new ArrayList<>();
+        for (StockItem si : getStockForProduct(productId)) {
+            if (si.getArea() == Area.STORE) {
+                storeItems.add(si);
+            } else {
+                warehouseItems.add(si);
+            }
+        }
+
+        List<StockItem> sorted = new ArrayList<>();
+        sorted.addAll(storeItems);
+        sorted.addAll(warehouseItems);
 
         int remaining = quantity;
         for (StockItem item : sorted) {
