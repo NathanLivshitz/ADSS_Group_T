@@ -18,6 +18,18 @@ public class InventoryController {
         this.defectiveReports = new ArrayList<>();
     }
 
+    /**
+     * Clears all data — catalog, stock, categories, promotions, defective reports.
+     * Used before reloading preloaded data to avoid duplicates.
+     */
+    public void reset() {
+        catalog.clear();
+        stockItems.clear();
+        rootCategories.clear();
+        promotions.clear();
+        defectiveReports.clear();
+    }
+
     // ── CATALOG ──────────────────────────────────────────────
 
     /**
@@ -270,6 +282,38 @@ public class InventoryController {
         }
         return new InventoryReport(reportDate,
                 categoriesFilter != null ? categoriesFilter : new ArrayList<>(), items);
+    }
+
+    /**
+     * Auto-remove expired stock items.
+     * INV-11: Automatically reduces quantity when items are expired.
+     * Scans all StockItems, sets expired ones to qty=0, creates defective reports.
+     * Returns: number of items removed.
+     */
+    public int removeExpiredStock() {
+        int totalRemoved = 0;
+        LocalDate today = LocalDate.now();
+        for (StockItem si : stockItems) {
+            if (si.getExpiryDate() != null && si.getExpiryDate().isBefore(today) && si.getQuantity() > 0) {
+                int qty = si.getQuantity();
+                int productId = findProductIdBySpec(si.getSpec());
+                if (productId != -1) {
+                    defectiveReports.add(new DefectiveReport(productId, qty, "EXPIRED", today));
+                    totalRemoved += qty;
+                }
+                si.setQuantity(0);
+            }
+        }
+        return totalRemoved;
+    }
+
+    private int findProductIdBySpec(ProductSpec spec) {
+        for (Map.Entry<Integer, Product> entry : catalog.entrySet()) {
+            if (entry.getValue().getSpec() == spec) {
+                return entry.getKey();
+            }
+        }
+        return -1;
     }
 
     // ── INTERNAL ─────────────────────────────────────────────

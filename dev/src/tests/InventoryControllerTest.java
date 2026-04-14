@@ -344,4 +344,117 @@ class InventoryControllerTest {
                 LocalDate.now(), List.of(dairy, snacks));
         assertEquals(2, report.getItems().size());
     }
+
+    // ── RESET ───────────────────────────────────────────────
+
+    @Test
+    void resetClearsCatalog() {
+        controller.addProduct(milkProduct);
+        controller.reset();
+        assertThrows(IllegalArgumentException.class, () -> controller.getProduct(1));
+    }
+
+    @Test
+    void resetClearsStockItems() {
+        controller.addProduct(milkProduct);
+        controller.addStockItem(new StockItem(milkSpec, Area.STORE, 1, 1, 10, null));
+        controller.reset();
+        // after reset, product doesn't exist so getStockForProduct throws
+        assertThrows(IllegalArgumentException.class, () -> controller.getStockForProduct(1));
+    }
+
+    @Test
+    void resetClearsCategories() {
+        controller.addCategory(dairy);
+        controller.reset();
+        assertTrue(controller.getRootCategories().isEmpty());
+    }
+
+    @Test
+    void resetClearsPromotions() {
+        controller.addPromotion(new Promotion(10, LocalDate.now().minusDays(1),
+                LocalDate.now().plusDays(1), milkSpec, null));
+        controller.reset();
+        assertTrue(controller.getActivePromotions().isEmpty());
+    }
+
+    @Test
+    void resetClearsDefectiveReports() {
+        controller.addProduct(milkProduct);
+        controller.addStockItem(new StockItem(milkSpec, Area.STORE, 1, 1, 10, null));
+        controller.reportDefective(1, 1, "DEFECTIVE");
+        controller.reset();
+        List<DefectiveReport> reports = controller.getDefectiveReports(
+                LocalDate.now().minusDays(1), LocalDate.now().plusDays(1));
+        assertTrue(reports.isEmpty());
+    }
+
+    @Test
+    void resetAllowsReaddingSameProductId() {
+        controller.addProduct(milkProduct);
+        controller.reset();
+        controller.addProduct(milkProduct);
+        assertEquals("Tnuva 3% 1L", controller.getProduct(1).getSpec().getName());
+    }
+
+    // ── EMPTY DATA OPERATIONS ───────────────────────────────
+
+    @Test
+    void lowStockOnEmptyCatalogReturnsEmpty() {
+        assertTrue(controller.getLowStockProducts().isEmpty());
+    }
+
+    @Test
+    void inventoryReportOnEmptyCatalogReturnsEmpty() {
+        InventoryReport report = controller.generateInventoryReport(LocalDate.now(), null);
+        assertTrue(report.getItems().isEmpty());
+    }
+
+    @Test
+    void activePromotionsOnEmptyReturnsEmpty() {
+        assertTrue(controller.getActivePromotions().isEmpty());
+    }
+
+    @Test
+    void removeExpiredStockOnEmptyReturnsZero() {
+        assertEquals(0, controller.removeExpiredStock());
+    }
+
+    @Test
+    void defectiveReportsOnEmptyReturnsEmpty() {
+        List<DefectiveReport> reports = controller.getDefectiveReports(
+                LocalDate.now().minusDays(1), LocalDate.now().plusDays(1));
+        assertTrue(reports.isEmpty());
+    }
+
+    @Test
+    void defectiveItemsWithLocationsOnEmptyReturnsEmpty() {
+        assertTrue(controller.getDefectiveItemsWithLocations().isEmpty());
+    }
+
+    @Test
+    void getEffectivePriceOnEmptyThrows() {
+        assertThrows(IllegalArgumentException.class, () -> controller.getEffectivePrice(1));
+    }
+
+    @Test
+    void getStockForProductOnEmptyThrows() {
+        assertThrows(IllegalArgumentException.class, () -> controller.getStockForProduct(1));
+    }
+
+    @Test
+    void reportDefectiveOnEmptyThrows() {
+        assertThrows(IllegalArgumentException.class, () -> controller.reportDefective(1, 1, "DEFECTIVE"));
+    }
+
+    @Test
+    void updateQuantityOnEmptyThrows() {
+        assertThrows(IllegalArgumentException.class,
+                () -> controller.updateQuantity(1, Area.STORE, 1, 1, 5));
+    }
+
+    @Test
+    void rootCategoriesOnEmptyReturnsEmpty() {
+        assertTrue(controller.getRootCategories().isEmpty());
+    }
 }

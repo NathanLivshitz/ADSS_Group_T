@@ -1,6 +1,7 @@
 package Inventory.Presentation;
 
 import Inventory.Domain.*;
+import Inventory.Data.PreloadData;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -10,11 +11,13 @@ import java.util.Scanner;
 
 public class InventoryMenu {
     private final InventoryController controller;
+    private final PreloadData preloadData;
     private final Scanner scanner;
 
-    public InventoryMenu(InventoryController controller) {
+    public InventoryMenu(InventoryController controller, PreloadData preloadData, Scanner scanner) {
         this.controller = controller;
-        this.scanner = new Scanner(System.in);
+        this.preloadData = preloadData;
+        this.scanner = scanner;
     }
 
     public void run() {
@@ -34,9 +37,11 @@ public class InventoryMenu {
                     case "8":  viewActivePromotions(); break;
                     case "9":  checkEffectivePrice(); break;
                     case "10": reportDefective(); break;
-                    case "11": locateDefectiveItems(); break;
-                    case "12": defectiveReportByDates(); break;
-                    case "13": generateInventoryReport(); break;
+                    case "11": removeExpiredStock(); break;
+                    case "12": locateDefectiveItems(); break;
+                    case "13": defectiveReportByDates(); break;
+                    case "14": generateInventoryReport(); break;
+                    case "15": loadTestData(); break;
                     case "0":  running = false; break;
                     default:   System.out.println("Invalid option."); break;
                 }
@@ -57,10 +62,12 @@ public class InventoryMenu {
         System.out.println("7.  Add promotion");
         System.out.println("8.  View active promotions");
         System.out.println("9.  Check effective price");
-        System.out.println("10. Report defective/expired");
-        System.out.println("11. Locate defective items");
-        System.out.println("12. Defective report by dates");
-        System.out.println("13. Generate inventory report");
+        System.out.println("10. Report defective item");
+        System.out.println("11. Remove expired stock");
+        System.out.println("12. Locate defective items");
+        System.out.println("13. Defective report by dates");
+        System.out.println("14. Generate inventory report");
+        System.out.println("15. Load test data");
         System.out.println("0.  Exit");
         System.out.print("Choose: ");
     }
@@ -73,11 +80,11 @@ public class InventoryMenu {
         String name = scanner.nextLine().trim();
         System.out.print("Manufacturer: ");
         String manufacturer = scanner.nextLine().trim();
-        System.out.print("Category name: ");
-        String catName = scanner.nextLine().trim();
-        Category category = findCategory(catName);
+        System.out.print("Category path (c1,c2,c3): ");
+        String catPath = scanner.nextLine().trim();
+        Category category = findOrCreateCategoryPath(catPath);
         if (category == null) {
-            System.out.println("Category not found.");
+            System.out.println("Invalid category path.");
             return;
         }
         System.out.print("Cost price: ");
@@ -264,13 +271,19 @@ public class InventoryMenu {
     private void reportDefective() {
         System.out.print("Product ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
-        System.out.print("Quantity: ");
-        int qty = Integer.parseInt(scanner.nextLine().trim());
-        System.out.print("Reason (DEFECTIVE/EXPIRED): ");
-        String reason = scanner.nextLine().trim();
 
-        controller.reportDefective(productId, qty, reason);
-        System.out.println("Defective reported and stock reduced.");
+        controller.reportDefective(productId, 1, "DEFECTIVE");
+        System.out.println("Defective item reported and stock reduced by 1.");
+    }
+
+    // INV-11 — auto-remove expired stock
+    private void removeExpiredStock() {
+        int removed = controller.removeExpiredStock();
+        if (removed == 0) {
+            System.out.println("No expired stock found.");
+        } else {
+            System.out.println(removed + " expired items removed from stock.");
+        }
     }
 
     // INV-7
@@ -348,6 +361,11 @@ public class InventoryMenu {
         }
     }
 
+    private void loadTestData() {
+        preloadData.load();
+        System.out.println("Test data loaded (previous data cleared).");
+    }
+
     // ── HELPERS ──────────────────────────────────────────────
 
     private Product findProduct(int productId) {
@@ -365,6 +383,40 @@ public class InventoryMenu {
             if (found != null) return found;
         }
         return null;
+    }
+
+    private Category findOrCreateCategoryPath(String path) {
+        String[] parts = path.split(",");
+        if (parts.length == 0) return null;
+
+        Category current = null;
+        for (int i = 0; i < parts.length; i++) {
+            String name = parts[i].trim();
+            if (name.isEmpty()) return null;
+
+            if (i == 0) {
+                // Find or create root category
+                current = findCategory(name);
+                if (current == null) {
+                    current = new Category(name);
+                    controller.addCategory(current);
+                }
+            } else {
+                // Find or create sub-category under current
+                Category child = null;
+                for (Category sub : current.getSubCategories()) {
+                    if (sub.getName().equalsIgnoreCase(name)) {
+                        child = sub;
+                        break;
+                    }
+                }
+                if (child == null) {
+                    child = new Category(name, current);
+                }
+                current = child;
+            }
+        }
+        return current;
     }
 
     private Category findCategoryRecursive(Category current, String name) {
