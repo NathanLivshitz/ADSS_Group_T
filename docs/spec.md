@@ -135,7 +135,7 @@ Toiletries (קטגוריה)
 | INV-NF1 | Inventory | NF | All data stored in memory, resets each run (no database) | MH | Low | Done |
 | INV-NF2 | Inventory | NF | CLI interface for all operations | MH | Low | Done |
 | INV-NF3 | Inventory | NF | Preloaded test data available on startup | MH | Low | Done |
-| INV-NF4 | Inventory | NF | Service layer shall bridge Presentation to Domain (InventoryMenu → InventoryService → InventoryController) | MH | Low | TODO |
+| INV-NF4 | Inventory | NF | Service layer shall bridge Presentation to Domain (InventoryMenu → InventoryService → InventoryController) | MH | Low | Done |
 | INV-NF5 | Inventory | NF | Edge case validation tests for all domain classes (null inputs, negative values, empty strings, boundary conditions) | MH | Low | Done |
 
 ---

@@ -10,7 +10,7 @@
                 <mxCell id="menu" value="InventoryMenu" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#f5f5f5;strokeColor=#666666;" parent="1" vertex="1">
                     <mxGeometry x="460" y="70" width="280" height="100" as="geometry"/>
                 </mxCell>
-                <mxCell id="menu_attrs" value="- controller: InventoryController&#xa;- preloadData: PreloadData&#xa;- scanner: Scanner" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="menu" vertex="1">
+                <mxCell id="menu_attrs" value="- service: InventoryService&#xa;- preloadData: PreloadData&#xa;- scanner: Scanner" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="menu" vertex="1">
                     <mxGeometry y="26" width="280" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="menu_sep" value="" style="line;strokeWidth=1;fillColor=none;" parent="menu" vertex="1">

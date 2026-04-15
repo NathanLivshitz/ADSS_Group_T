@@ -2,6 +2,7 @@ package Inventory.Presentation;
 
 import Inventory.Domain.*;
 import Inventory.Data.PreloadData;
+import Inventory.Service.InventoryService;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -10,12 +11,12 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class InventoryMenu {
-    private final InventoryController controller;
+    private final InventoryService service;
     private final PreloadData preloadData;
     private final Scanner scanner;
 
-    public InventoryMenu(InventoryController controller, PreloadData preloadData, Scanner scanner) {
-        this.controller = controller;
+    public InventoryMenu(InventoryService service, PreloadData preloadData, Scanner scanner) {
+        this.service = service;
         this.preloadData = preloadData;
         this.scanner = scanner;
     }
@@ -96,7 +97,7 @@ public class InventoryMenu {
 
         ProductSpec spec = new ProductSpec(name, manufacturer, category, costPrice, sellPrice, minStock);
         Product product = new Product(id, spec);
-        controller.addProduct(product);
+        service.addProduct(product);
         System.out.println("Product added.");
     }
 
@@ -120,7 +121,7 @@ public class InventoryMenu {
         LocalDate expiry = expiryStr.isEmpty() ? null : LocalDate.parse(expiryStr);
 
         StockItem item = new StockItem(product.getSpec(), area, shelf, row, qty, expiry);
-        controller.addStockItem(item);
+        service.addStockItem(item);
         System.out.println("Stock added.");
     }
 
@@ -129,7 +130,7 @@ public class InventoryMenu {
         System.out.print("Product ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
 
-        List<StockItem> stock = controller.getStockForProduct(productId);
+        List<StockItem> stock = service.getStockForProduct(productId);
         if (stock.isEmpty()) {
             System.out.println("No stock found.");
             return;
@@ -160,20 +161,20 @@ public class InventoryMenu {
         System.out.print("Delta (positive to add, negative to remove): ");
         int delta = Integer.parseInt(scanner.nextLine().trim());
 
-        controller.updateQuantity(productId, area, shelf, row, delta);
+        service.updateQuantity(productId, area, shelf, row, delta);
         System.out.println("Stock updated.");
     }
 
     // INV-3
     private void lowStockAlerts() {
-        List<Product> low = controller.getLowStockProducts();
+        List<Product> low = service.getLowStockProducts();
         if (low.isEmpty()) {
             System.out.println("No low stock products.");
             return;
         }
         for (Product p : low) {
             ProductSpec spec = p.getSpec();
-            List<StockItem> stock = controller.getStockForProduct(p.getId());
+            List<StockItem> stock = service.getStockForProduct(p.getId());
             int total = 0;
             for (StockItem si : stock) { total += si.getQuantity(); }
             System.out.printf("  [ID=%d] %s (%s) — total=%d, min=%d%n",
@@ -200,7 +201,7 @@ public class InventoryMenu {
 
         Category category = new Category(name, parent);
         if (parent == null) {
-            controller.addCategory(category);
+            service.addCategory(category);
         }
         System.out.println("Category added.");
     }
@@ -239,13 +240,13 @@ public class InventoryMenu {
         }
 
         Promotion promo = new Promotion(discount, start, end, targetSpec, targetCat);
-        controller.addPromotion(promo);
+        service.addPromotion(promo);
         System.out.println("Promotion added.");
     }
 
     // INV-5
     private void viewActivePromotions() {
-        List<Promotion> active = controller.getActivePromotions();
+        List<Promotion> active = service.getActivePromotions();
         if (active.isEmpty()) {
             System.out.println("No active promotions.");
             return;
@@ -263,7 +264,7 @@ public class InventoryMenu {
     private void checkEffectivePrice() {
         System.out.print("Product ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
-        double price = controller.getEffectivePrice(productId);
+        double price = service.getEffectivePrice(productId);
         System.out.printf("Effective price: %.2f%n", price);
     }
 
@@ -272,13 +273,13 @@ public class InventoryMenu {
         System.out.print("Product ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
 
-        controller.reportDefective(productId, 1, "DEFECTIVE");
+        service.reportDefective(productId, 1, "DEFECTIVE");
         System.out.println("Defective item reported and stock reduced by 1.");
     }
 
     // INV-11 — auto-remove expired stock
     private void removeExpiredStock() {
-        int removed = controller.removeExpiredStock();
+        int removed = service.removeExpiredStock();
         if (removed == 0) {
             System.out.println("No expired stock found.");
         } else {
@@ -288,7 +289,7 @@ public class InventoryMenu {
 
     // INV-7
     private void locateDefectiveItems() {
-        Map<Integer, List<StockItem>> defectives = controller.getDefectiveItemsWithLocations();
+        Map<Integer, List<StockItem>> defectives = service.getDefectiveItemsWithLocations();
         if (defectives.isEmpty()) {
             System.out.println("No defective items found.");
             return;
@@ -309,7 +310,7 @@ public class InventoryMenu {
         System.out.print("To date (YYYY-MM-DD): ");
         LocalDate to = LocalDate.parse(scanner.nextLine().trim());
 
-        List<DefectiveReport> reports = controller.getDefectiveReports(from, to);
+        List<DefectiveReport> reports = service.getDefectiveReports(from, to);
         if (reports.isEmpty()) {
             System.out.println("No defective reports in this period.");
             return;
@@ -341,12 +342,12 @@ public class InventoryMenu {
             }
         }
 
-        InventoryReport report = controller.generateInventoryReport(LocalDate.now(), filter);
+        InventoryReport report = service.generateInventoryReport(LocalDate.now(), filter);
         System.out.printf("Inventory Report — %s (%d items)%n",
                 report.getReportDate(), report.getItems().size());
         for (Product p : report.getItems()) {
             ProductSpec spec = p.getSpec();
-            List<StockItem> stock = controller.getStockForProduct(p.getId());
+            List<StockItem> stock = service.getStockForProduct(p.getId());
             int storeQty = 0;
             int warehouseQty = 0;
             for (StockItem si : stock) {
@@ -370,7 +371,7 @@ public class InventoryMenu {
 
     private Product findProduct(int productId) {
         try {
-            return controller.getProduct(productId);
+            return service.getProduct(productId);
         } catch (IllegalArgumentException e) {
             System.out.println("Product not found: " + productId);
             return null;
@@ -378,7 +379,7 @@ public class InventoryMenu {
     }
 
     private Category findCategory(String name) {
-        for (Category root : controller.getRootCategories()) {
+        for (Category root : service.getRootCategories()) {
             Category found = findCategoryRecursive(root, name);
             if (found != null) return found;
         }
@@ -399,7 +400,7 @@ public class InventoryMenu {
                 current = findCategory(name);
                 if (current == null) {
                     current = new Category(name);
-                    controller.addCategory(current);
+                    service.addCategory(current);
                 }
             } else {
                 // Find or create sub-category under current
