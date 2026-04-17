@@ -1,10 +1,7 @@
-# Inventory Module (מלאי) — Deep Dive Guide
-> Assignment: Practical Assignment #1 — Super-Li Supermarket System
-> Course: Analysis and Design of Software Systems S2 (372-1-3401)
-> Due: 2026-04-19, 23:59
-> Module: Inventory (מחסן/מלאי)
-> Generated: 2026-04-12
-> Sources: ProjectDescription.pdf, PracticalAssignment1_2026.pdf, Moodle forum "שאלות ללקוח [מחסן/מלאי]", general Q&A forum
+# Inventory Module - Notes
+Assignment 1, Super-Li, due 19/4/26
+
+Our working notes for the inventory module. Based on the project description, assignment 1 PDF, and the Moodle Q&A forum for the inventory module.
 
 ---
 
@@ -152,138 +149,13 @@ Toiletries (קטגוריה)
 
 ---
 
-## 6. Class Diagram — Inventory Module
+## 6. Class Diagram
 
-### Presentation Layer
+The class diagram is in docs/domain-uml.drawio (open with draw.io extension in VS Code).
+Also a mermaid preview at docs/class-diagram.md.
 
-```
-InventoryMenu
-  - scanner: Scanner
-  Fields:
-  - inventoryService: InventoryService
-
-  (handles CLI: add product, update stock, search, reports, defectives)
-```
-
-### Domain Layer — UML Class Diagram
-
-```
-┌─────────────────────────────────┐
-│          «value object»         │
-│           ProductSpec           │
-├─────────────────────────────────┤
-│ - name: String                  │
-│ - manufacturer: String          │
-│ - costPrice: double             │  ← reflects supplier discounts
-│ - sellPrice: double             │  ← reflects supplier discounts
-│ - minStockThreshold: int        │
-├─────────────────────────────────┤
-│ + getCostPrice(): double        │
-│ + setCostPrice(double): void    │
-│ + getSellPrice(): double        │
-│ + setSellPrice(double): void    │
-│ + getMinStockThreshold(): int   │
-└─────────────────────────────────┘
-        │ *..1           │ 1..*
-        │                │
-        ▼                ▼
-┌──────────────┐  ┌─────────────────────────┐
-│  «entity»    │  │       StockItem          │
-│   Product    │  ├─────────────────────────┤
-├──────────────┤  │ - area: Area             │
-│ - id: int    │  │ - shelfNumber: int       │
-├──────────────┤  │ - rowNumber: int         │
-│ + getId()    │  │ - quantity: int          │
-│ + getSpec()  │  │ - expiryDate: LocalDate  │  ← nullable, per batch
-└──────────────┘  ├─────────────────────────┤
-                  │ + getQuantity(): int     │
-                  │ + setQuantity(int): void │
-                  └─────────────────────────┘
-
-┌──────────────────────────────┐
-│          Category            │
-├──────────────────────────────┤     ◇ parent
-│ - name: String               │◄────────────┐
-│ - parent: Category           │  0..1    *   │
-│ - subCategories: List        │─────────────┘
-│ - products: List<ProductSpec>│
-├──────────────────────────────┤
-│ + getAllProducts(): List      │
-│ + addProduct(ProductSpec)    │
-└──────────────────────────────┘
-        ▲ *..1
-        │
-        │ category
-┌───────┴─────────────────────────┐
-│          ProductSpec             │  (same class as above)
-└─────────────────────────────────┘
-
-┌──────────────────────────────┐
-│         Promotion            │
-├──────────────────────────────┤
-│ - discountPercent: double    │
-│ - startDate: LocalDate       │
-│ - endDate: LocalDate         │
-│ - targetProduct: ProductSpec │  ← null if targeting category
-│ - targetCategory: Category   │  ← null if targeting product
-├──────────────────────────────┤
-│ + isActive(): boolean        │
-│ + getEffectivePrice(): double│
-│ + appliesTo(ProductSpec): boolean │
-└──────────────────────────────┘
-
-┌──────────────────────────────┐  ┌─────────────────────────────┐
-│      DefectiveReport         │  │      InventoryReport        │
-├──────────────────────────────┤  ├─────────────────────────────┤
-│ - productId: int             │  │ - reportDate: LocalDate     │
-│ - quantity: int              │  │ - categoriesFilter: List    │
-│ - reason: String             │  │ - items: List<Product>      │
-│ - reportDate: LocalDate      │  └─────────────────────────────┘
-└──────────────────────────────┘
-
-┌───────────────────────────────────────────┐
-│          InventoryController              │
-├───────────────────────────────────────────┤
-│ - catalog: Map<Integer, Product>          │
-│ - stockItems: List<StockItem>             │
-│ - rootCategories: List<Category>          │
-│ - promotions: List<Promotion>             │
-│ - defectiveReports: List<DefectiveReport> │
-├───────────────────────────────────────────┤
-│ + addProduct(Product): void               │
-│ + getProduct(int): Product                │
-│ + addStockItem(StockItem): void           │
-│ + getTotalQuantity(int): int              │
-│ + updateQuantity(...): void               │
-│ + getLowStockProducts(): List<Product>    │
-│ + addPromotion(Promotion): void           │
-│ + getEffectivePrice(int): double          │
-│ + reportDefective(...): void              │
-│ + generateReport(List<Category>): InventoryReport │
-└───────────────────────────────────────────┘
-```
-
-### Relationships
-
-```
-ProductSpec  1 ──────── *  Product         (each Product references one spec)
-ProductSpec  1 ──────── *  StockItem       (many stock entries per spec)
-ProductSpec  * ──────── 1  Category        (each spec belongs to one category)
-Category     0..1 ◇──── *  Category        (self-aggregation: parent → children)
-Category     1 ◇─────── *  ProductSpec     (aggregation: category holds products)
-Promotion    * ─ ─ ─ ─  0..1 ProductSpec   (optional target, XOR with category)
-Promotion    * ─ ─ ─ ─  0..1 Category      (optional target, XOR with product)
-DefectiveReport * ────── 1  Product        (by productId)
-```
-
-### UML Notes
-- **Aggregation (◇)**: Category aggregates subcategories and products (provides find, remove, count)
-- **Association (──)**: Simple reference (Product→ProductSpec, StockItem→ProductSpec)
-- **Dashed (─ ─)**: Optional association (Promotion targets one OR the other, never both)
-- ProductSpec is a **value object** (no identity) — Product and StockItem share the same spec reference
-- Category hierarchy = self-referencing aggregation (recursive tree)
-
----
+Two layers: Presentation (InventoryMenu) and Domain (everything else).
+All classes use attributes only, no methods shown in the diagram boxes (per assignment).
 
 ## 7. Java Implementation Guide
 

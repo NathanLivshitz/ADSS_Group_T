@@ -198,12 +198,16 @@ public class InventoryController {
      */
     public double getEffectivePrice(int productId) {
         ProductSpec spec = getProduct(productId).getSpec();
+        double bestPrice = spec.getSellPrice();
         for (Promotion p : promotions) {
             if (p.isActive() && p.appliesTo(spec)) {
-                return p.getEffectivePrice(spec);
+                double promoPrice = p.getEffectivePrice(spec);
+                if (promoPrice < bestPrice) {
+                    bestPrice = promoPrice;
+                }
             }
         }
-        return spec.getSellPrice();
+        return bestPrice;
     }
 
     // ── DEFECTIVES ───────────────────────────────────────────
@@ -269,6 +273,11 @@ public class InventoryController {
         if (categoriesFilter == null || categoriesFilter.isEmpty()) {
             items = new ArrayList<>(catalog.values());
         } else {
+            for (Category filterCat : categoriesFilter) {
+                if (!containsCategory(filterCat)) {
+                    throw new IllegalArgumentException("Category not found: " + filterCat.getName());
+                }
+            }
             Set<ProductSpec> specSet = new HashSet<>();
             for (Category c : categoriesFilter) {
                 specSet.addAll(c.getAllProducts());
@@ -293,6 +302,7 @@ public class InventoryController {
     public int removeExpiredStock() {
         int totalRemoved = 0;
         LocalDate today = LocalDate.now();
+        ArrayList<StockItem> toRemove = new ArrayList<StockItem>();
         for (StockItem si : stockItems) {
             if (si.getExpiryDate() != null && si.getExpiryDate().isBefore(today) && si.getQuantity() > 0) {
                 int qty = si.getQuantity();
@@ -301,10 +311,26 @@ public class InventoryController {
                     defectiveReports.add(new DefectiveReport(productId, qty, "EXPIRED", today));
                     totalRemoved += qty;
                 }
-                si.setQuantity(0);
+                toRemove.add(si);
             }
         }
+        stockItems.removeAll(toRemove);
         return totalRemoved;
+    }
+
+    private boolean containsCategory(Category target) {
+        for (Category root : rootCategories) {
+            if (containsCategoryRecursive(root, target)) return true;
+        }
+        return false;
+    }
+
+    private boolean containsCategoryRecursive(Category current, Category target) {
+        if (current == target) return true;
+        for (Category sub : current.getSubCategories()) {
+            if (containsCategoryRecursive(sub, target)) return true;
+        }
+        return false;
     }
 
     private int findProductIdBySpec(ProductSpec spec) {

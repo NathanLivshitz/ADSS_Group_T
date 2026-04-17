@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body style="font-family:Arial;margin:20px;background:#fff;">
+
+<h3>ADSS Group T - Inventory Module - Class Diagram</h3>
+
+<div class="mermaid">
+classDiagram
+
+    class InventoryMenu {
+        -service InventoryService
+        -scanner Scanner
+    }
+
+    class InventoryService {
+        -controller InventoryController
+    }
+
+    class InventoryController {
+        -catalog Map
+        -stockItems List
+        -rootCategories List
+        -promotions List
+        -defectiveReports List
+    }
+
+    class Product {
+        -id int
+        -spec ProductSpec
+    }
+
+    class ProductSpec {
+        name String
+        -manufacturer String
+        -costPrice double
+        -sellPrice double
+        minStockThreshold int
+    }
+
+    class StockItem {
+        -spec ProductSpec
+        -area Area
+        -shelfNumber int
+        -rowNumber int
+        -quantity int
+        expiryDate Date
+    }
+
+    class Category {
+        -name String
+        -parent Category
+        -subCategories List
+        -products List
+    }
+
+    class Promotion {
+        -discountPercent double
+        -startDate Date
+        -endDate Date
+        -targetProduct ProductSpec
+        -targetCategory Category
+    }
+
+    class DefectiveReport {
+        -productId int
+        -quantity int
+        -reason String
+        reportDate Date
+    }
+
+    class InventoryReport {
+        -reportDate Date
+        -categoriesFilter List
+        -items List
+    }
+
+    class Area {
+        STORE
+        WAREHOUSE
+    }
+
+    InventoryMenu --> InventoryService
+    InventoryService --> InventoryController
+    InventoryController --> "0..*" Product
+    InventoryController --> "0..*" StockItem
+    InventoryController o-- "0..*" Category
+    InventoryController --> "*" Promotion
+    InventoryController --> "*" DefectiveReport
+    Product "1" *-- "1" ProductSpec
+    ProductSpec "*" --> "1" Category
+    StockItem "*" --> "1" ProductSpec
+    StockItem --> Area
+    Category o-- "0..1" Category
+    Category --> "*" ProductSpec
+    Promotion --> "0..1" ProductSpec
+    Promotion --> "0..1" Category
+    DefectiveReport --> "1" Product
+    InventoryReport --> "*" Product
+    InventoryReport --> "*" Category
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'default' });
+</script>
+
+</body>
+</html>

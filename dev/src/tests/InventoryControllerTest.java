@@ -318,9 +318,11 @@ class InventoryControllerTest {
 
     @Test
     void generateInventoryReportFilterByCategory() {
+        controller.addCategory(dairy);
         controller.addProduct(milkProduct); // in dairy > milk > bySize
 
         Category snacks = new Category("Snacks");
+        controller.addCategory(snacks);
         Category chips = new Category("Chips", snacks);
         ProductSpec bambaSpec = new ProductSpec("Bamba", "Osem", chips, 2.5, 4.5, 20);
         controller.addProduct(new Product(2, bambaSpec));
@@ -333,9 +335,11 @@ class InventoryControllerTest {
 
     @Test
     void generateInventoryReportFilterMultipleCategories() {
+        controller.addCategory(dairy);
         controller.addProduct(milkProduct);
 
         Category snacks = new Category("Snacks");
+        controller.addCategory(snacks);
         Category chips = new Category("Chips", snacks);
         ProductSpec bambaSpec = new ProductSpec("Bamba", "Osem", chips, 2.5, 4.5, 20);
         controller.addProduct(new Product(2, bambaSpec));

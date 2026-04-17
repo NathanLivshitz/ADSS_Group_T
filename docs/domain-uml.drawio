@@ -1,375 +1,252 @@
-<mxfile host="65bd71144e">
-    <diagram id="domain-uml" name="Inventory Module - Layered UML Class Diagram">
-        <mxGraphModel dx="1636" dy="1331" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="2200" math="0" shadow="0">
+<mxfile host="app.diagrams.net">
+    <diagram id="domain-uml" name="Class Diagram">
+        <mxGraphModel dx="1600" dy="1800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1800" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="pres_layer" value="Presentation Layer" style="shape=mxgraph.uml.package;fontSize=14;fontStyle=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;verticalAlign=top;align=left;spacingLeft=10;spacingTop=5;tabWidth=160;tabHeight=28;labelX=10;" parent="1" vertex="1">
-                    <mxGeometry x="400" y="20" width="400" height="170" as="geometry"/>
+
+                <mxCell id="pres_layer" value="Presentation Layer" style="shape=mxgraph.uml.package;fontSize=14;fontStyle=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;verticalAlign=top;align=left;spacingLeft=10;spacingTop=5;tabWidth=180;tabHeight=28;labelX=10;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="30" width="1520" height="140" as="geometry"/>
                 </mxCell>
-                <mxCell id="menu" value="InventoryMenu" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#f5f5f5;strokeColor=#666666;" parent="1" vertex="1">
-                    <mxGeometry x="460" y="70" width="280" height="100" as="geometry"/>
+
+                <mxCell id="menu" value="InventoryMenu" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#ffffff;strokeColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="75" width="280" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="menu_attrs" value="- service: InventoryService&#xa;- preloadData: PreloadData&#xa;- scanner: Scanner" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="menu" vertex="1">
-                    <mxGeometry y="26" width="280" height="50" as="geometry"/>
+                <mxCell id="menu_attrs" value="- service: InventoryService&#10;- preloadData: PreloadData&#10;- scanner: Scanner" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="menu" vertex="1">
+                    <mxGeometry y="26" width="280" height="54" as="geometry"/>
                 </mxCell>
-                <mxCell id="menu_sep" value="" style="line;strokeWidth=1;fillColor=none;" parent="menu" vertex="1">
-                    <mxGeometry y="62" width="280" height="8" as="geometry"/>
+
+                <mxCell id="domain_layer" value="Domain Layer" style="shape=mxgraph.uml.package;fontSize=14;fontStyle=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;verticalAlign=top;align=left;spacingLeft=10;spacingTop=5;tabWidth=140;tabHeight=28;labelX=10;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="210" width="1520" height="1200" as="geometry"/>
                 </mxCell>
-                <mxCell id="menu_methods" value="+ run(): void" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="menu" vertex="1">
-                    <mxGeometry y="70" width="280" height="30" as="geometry"/>
-                </mxCell>
-                <mxCell id="svc_layer" value="Service Layer" style="shape=mxgraph.uml.package;fontSize=14;fontStyle=1;fillColor=#e8f0fe;strokeColor=#6c8ebf;fontColor=#333333;verticalAlign=top;align=left;spacingLeft=10;spacingTop=5;tabWidth=130;tabHeight=28;labelX=10;" parent="1" vertex="1">
-                    <mxGeometry x="350" y="240" width="500" height="180" as="geometry"/>
-                </mxCell>
-                <mxCell id="svc" value="InventoryService" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
-                    <mxGeometry x="410" y="290" width="380" height="110" as="geometry"/>
+
+                <mxCell id="svc" value="InventoryService" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#ffffff;strokeColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="260" width="300" height="56" as="geometry"/>
                 </mxCell>
                 <mxCell id="svc_attrs" value="- controller: InventoryController" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="svc" vertex="1">
-                    <mxGeometry y="26" width="380" height="26" as="geometry"/>
+                    <mxGeometry y="26" width="300" height="26" as="geometry"/>
                 </mxCell>
-                <mxCell id="svc_sep" value="" style="line;strokeWidth=1;fillColor=none;" parent="svc" vertex="1">
-                    <mxGeometry y="52" width="380" height="8" as="geometry"/>
+
+                <mxCell id="ic" value="InventoryController" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#ffffff;strokeColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="370" width="300" height="130" as="geometry"/>
                 </mxCell>
-                <mxCell id="svc_methods" value="+ (bridges Presentation to Domain)" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;fontStyle=2;" parent="svc" vertex="1">
-                    <mxGeometry y="60" width="380" height="50" as="geometry"/>
+                <mxCell id="ic_attrs" value="- catalog: Map&lt;Integer, Product&gt;&#10;- stockItems: List&lt;StockItem&gt;&#10;- rootCategories: List&lt;Category&gt;&#10;- promotions: List&lt;Promotion&gt;&#10;- defectiveReports: List&lt;DefectiveReport&gt;" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="ic" vertex="1">
+                    <mxGeometry y="26" width="300" height="100" as="geometry"/>
                 </mxCell>
-                <mxCell id="domain_layer" value="Domain Layer" style="shape=mxgraph.uml.package;fontSize=14;fontStyle=1;fillColor=#fce5cd;strokeColor=#d6b656;fontColor=#333333;verticalAlign=top;align=left;spacingLeft=10;spacingTop=5;tabWidth=130;tabHeight=28;labelX=10;" parent="1" vertex="1">
-                    <mxGeometry x="20" y="470" width="1180" height="1020" as="geometry"/>
+
+                <mxCell id="ps" value="ProductSpec (value object)" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#ffffff;strokeColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="480" y="260" width="300" height="120" as="geometry"/>
                 </mxCell>
-                <mxCell id="ps" value="ProductSpec&#xa;(value object)" style="swimlane;fontStyle=1;align=center;startSize=40;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
-                    <mxGeometry x="370" y="520" width="280" height="270" as="geometry"/>
+                <mxCell id="ps_attrs" value="- name: String&#10;- manufacturer: String&#10;- costPrice: double&#10;- sellPrice: double&#10;- minStockThreshold: int" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="ps" vertex="1">
+                    <mxGeometry y="26" width="300" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="ps_attrs" value="- name: String&#xa;- manufacturer: String&#xa;- costPrice: double          (supplier discounts)&#xa;- sellPrice: double          (supplier discounts)&#xa;- minStockThreshold: int" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="ps" vertex="1">
-                    <mxGeometry y="40" width="280" height="100" as="geometry"/>
+
+                <mxCell id="cat" value="Category" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#ffffff;strokeColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="900" y="260" width="260" height="120" as="geometry"/>
                 </mxCell>
-                <mxCell id="ps_sep" value="" style="line;strokeWidth=1;fillColor=none;" parent="ps" vertex="1">
-                    <mxGeometry y="140" width="280" height="8" as="geometry"/>
-                </mxCell>
-                <mxCell id="ps_methods" value="+ getCostPrice(): double&#xa;+ setCostPrice(double): void&#xa;+ getSellPrice(): double&#xa;+ setSellPrice(double): void&#xa;+ getMinStockThreshold(): int&#xa;+ getName(): String&#xa;+ getManufacturer(): String&#xa;+ getCategory(): Category" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="ps" vertex="1">
-                    <mxGeometry y="148" width="280" height="122" as="geometry"/>
-                </mxCell>
-                <mxCell id="prod" value="Product&#xa;(entity)" style="swimlane;fontStyle=1;align=center;startSize=40;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
-                    <mxGeometry x="80" y="880" width="200" height="130" as="geometry"/>
-                </mxCell>
-                <mxCell id="prod_attrs" value="- id: int&#xa;- spec: ProductSpec" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="prod" vertex="1">
-                    <mxGeometry y="40" width="200" height="40" as="geometry"/>
-                </mxCell>
-                <mxCell id="prod_sep" value="" style="line;strokeWidth=1;fillColor=none;" parent="prod" vertex="1">
-                    <mxGeometry y="80" width="200" height="8" as="geometry"/>
-                </mxCell>
-                <mxCell id="prod_methods" value="+ getId(): int&#xa;+ getSpec(): ProductSpec" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="prod" vertex="1">
-                    <mxGeometry y="88" width="200" height="42" as="geometry"/>
-                </mxCell>
-                <mxCell id="si" value="StockItem" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
-                    <mxGeometry x="560" y="880" width="260" height="200" as="geometry"/>
-                </mxCell>
-                <mxCell id="si_attrs" value="- spec: ProductSpec&#xa;- area: Area&#xa;- shelfNumber: int&#xa;- rowNumber: int&#xa;- quantity: int&#xa;- expiryDate: LocalDate    {nullable}" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="si" vertex="1">
-                    <mxGeometry y="26" width="260" height="100" as="geometry"/>
-                </mxCell>
-                <mxCell id="si_sep" value="" style="line;strokeWidth=1;fillColor=none;" parent="si" vertex="1">
-                    <mxGeometry y="126" width="260" height="8" as="geometry"/>
-                </mxCell>
-                <mxCell id="si_methods" value="+ getQuantity(): int&#xa;+ setQuantity(int): void&#xa;+ getExpiryDate(): LocalDate" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="si" vertex="1">
-                    <mxGeometry y="134" width="260" height="66" as="geometry"/>
-                </mxCell>
-                <mxCell id="area" value="Area&#xa;(enumeration)" style="swimlane;fontStyle=1;align=center;startSize=40;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
-                    <mxGeometry x="890" y="900" width="140" height="90" as="geometry"/>
-                </mxCell>
-                <mxCell id="area_vals" value="STORE&#xa;WAREHOUSE" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="area" vertex="1">
-                    <mxGeometry y="40" width="140" height="50" as="geometry"/>
-                </mxCell>
-                <mxCell id="cat" value="Category" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
-                    <mxGeometry x="780" y="520" width="260" height="230" as="geometry"/>
-                </mxCell>
-                <mxCell id="cat_attrs" value="- name: String&#xa;- parent: Category&#xa;- subCategories: List&lt;Category&gt;&#xa;- products: List&lt;ProductSpec&gt;" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="cat" vertex="1">
-                    <mxGeometry y="26" width="260" height="80" as="geometry"/>
-                </mxCell>
-                <mxCell id="cat_sep" value="" style="line;strokeWidth=1;fillColor=none;" parent="cat" vertex="1">
-                    <mxGeometry y="106" width="260" height="8" as="geometry"/>
-                </mxCell>
-                <mxCell id="cat_methods" value="+ getName(): String&#xa;+ getParent(): Category&#xa;+ getSubCategories(): List&#xa;+ getProducts(): List&lt;ProductSpec&gt;&#xa;+ addProduct(ProductSpec): void&#xa;+ getAllProducts(): List&lt;ProductSpec&gt;" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="cat" vertex="1">
-                    <mxGeometry y="114" width="260" height="116" as="geometry"/>
-                </mxCell>
-                <mxCell id="promo" value="Promotion" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
-                    <mxGeometry x="350" y="1160" width="290" height="220" as="geometry"/>
-                </mxCell>
-                <mxCell id="promo_attrs" value="- discountPercent: double&#xa;- startDate: LocalDate&#xa;- endDate: LocalDate&#xa;- targetProduct: ProductSpec    {xor}&#xa;- targetCategory: Category      {xor}" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="promo" vertex="1">
-                    <mxGeometry y="26" width="290" height="100" as="geometry"/>
-                </mxCell>
-                <mxCell id="promo_sep" value="" style="line;strokeWidth=1;fillColor=none;" parent="promo" vertex="1">
-                    <mxGeometry y="126" width="290" height="8" as="geometry"/>
-                </mxCell>
-                <mxCell id="promo_methods" value="+ isActive(): boolean&#xa;+ getEffectivePrice(ProductSpec): double&#xa;+ appliesTo(ProductSpec): boolean" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="promo" vertex="1">
-                    <mxGeometry y="134" width="290" height="86" as="geometry"/>
-                </mxCell>
-                <mxCell id="dr" value="DefectiveReport" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
-                    <mxGeometry x="40" y="1160" width="240" height="140" as="geometry"/>
-                </mxCell>
-                <mxCell id="dr_attrs" value="- productId: int&#xa;- quantity: int&#xa;- reason: String    {DEFECTIVE | EXPIRED}&#xa;- reportDate: LocalDate" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="dr" vertex="1">
-                    <mxGeometry y="26" width="240" height="80" as="geometry"/>
-                </mxCell>
-                <mxCell id="dr_sep" value="" style="line;strokeWidth=1;fillColor=none;" parent="dr" vertex="1">
-                    <mxGeometry y="106" width="240" height="8" as="geometry"/>
-                </mxCell>
-                <mxCell id="dr_methods" value="+ getProductId(): int&#xa;+ getReason(): String" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="dr" vertex="1">
-                    <mxGeometry y="114" width="240" height="26" as="geometry"/>
-                </mxCell>
-                <mxCell id="ir" value="InventoryReport" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" parent="1" vertex="1">
-                    <mxGeometry x="720" y="1160" width="260" height="120" as="geometry"/>
-                </mxCell>
-                <mxCell id="ir_attrs" value="- reportDate: LocalDate&#xa;- categoriesFilter: List&lt;Category&gt;&#xa;- items: List&lt;Product&gt;" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="ir" vertex="1">
-                    <mxGeometry y="26" width="260" height="60" as="geometry"/>
-                </mxCell>
-                <mxCell id="ir_sep" value="" style="line;strokeWidth=1;fillColor=none;" parent="ir" vertex="1">
-                    <mxGeometry y="86" width="260" height="8" as="geometry"/>
-                </mxCell>
-                <mxCell id="ir_methods" value="+ getItems(): List&lt;Product&gt;" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="ir" vertex="1">
-                    <mxGeometry y="94" width="260" height="26" as="geometry"/>
-                </mxCell>
-                <mxCell id="ic" value="InventoryController" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
-                    <mxGeometry x="40" y="520" width="260" height="300" as="geometry"/>
-                </mxCell>
-                <mxCell id="ic_attrs" value="- catalog: Map&lt;Integer, Product&gt;&#xa;- stockItems: List&lt;StockItem&gt;&#xa;- rootCategories: List&lt;Category&gt;&#xa;- promotions: List&lt;Promotion&gt;&#xa;- defectiveReports: List&lt;DefectiveReport&gt;" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="ic" vertex="1">
+                <mxCell id="cat_attrs" value="- name: String&#10;- parent: Category&#10;- subCategories: List&lt;Category&gt;&#10;- products: List&lt;ProductSpec&gt;" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="cat" vertex="1">
                     <mxGeometry y="26" width="260" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="ic_sep" value="" style="line;strokeWidth=1;fillColor=none;" parent="ic" vertex="1">
-                    <mxGeometry y="116" width="260" height="8" as="geometry"/>
+
+                <mxCell id="prod" value="Product (entity)" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#ffffff;strokeColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="560" width="200" height="70" as="geometry"/>
                 </mxCell>
-                <mxCell id="ic_methods" value="+ addProduct(Product): void&#xa;+ getProduct(int): Product&#xa;+ addStockItem(StockItem): void&#xa;+ getTotalQuantity(int): int&#xa;+ updateQuantity(...): void&#xa;+ getLowStockProducts(): List&#xa;+ addPromotion(Promotion): void&#xa;+ getEffectivePrice(int): double&#xa;+ reportDefective(...): void&#xa;+ generateInventoryReport(...): InventoryReport&#xa;+ getDefectiveReports(...): List" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="ic" vertex="1">
-                    <mxGeometry y="124" width="260" height="176" as="geometry"/>
+                <mxCell id="prod_attrs" value="- id: int&#10;- spec: ProductSpec" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="prod" vertex="1">
+                    <mxGeometry y="26" width="200" height="40" as="geometry"/>
                 </mxCell>
-                <mxCell id="data_layer" value="Data Layer" style="shape=mxgraph.uml.package;fontSize=14;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;verticalAlign=top;align=left;spacingLeft=10;spacingTop=5;tabWidth=110;tabHeight=28;labelX=10;" parent="1" vertex="1">
-                    <mxGeometry x="350" y="1560" width="500" height="200" as="geometry"/>
+
+                <mxCell id="si" value="StockItem" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#ffffff;strokeColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="340" y="560" width="280" height="140" as="geometry"/>
                 </mxCell>
-                <mxCell id="preload" value="PreloadData" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
-                    <mxGeometry x="410" y="1610" width="380" height="130" as="geometry"/>
+                <mxCell id="si_attrs" value="- spec: ProductSpec&#10;- area: Area&#10;- shelfNumber: int&#10;- rowNumber: int&#10;- quantity: int&#10;- expiryDate: LocalDate" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="si" vertex="1">
+                    <mxGeometry y="26" width="280" height="110" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="area" value="Area (enumeration)" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#ffffff;strokeColor=#666666;" parent="1" vertex="1">
+                    <mxGeometry x="700" y="560" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="area_vals" value="STORE&#10;WAREHOUSE" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="area" vertex="1">
+                    <mxGeometry y="26" width="160" height="50" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="promo" value="Promotion" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#ffffff;strokeColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="780" width="310" height="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="promo_attrs" value="- discountPercent: double&#10;- startDate: LocalDate&#10;- endDate: LocalDate&#10;- targetProduct: ProductSpec&#10;- targetCategory: Category" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="promo" vertex="1">
+                    <mxGeometry y="26" width="310" height="110" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="dr" value="DefectiveReport" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#ffffff;strokeColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="460" y="780" width="260" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="dr_attrs" value="- productId: int&#10;- quantity: int&#10;- reason: String&#10;- reportDate: LocalDate" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="dr" vertex="1">
+                    <mxGeometry y="26" width="260" height="90" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="ir" value="InventoryReport" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#ffffff;strokeColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="810" y="780" width="280" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="ir_attrs" value="- reportDate: LocalDate&#10;- categoriesFilter: List&lt;Category&gt;&#10;- items: List&lt;Product&gt;" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="ir" vertex="1">
+                    <mxGeometry y="26" width="280" height="70" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="preload" value="PreloadData" style="swimlane;fontStyle=1;align=center;startSize=26;fontSize=12;fillColor=#ffffff;strokeColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="980" width="300" height="56" as="geometry"/>
                 </mxCell>
                 <mxCell id="preload_attrs" value="- controller: InventoryController" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="preload" vertex="1">
-                    <mxGeometry y="26" width="380" height="26" as="geometry"/>
+                    <mxGeometry y="26" width="300" height="26" as="geometry"/>
                 </mxCell>
-                <mxCell id="preload_sep" value="" style="line;strokeWidth=1;fillColor=none;" parent="preload" vertex="1">
-                    <mxGeometry y="52" width="380" height="8" as="geometry"/>
-                </mxCell>
-                <mxCell id="preload_methods" value="+ load(): void&#xa;  creates: Categories, Products, StockItems,&#xa;  Promotions, DefectiveReports (seed data)" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;whiteSpace=wrap;fontSize=11;" parent="preload" vertex="1">
-                    <mxGeometry y="60" width="380" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="layer_pres_svc" value="" style="endArrow=open;endFill=0;dashed=1;strokeWidth=2;strokeColor=#666666;" parent="1" source="menu" target="svc" edge="1">
+                <mxCell id="rel_menu_svc" value="uses" style="endArrow=open;endFill=0;dashed=1;strokeWidth=1.5;strokeColor=#666666;fontSize=10;" parent="1" source="menu" target="svc" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="layer_pres_svc_label" value="uses" style="edgeLabel;resizable=0;fontSize=11;fontColor=#666666;" parent="layer_pres_svc" connectable="0" vertex="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <mxPoint as="offset"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="layer_svc_ic" value="" style="endArrow=open;endFill=0;dashed=1;strokeWidth=2;strokeColor=#6c8ebf;" parent="1" source="svc" target="ic" edge="1">
+                <mxCell id="rel_svc_ic" value="uses" style="endArrow=open;endFill=0;dashed=1;strokeWidth=1.5;strokeColor=#666666;fontSize=10;" parent="1" source="svc" target="ic" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="layer_svc_ic_label" value="uses" style="edgeLabel;resizable=0;fontSize=11;fontColor=#6c8ebf;" parent="layer_svc_ic" connectable="0" vertex="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <mxPoint as="offset"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="layer_data_ic" value="" style="endArrow=open;endFill=0;dashed=1;strokeWidth=2;strokeColor=#82b366;" parent="1" source="preload" target="ic" edge="1">
+                <mxCell id="rel_preload_ic" value="populates" style="endArrow=open;endFill=0;dashed=1;strokeWidth=1.5;strokeColor=#666666;fontSize=10;" parent="1" source="preload" target="ic" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="layer_data_ic_label" value="populates" style="edgeLabel;resizable=0;fontSize=11;fontColor=#82b366;" parent="layer_data_ic" connectable="0" vertex="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <mxPoint as="offset"/>
-                    </mxGeometry>
-                </mxCell>
-                <!-- ============================================================ -->
-                <!-- DOMAIN INTERNAL RELATIONSHIPS                              -->
-                <!-- ============================================================ -->
-
-                <!-- ProductSpec 1 ── * Product -->
-                <mxCell id="rel_ps_prod" value="" style="endArrow=none;startArrow=none;strokeWidth=1.5;" parent="1" source="ps" target="prod" edge="1">
+                <mxCell id="rel_ic_prod" value="" style="endArrow=none;startArrow=diamond;startFill=0;startSize=14;strokeWidth=1.5;" parent="1" source="ic" target="prod" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="rel_ps_prod_1" value="1" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ps_prod" connectable="0" vertex="1">
+                <mxCell id="rel_ic_prod_1" value="1" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ic_prod" connectable="0" vertex="1">
                     <mxGeometry x="-0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-                <mxCell id="rel_ps_prod_star" value="*" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ps_prod" connectable="0" vertex="1">
+                <mxCell id="rel_ic_prod_s" value="*" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ic_prod" connectable="0" vertex="1">
                     <mxGeometry x="0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-
-                <!-- ProductSpec 1 ── * StockItem -->
-                <mxCell id="rel_ps_si" value="" style="endArrow=none;startArrow=none;strokeWidth=1.5;" parent="1" source="ps" target="si" edge="1">
+                <mxCell id="rel_ic_si" value="" style="endArrow=none;startArrow=diamond;startFill=0;startSize=14;strokeWidth=1.5;" parent="1" source="ic" target="si" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="rel_ps_si_1" value="1" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ps_si" connectable="0" vertex="1">
+                <mxCell id="rel_ic_si_1" value="1" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ic_si" connectable="0" vertex="1">
                     <mxGeometry x="-0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-                <mxCell id="rel_ps_si_star" value="*" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ps_si" connectable="0" vertex="1">
+                <mxCell id="rel_ic_si_s" value="*" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ic_si" connectable="0" vertex="1">
                     <mxGeometry x="0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-
-                <!-- Category ◇── * ProductSpec (aggregation: products) -->
+                <mxCell id="rel_ic_cat" value="" style="endArrow=none;startArrow=diamond;startFill=0;startSize=14;strokeWidth=1.5;" parent="1" source="ic" target="cat" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel_ic_cat_1" value="1" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ic_cat" connectable="0" vertex="1">
+                    <mxGeometry x="-0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+                </mxCell>
+                <mxCell id="rel_ic_cat_s" value="*" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ic_cat" connectable="0" vertex="1">
+                    <mxGeometry x="0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+                </mxCell>
+                <mxCell id="rel_ic_promo" value="" style="endArrow=none;startArrow=diamond;startFill=0;startSize=14;strokeWidth=1.5;" parent="1" source="ic" target="promo" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel_ic_promo_1" value="1" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ic_promo" connectable="0" vertex="1">
+                    <mxGeometry x="-0.7" y="10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+                </mxCell>
+                <mxCell id="rel_ic_promo_s" value="*" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ic_promo" connectable="0" vertex="1">
+                    <mxGeometry x="0.7" y="10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+                </mxCell>
+                <mxCell id="rel_ic_dr" value="" style="endArrow=none;startArrow=diamond;startFill=0;startSize=14;strokeWidth=1.5;" parent="1" source="ic" target="dr" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel_ic_dr_1" value="1" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ic_dr" connectable="0" vertex="1">
+                    <mxGeometry x="-0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+                </mxCell>
+                <mxCell id="rel_ic_dr_s" value="*" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ic_dr" connectable="0" vertex="1">
+                    <mxGeometry x="0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+                </mxCell>
+                <mxCell id="rel_ps_prod" value="" style="endArrow=none;strokeWidth=1.5;" parent="1" source="ps" target="prod" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel_ps_prod_1" value="1" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ps_prod" connectable="0" vertex="1">
+                    <mxGeometry x="-0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+                </mxCell>
+                <mxCell id="rel_ps_prod_s" value="*" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ps_prod" connectable="0" vertex="1">
+                    <mxGeometry x="0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+                </mxCell>
+                <mxCell id="rel_ps_si" value="" style="endArrow=none;strokeWidth=1.5;" parent="1" source="ps" target="si" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel_ps_si_1" value="1" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ps_si" connectable="0" vertex="1">
+                    <mxGeometry x="-0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+                </mxCell>
+                <mxCell id="rel_ps_si_s" value="*" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ps_si" connectable="0" vertex="1">
+                    <mxGeometry x="0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+                </mxCell>
                 <mxCell id="rel_cat_ps" value="" style="endArrow=none;startArrow=diamond;startFill=0;startSize=14;strokeWidth=1.5;" parent="1" source="cat" target="ps" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="rel_cat_ps_1" value="1" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_cat_ps" connectable="0" vertex="1">
+                <mxCell id="rel_cat_ps_1" value="1" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_cat_ps" connectable="0" vertex="1">
                     <mxGeometry x="-0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-                <mxCell id="rel_cat_ps_star" value="*" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_cat_ps" connectable="0" vertex="1">
+                <mxCell id="rel_cat_ps_s" value="*" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_cat_ps" connectable="0" vertex="1">
                     <mxGeometry x="0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-                <mxCell id="rel_cat_ps_role" value="products" style="edgeLabel;resizable=0;fontSize=10;fontStyle=2;" parent="rel_cat_ps" connectable="0" vertex="1">
-                    <mxGeometry x="0.3" y="10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+                <mxCell id="rel_cat_ps_role" value="products" style="edgeLabel;resizable=0;fontSize=9;fontStyle=2;" parent="rel_cat_ps" connectable="0" vertex="1">
+                    <mxGeometry x="0.3" y="12" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-
-                <!-- Category self-aggregation (parent 0..1 ── * children) -->
-                <mxCell id="rel_cat_self" value="" style="endArrow=open;startArrow=diamond;startFill=0;startSize=14;strokeWidth=1.5;exitX=1;exitY=0.2;entryX=1;entryY=0.5;curved=1;" parent="1" source="cat" target="cat" edge="1">
+                <mxCell id="rel_cat_self" value="" style="endArrow=open;startArrow=diamond;startFill=0;startSize=14;strokeWidth=1.5;exitX=1;exitY=0.2;entryX=1;entryY=0.8;curved=1;" parent="1" source="cat" target="cat" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <Array as="points">
-                            <mxPoint x="1100" y="566"/>
-                            <mxPoint x="1100" y="635"/>
+                            <mxPoint x="1220" y="284"/>
+                            <mxPoint x="1220" y="356"/>
                         </Array>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="rel_cat_self_parent" value="parent&#xa;0..1" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_cat_self" connectable="0" vertex="1">
-                    <mxGeometry x="-0.5" y="15" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+                <mxCell id="rel_cat_self_p" value="parent 0..1" style="edgeLabel;resizable=0;fontSize=9;" parent="rel_cat_self" connectable="0" vertex="1">
+                    <mxGeometry x="-0.3" y="15" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-                <mxCell id="rel_cat_self_children" value="*" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_cat_self" connectable="0" vertex="1">
+                <mxCell id="rel_cat_self_c" value="*" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_cat_self" connectable="0" vertex="1">
                     <mxGeometry x="0.5" y="15" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-
-                <!-- StockItem ─ ─ Area (uses) -->
-                <mxCell id="rel_si_area" value="" style="endArrow=open;endFill=0;startArrow=none;strokeWidth=1.5;dashed=1;" parent="1" source="si" target="area" edge="1">
+                <mxCell id="rel_si_area" value="" style="endArrow=open;endFill=0;dashed=1;strokeWidth=1.5;" parent="1" source="si" target="area" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="rel_si_area_label" value="uses" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_si_area" connectable="0" vertex="1">
-                    <mxGeometry relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
-                </mxCell>
-
-                <!-- Promotion * ─ ─ 0..1 ProductSpec (xor) -->
-                <mxCell id="rel_promo_ps" value="" style="endArrow=open;endFill=0;startArrow=none;strokeWidth=1.5;dashed=1;dashPattern=8 4;" parent="1" source="promo" target="ps" edge="1">
+                <mxCell id="rel_promo_ps" value="" style="endArrow=open;endFill=0;dashed=1;strokeWidth=1.5;" parent="1" source="promo" target="ps" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="rel_promo_ps_star" value="*" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_promo_ps" connectable="0" vertex="1">
+                <mxCell id="rel_promo_ps_s" value="*" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_promo_ps" connectable="0" vertex="1">
                     <mxGeometry x="-0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-                <mxCell id="rel_promo_ps_01" value="0..1" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_promo_ps" connectable="0" vertex="1">
+                <mxCell id="rel_promo_ps_01" value="0..1" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_promo_ps" connectable="0" vertex="1">
                     <mxGeometry x="0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-
-                <!-- Promotion * ─ ─ 0..1 Category (xor) -->
-                <mxCell id="rel_promo_cat" value="" style="endArrow=open;endFill=0;startArrow=none;strokeWidth=1.5;dashed=1;dashPattern=8 4;" parent="1" source="promo" target="cat" edge="1">
+                <mxCell id="rel_promo_cat" value="" style="endArrow=open;endFill=0;dashed=1;strokeWidth=1.5;" parent="1" source="promo" target="cat" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="rel_promo_cat_star" value="*" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_promo_cat" connectable="0" vertex="1">
+                <mxCell id="rel_promo_cat_s" value="*" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_promo_cat" connectable="0" vertex="1">
                     <mxGeometry x="-0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-                <mxCell id="rel_promo_cat_01" value="0..1" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_promo_cat" connectable="0" vertex="1">
+                <mxCell id="rel_promo_cat_01" value="0..1" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_promo_cat" connectable="0" vertex="1">
                     <mxGeometry x="0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-
-                <!-- {xor} note -->
-                <mxCell id="xor_note" value="{xor}" style="shape=note;size=10;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=3;align=center;" parent="1" vertex="1">
-                    <mxGeometry x="690" y="1130" width="50" height="30" as="geometry"/>
-                </mxCell>
-
-                <!-- DefectiveReport * ── 1 Product -->
-                <mxCell id="rel_dr_prod" value="" style="endArrow=none;startArrow=none;strokeWidth=1.5;" parent="1" source="dr" target="prod" edge="1">
+                <mxCell id="rel_dr_prod" value="" style="endArrow=none;strokeWidth=1.5;" parent="1" source="dr" target="prod" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="rel_dr_prod_star" value="*" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_dr_prod" connectable="0" vertex="1">
+                <mxCell id="rel_dr_prod_s" value="*" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_dr_prod" connectable="0" vertex="1">
                     <mxGeometry x="-0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-                <mxCell id="rel_dr_prod_1" value="1" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_dr_prod" connectable="0" vertex="1">
+                <mxCell id="rel_dr_prod_1" value="1" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_dr_prod" connectable="0" vertex="1">
                     <mxGeometry x="0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-
-                <!-- InventoryReport 1 ── * Product (items) -->
-                <mxCell id="rel_ir_prod" value="" style="endArrow=none;startArrow=none;strokeWidth=1.5;" parent="1" source="ir" target="prod" edge="1">
+                <mxCell id="rel_ir_prod" value="" style="endArrow=none;strokeWidth=1.5;" parent="1" source="ir" target="prod" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="rel_ir_prod_1" value="1" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ir_prod" connectable="0" vertex="1">
+                <mxCell id="rel_ir_prod_1" value="1" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ir_prod" connectable="0" vertex="1">
                     <mxGeometry x="-0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-                <mxCell id="rel_ir_prod_star" value="*" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ir_prod" connectable="0" vertex="1">
+                <mxCell id="rel_ir_prod_s" value="*" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ir_prod" connectable="0" vertex="1">
                     <mxGeometry x="0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-                <mxCell id="rel_ir_prod_role" value="items" style="edgeLabel;resizable=0;fontSize=10;fontStyle=2;" parent="rel_ir_prod" connectable="0" vertex="1">
-                    <mxGeometry x="0.5" y="10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+                <mxCell id="rel_ir_prod_role" value="items" style="edgeLabel;resizable=0;fontSize=9;fontStyle=2;" parent="rel_ir_prod" connectable="0" vertex="1">
+                    <mxGeometry x="0.5" y="12" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-
-                <!-- InventoryReport 1 ─ ─ * Category (categoriesFilter) -->
-                <mxCell id="rel_ir_cat" value="" style="endArrow=none;startArrow=none;strokeWidth=1.5;dashed=1;" parent="1" source="ir" target="cat" edge="1">
+                <mxCell id="rel_ir_cat" value="" style="endArrow=none;dashed=1;strokeWidth=1.5;" parent="1" source="ir" target="cat" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="rel_ir_cat_1" value="1" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ir_cat" connectable="0" vertex="1">
+                <mxCell id="rel_ir_cat_1" value="1" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ir_cat" connectable="0" vertex="1">
                     <mxGeometry x="-0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-                <mxCell id="rel_ir_cat_star" value="*" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ir_cat" connectable="0" vertex="1">
+                <mxCell id="rel_ir_cat_s" value="*" style="edgeLabel;resizable=0;fontSize=10;" parent="rel_ir_cat" connectable="0" vertex="1">
                     <mxGeometry x="0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
-                <mxCell id="rel_ir_cat_role" value="categoriesFilter" style="edgeLabel;resizable=0;fontSize=10;fontStyle=2;" parent="rel_ir_cat" connectable="0" vertex="1">
-                    <mxGeometry x="0.5" y="10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
-                </mxCell>
-
-                <!-- ============================================================ -->
-                <!-- CONTROLLER AGGREGATIONS                                      -->
-                <!-- ============================================================ -->
-
-                <!-- IC 1 ◇── * Product -->
-                <mxCell id="rel_ic_prod" value="" style="endArrow=open;startArrow=diamond;startFill=0;startSize=14;strokeWidth=1.5;" parent="1" source="ic" target="prod" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="rel_ic_prod_1" value="1" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ic_prod" connectable="0" vertex="1">
-                    <mxGeometry x="-0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
-                </mxCell>
-                <mxCell id="rel_ic_prod_star" value="*" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ic_prod" connectable="0" vertex="1">
-                    <mxGeometry x="0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
-                </mxCell>
-
-                <!-- IC 1 ◇── * StockItem -->
-                <mxCell id="rel_ic_si" value="" style="endArrow=open;startArrow=diamond;startFill=0;startSize=14;strokeWidth=1.5;" parent="1" source="ic" target="si" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="rel_ic_si_1" value="1" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ic_si" connectable="0" vertex="1">
-                    <mxGeometry x="-0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
-                </mxCell>
-                <mxCell id="rel_ic_si_star" value="*" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ic_si" connectable="0" vertex="1">
-                    <mxGeometry x="0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
-                </mxCell>
-
-                <!-- IC 1 ◇── * Promotion -->
-                <mxCell id="rel_ic_promo" value="" style="endArrow=open;startArrow=diamond;startFill=0;startSize=14;strokeWidth=1.5;" parent="1" source="ic" target="promo" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="rel_ic_promo_1" value="1" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ic_promo" connectable="0" vertex="1">
-                    <mxGeometry x="-0.7" y="10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
-                </mxCell>
-                <mxCell id="rel_ic_promo_star" value="*" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ic_promo" connectable="0" vertex="1">
-                    <mxGeometry x="0.7" y="10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
-                </mxCell>
-
-                <!-- IC 1 ◇── * DefectiveReport -->
-                <mxCell id="rel_ic_dr" value="" style="endArrow=open;startArrow=diamond;startFill=0;startSize=14;strokeWidth=1.5;" parent="1" source="ic" target="dr" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="rel_ic_dr_1" value="1" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ic_dr" connectable="0" vertex="1">
-                    <mxGeometry x="-0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
-                </mxCell>
-                <mxCell id="rel_ic_dr_star" value="*" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ic_dr" connectable="0" vertex="1">
-                    <mxGeometry x="0.7" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
-                </mxCell>
-
-                <!-- IC 1 ◇── * Category -->
-                <mxCell id="rel_ic_cat" value="" style="endArrow=open;startArrow=diamond;startFill=0;startSize=14;strokeWidth=1.5;" parent="1" source="ic" target="cat" edge="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <Array as="points">
-                            <mxPoint x="170" y="510"/>
-                            <mxPoint x="910" y="510"/>
-                        </Array>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="rel_ic_cat_1" value="1" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ic_cat" connectable="0" vertex="1">
-                    <mxGeometry x="-0.9" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
-                </mxCell>
-                <mxCell id="rel_ic_cat_star" value="*" style="edgeLabel;resizable=0;fontSize=11;fontStyle=1;" parent="rel_ic_cat" connectable="0" vertex="1">
-                    <mxGeometry x="0.9" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+                <mxCell id="rel_ir_cat_role" value="categoriesFilter" style="edgeLabel;resizable=0;fontSize=9;fontStyle=2;" parent="rel_ir_cat" connectable="0" vertex="1">
+                    <mxGeometry x="0.5" y="12" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
                 </mxCell>
 
             </root>

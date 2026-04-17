@@ -2,83 +2,75 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>טבלה 1 - דרישות מערכת | מודול מלאי</title>
+<title>טבלה 1 - דרישות מערכת</title>
 <style>
-  body { font-family: Arial, Helvetica, sans-serif; max-width: 1100px; margin: 30px auto; padding: 0 20px; color: #222; line-height: 1.5; font-size: 12px; direction: rtl; }
-  h1 { font-size: 20px; text-align: center; border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 6px; }
-  h2 { font-size: 15px; margin-top: 22px; color: #444; border-right: 3px solid #666; padding-right: 10px; }
-  .meta { text-align: center; color: #666; font-size: 12px; margin-bottom: 20px; }
-  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 11px; }
-  th, td { border: 1px solid #999; padding: 5px 8px; text-align: right; vertical-align: top; }
-  th { background: #e6e6e6; font-weight: bold; }
-  td.desc { text-align: right; direction: rtl; }
-  td.id { font-family: Consolas, monospace; font-weight: bold; }
+  body { font-family: Arial, sans-serif; max-width: 1100px; margin: 30px auto; padding: 0 20px; font-size: 12px; direction: rtl; }
+  h1 { font-size: 18px; text-align: center; margin-bottom: 4px; }
+  h2 { font-size: 14px; margin-top: 20px; }
+  .meta { text-align: center; color: #666; font-size: 11px; margin-bottom: 20px; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 11px; }
+  th, td { border: 1px solid #888; padding: 5px 8px; text-align: right; vertical-align: top; }
+  th { background: #eee; }
+  td.id { font-family: monospace; font-weight: bold; text-align: center; }
   td.center { text-align: center; }
-  .legend { font-size: 10px; color: #666; margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px; }
-  @media print { body { margin: 10px; } @page { size: A4; margin: 12mm; } }
+  @media print { @page { size: A4; margin: 12mm; } }
 </style>
 </head>
 <body>
 
-<h1>טבלה 1 — דרישות מערכת | מודול מלאי</h1>
-<p class="meta">Super-Li | ניתוח ותיכון מערכות תוכנה | ADSS_Group_T | עבודה 1, 2026</p>
+<h1>טבלה 1 - דרישות מערכת</h1>
+<p class="meta">מודול מלאי - ADSS_Group_T - עבודה 1</p>
 
-<h2>דרישות פונקציונליות (Functional)</h2>
+<h2>דרישות פונקציונליות</h2>
 <table>
 <thead>
 <tr>
-  <th>ID</th>
+  <th>מזהה</th>
   <th>מודול</th>
-  <th>F/NF</th>
-  <th>תיאור הדרישה</th>
+  <th>סוג</th>
+  <th>תיאור</th>
   <th>עדיפות</th>
   <th>סיכון</th>
   <th>סטטוס</th>
 </tr>
 </thead>
 <tbody>
-<tr><td class="id">INV-1</td><td class="center">Inventory</td><td class="center">F</td><td class="desc">The system SHALL maintain a product catalog with name, manufacturer, category, cost price, and selling price</td><td class="center">MH</td><td class="center">Low</td><td class="center">Done</td></tr>
-<tr><td class="id">INV-2</td><td class="center">Inventory</td><td class="center">F</td><td class="desc">The system SHALL track product quantities by exact location (area + shelf + row) for both store and warehouse</td><td class="center">MH</td><td class="center">Medium</td><td class="center">Done</td></tr>
-<tr><td class="id">INV-3</td><td class="center">Inventory</td><td class="center">F</td><td class="desc">The system SHALL alert when a product's total quantity falls below its minimum stock threshold</td><td class="center">MH</td><td class="center">Medium</td><td class="center">Done</td></tr>
-<tr><td class="id">INV-4</td><td class="center">Inventory</td><td class="center">F</td><td class="desc">The system SHALL support a hierarchical category structure (category → sub-category → sub-sub-category)</td><td class="center">MH</td><td class="center">Medium</td><td class="center">Done</td></tr>
-<tr><td class="id">INV-5</td><td class="center">Inventory</td><td class="center">F</td><td class="desc">The system SHALL allow defining promotions with percentage discounts on products or categories within date ranges</td><td class="center">MH</td><td class="center">Medium</td><td class="center">Done</td></tr>
-<tr><td class="id">INV-6</td><td class="center">Inventory</td><td class="center">F</td><td class="desc">The system SHALL generate inventory reports filterable by one or more categories</td><td class="center">MH</td><td class="center">Low</td><td class="center">Done</td></tr>
-<tr><td class="id">INV-7</td><td class="center">Inventory</td><td class="center">F</td><td class="desc">The system SHALL allow employees to report defective or expired items</td><td class="center">MH</td><td class="center">Low</td><td class="center">Done</td></tr>
-<tr><td class="id">INV-8</td><td class="center">Inventory</td><td class="center">F</td><td class="desc">The system SHALL generate periodic defect reports listing all reported defective/expired items</td><td class="center">MH</td><td class="center">Low</td><td class="center">Done</td></tr>
-<tr><td class="id">INV-9</td><td class="center">Inventory</td><td class="center">F</td><td class="desc">The system SHALL preserve and track the cost price (reflecting supplier discounts) and selling price per product</td><td class="center">MH</td><td class="center">Low</td><td class="center">Done</td></tr>
-<tr><td class="id">INV-10</td><td class="center">Inventory</td><td class="center">F</td><td class="desc">The system SHALL allow updating product quantities when stock is received, sold, or expired</td><td class="center">MH</td><td class="center">Low</td><td class="center">Done</td></tr>
-<tr><td class="id">INV-11</td><td class="center">Inventory</td><td class="center">F</td><td class="desc">The system SHALL automatically reduce quantity when items are reported expired/defective</td><td class="center">MH</td><td class="center">Low</td><td class="center">Done</td></tr>
-<tr><td class="id">INV-12</td><td class="center">Inventory</td><td class="center">F</td><td class="desc">The system CAN proactively alert on products approaching expiry date</td><td class="center">NTH</td><td class="center">High</td><td class="center">Deferred</td></tr>
+<tr><td class="id">INV-1</td><td class="center">מלאי</td><td class="center">F</td><td>המערכת תנהל קטלוג מוצרים עם שם, יצרן, קטגוריה, מחיר עלות ומחיר מכירה</td><td class="center">חובה</td><td class="center">נמוך</td><td class="center">מומש</td></tr>
+<tr><td class="id">INV-2</td><td class="center">מלאי</td><td class="center">F</td><td>המערכת תעקוב אחרי כמויות מוצרים לפי מיקום מדויק (חנות/מחסן + מדף + שורה)</td><td class="center">חובה</td><td class="center">בינוני</td><td class="center">מומש</td></tr>
+<tr><td class="id">INV-3</td><td class="center">מלאי</td><td class="center">F</td><td>המערכת תתריע כאשר סך הכמות של מוצר יורד מתחת לרף המינימום</td><td class="center">חובה</td><td class="center">בינוני</td><td class="center">מומש</td></tr>
+<tr><td class="id">INV-4</td><td class="center">מלאי</td><td class="center">F</td><td>המערכת תתמוך בהיררכיית קטגוריות (קטגוריה, תת-קטגוריה, תת-תת-קטגוריה)</td><td class="center">חובה</td><td class="center">בינוני</td><td class="center">מומש</td></tr>
+<tr><td class="id">INV-5</td><td class="center">מלאי</td><td class="center">F</td><td>המערכת תאפשר להגדיר מבצעים עם אחוזי הנחה על מוצרים או קטגוריות בטווחי תאריכים</td><td class="center">חובה</td><td class="center">בינוני</td><td class="center">מומש</td></tr>
+<tr><td class="id">INV-6</td><td class="center">מלאי</td><td class="center">F</td><td>המערכת תפיק דוחות מלאי עם אפשרות סינון לפי קטגוריה אחת או יותר</td><td class="center">חובה</td><td class="center">נמוך</td><td class="center">מומש</td></tr>
+<tr><td class="id">INV-7</td><td class="center">מלאי</td><td class="center">F</td><td>המערכת תאפשר לעובדים לדווח על פריטים פגומים או שפג תוקפם</td><td class="center">חובה</td><td class="center">נמוך</td><td class="center">מומש</td></tr>
+<tr><td class="id">INV-8</td><td class="center">מלאי</td><td class="center">F</td><td>המערכת תפיק דוח תקופתי של פריטים פגומים או פגי תוקף לפי טווח תאריכים</td><td class="center">חובה</td><td class="center">נמוך</td><td class="center">מומש</td></tr>
+<tr><td class="id">INV-9</td><td class="center">מלאי</td><td class="center">F</td><td>המערכת תשמור ותעקוב אחרי מחיר עלות (כולל הנחות מספקים) ומחיר מכירה לכל מוצר</td><td class="center">חובה</td><td class="center">נמוך</td><td class="center">מומש</td></tr>
+<tr><td class="id">INV-10</td><td class="center">מלאי</td><td class="center">F</td><td>המערכת תאפשר לעדכן כמויות מוצר בעת קבלת סחורה, מכירה או תפוגה</td><td class="center">חובה</td><td class="center">נמוך</td><td class="center">מומש</td></tr>
+<tr><td class="id">INV-11</td><td class="center">מלאי</td><td class="center">F</td><td>המערכת תפחית אוטומטית את הכמות כאשר פריטים מדווחים כפגומים או פגי תוקף</td><td class="center">חובה</td><td class="center">נמוך</td><td class="center">מומש</td></tr>
+<tr><td class="id">INV-12</td><td class="center">מלאי</td><td class="center">F</td><td>המערכת יכולה להתריע מראש על מוצרים המתקרבים לתאריך התפוגה</td><td class="center">רצוי</td><td class="center">גבוה</td><td class="center">נדחה</td></tr>
 </tbody>
 </table>
 
-<h2>דרישות לא-פונקציונליות (Non-Functional)</h2>
+<h2>דרישות לא-פונקציונליות</h2>
 <table>
 <thead>
 <tr>
-  <th>ID</th>
+  <th>מזהה</th>
   <th>מודול</th>
-  <th>F/NF</th>
-  <th>תיאור הדרישה</th>
+  <th>סוג</th>
+  <th>תיאור</th>
   <th>עדיפות</th>
   <th>סיכון</th>
   <th>סטטוס</th>
 </tr>
 </thead>
 <tbody>
-<tr><td class="id">INV-NF1</td><td class="center">Inventory</td><td class="center">NF</td><td class="desc">All data stored in memory, resets each run (no database)</td><td class="center">MH</td><td class="center">Low</td><td class="center">Done</td></tr>
-<tr><td class="id">INV-NF2</td><td class="center">Inventory</td><td class="center">NF</td><td class="desc">CLI interface for all operations</td><td class="center">MH</td><td class="center">Low</td><td class="center">Done</td></tr>
-<tr><td class="id">INV-NF3</td><td class="center">Inventory</td><td class="center">NF</td><td class="desc">Preloaded test data available on startup</td><td class="center">MH</td><td class="center">Low</td><td class="center">Done</td></tr>
-<tr><td class="id">INV-NF4</td><td class="center">Inventory</td><td class="center">NF</td><td class="desc">Service layer shall bridge Presentation to Domain (InventoryMenu → InventoryService → InventoryController)</td><td class="center">MH</td><td class="center">Low</td><td class="center">Done</td></tr>
-<tr><td class="id">INV-NF5</td><td class="center">Inventory</td><td class="center">NF</td><td class="desc">Edge case validation tests for all domain classes (null inputs, negative values, empty strings, boundary conditions)</td><td class="center">MH</td><td class="center">Low</td><td class="center">Done</td></tr>
+<tr><td class="id">INV-NF1</td><td class="center">מלאי</td><td class="center">NF</td><td>כל הנתונים נשמרים בזיכרון בלבד, ללא בסיס נתונים</td><td class="center">חובה</td><td class="center">נמוך</td><td class="center">מומש</td></tr>
+<tr><td class="id">INV-NF2</td><td class="center">מלאי</td><td class="center">NF</td><td>ממשק משתמש טקסטואלי (CLI) לכל הפעולות</td><td class="center">חובה</td><td class="center">נמוך</td><td class="center">מומש</td></tr>
+<tr><td class="id">INV-NF3</td><td class="center">מלאי</td><td class="center">NF</td><td>אפשרות לטעון נתוני דוגמה מראש בעלייה</td><td class="center">חובה</td><td class="center">נמוך</td><td class="center">מומש</td></tr>
+<tr><td class="id">INV-NF4</td><td class="center">מלאי</td><td class="center">NF</td><td>שכבת שירות שמתווכת בין שכבת התצוגה לשכבת הלוגיקה</td><td class="center">חובה</td><td class="center">נמוך</td><td class="center">מומש</td></tr>
+<tr><td class="id">INV-NF5</td><td class="center">מלאי</td><td class="center">NF</td><td>בדיקות קצה למחלקות הדומיין (ערכים ריקים, שליליים, גבולות)</td><td class="center">חובה</td><td class="center">נמוך</td><td class="center">מומש</td></tr>
 </tbody>
 </table>
-
-<p class="legend">
-<strong>מקרא עדיפות:</strong> MH = Must-Have (חייב) | NTH = Nice-To-Have (רצוי) &nbsp;|&nbsp;
-<strong>מקרא סיכון:</strong> Low / Medium / High &nbsp;|&nbsp;
-<strong>מקרא סטטוס:</strong> Done = מומש בעבודה זו | Deferred = נדחה
-</p>
 
 </body>
 </html>

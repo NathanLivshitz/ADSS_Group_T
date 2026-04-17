@@ -2,28 +2,22 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>טבלה 2 - שאלות פתוחות | מודול מלאי</title>
+<title>טבלה 2 - שאלות פתוחות</title>
 <style>
-  body { font-family: Arial, Helvetica, sans-serif; max-width: 1000px; margin: 30px auto; padding: 0 20px; color: #222; line-height: 1.5; font-size: 12px; direction: rtl; }
-  h1 { font-size: 20px; text-align: center; border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 6px; }
-  .meta { text-align: center; color: #666; font-size: 12px; margin-bottom: 20px; }
-  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 11px; }
-  th, td { border: 1px solid #999; padding: 6px 8px; text-align: right; vertical-align: top; }
-  th { background: #e6e6e6; font-weight: bold; }
-  td.num { text-align: center; font-weight: bold; width: 30px; }
-  td.center { text-align: center; white-space: nowrap; }
-  .note { font-size: 10px; color: #666; margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px; }
-  @media print { body { margin: 10px; } @page { size: A4; margin: 12mm; } }
+  body { font-family: Arial, sans-serif; max-width: 900px; margin: 30px auto; padding: 0 20px; font-size: 12px; direction: rtl; }
+  h1 { font-size: 18px; text-align: center; margin-bottom: 4px; }
+  .meta { text-align: center; color: #666; font-size: 11px; margin-bottom: 20px; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 12px; }
+  th, td { border: 1px solid #888; padding: 6px 8px; text-align: right; vertical-align: top; }
+  th { background: #eee; }
+  td.num { text-align: center; width: 30px; }
+  @media print { @page { size: A4; margin: 15mm; } }
 </style>
 </head>
 <body>
 
-<h1>טבלה 2 — שאלות פתוחות | מודול מלאי</h1>
-<p class="meta">Super-Li | ניתוח ותיכון מערכות תוכנה | ADSS_Group_T | עבודה 1, 2026</p>
-
-<p style="font-size: 11px; color: #555; margin-bottom: 15px;">
-שאלות שהתעוררו בניתוח הדרישות. מועד השאלות הפתוחות בפורום Moodle עבר (12/4/26) ולכן כל השאלות מטופלות כהנחות מתועדות.
-</p>
+<h1>טבלה 2 - שאלות פתוחות</h1>
+<p class="meta">מודול מלאי - ADSS_Group_T - עבודה 1</p>
 
 <table>
 <thead>
@@ -31,88 +25,36 @@
   <th>#</th>
   <th>נושא</th>
   <th>השאלה</th>
-  <th>השפעה</th>
-  <th>פתרון / הנחה</th>
 </tr>
 </thead>
 <tbody>
 <tr>
   <td class="num">1</td>
-  <td>מעקב תאריך תפוגה</td>
-  <td>האם לעקוב ברמת פריט בודד, ברמת אצווה (batch), או ברמת סוג מוצר?</td>
-  <td class="center">פחות מ-5 שעות</td>
-  <td>המעקב נעשה ברמת <strong>StockItem</strong> (רמת אצווה). אצוות שונות של אותו סוג מוצר יכולות להיות עם תאריכי תפוגה שונים.</td>
+  <td>תאריך תפוגה</td>
+  <td>האם לעקוב אחרי תאריך תפוגה ברמת פריט בודד או ברמת סוג המוצר?</td>
 </tr>
 <tr>
   <td class="num">2</td>
-  <td>רזולוציית מיקום</td>
-  <td>האם לשמור מיקום מדויק (מדף + שורה) או רק חנות/מחסן?</td>
-  <td class="center">פחות מ-5 שעות</td>
-  <td>מיקום מדויק — <strong>Area</strong> (STORE/WAREHOUSE) + shelfNumber + rowNumber. מבנה זהה לחנות ולמחסן.</td>
+  <td>מיקום המוצר</td>
+  <td>האם לשמור מיקום מדויק (מדף+שורה) או רק לציין חנות או מחסן?</td>
 </tr>
 <tr>
   <td class="num">3</td>
-  <td>אופן התראה</td>
-  <td>האם ההתראות הן push notifications או נגישות על ידי שאילתה?</td>
-  <td class="center">פחות מ-5 שעות</td>
-  <td>הנחה: שאילתה ("דגל" על המוצר). המשתמש מבקש את רשימת המוצרים שהכמות שלהם מתחת למינימום — אין הודעות push.</td>
+  <td>התראות על חוסר</td>
+  <td>האם ההתראות מוצגות אוטומטית או רק כשהמשתמש מבקש לראות אותן?</td>
 </tr>
 <tr>
   <td class="num">4</td>
-  <td>ספירת מלאי אוטומטית</td>
-  <td>האם ספירת המלאי מתבצעת אוטומטית או ידני על ידי העובד?</td>
-  <td class="center">פחות מ-5 שעות</td>
-  <td>הנחה: ספירה ידנית על ידי עובד (ביום ב' ויום ה' כמתואר במסמך הפרויקט). המערכת רק עוזרת לעקוב ולחשב.</td>
+  <td>ספירת מלאי</td>
+  <td>האם ספירת המלאי נעשית ידנית על ידי העובד או באופן אוטומטי?</td>
 </tr>
 <tr>
   <td class="num">5</td>
-  <td>עומק היררכיית קטגוריות</td>
-  <td>האם המבנה הוא בדיוק 3 רמות או רקורסיה לא-מוגבלת?</td>
-  <td class="center">פחות מ-5 שעות</td>
-  <td>הנחה: עץ רקורסיבי ללא הגבלה (מתאים לדפוסי UML שנלמדו). מוצר שייך לקטגוריית עלה (leaf). מבנה זה גמיש יותר מ-3 רמות קשיחות.</td>
-</tr>
-<tr>
-  <td class="num">6</td>
-  <td>יחס מוצר-קטגוריה</td>
-  <td>האם מוצר יכול להיות בכמה קטגוריות או רק אחת?</td>
-  <td class="center">פחות מ-5 שעות</td>
-  <td>הנחה: מוצר שייך בדיוק לקטגוריה אחת (leaf) — 1 ל-* מול קטגוריה. פשוט יותר לחישובי דוחות וסינון.</td>
-</tr>
-<tr>
-  <td class="num">7</td>
-  <td>היסטוריית מחירים</td>
-  <td>האם לשמור היסטוריה של שינויי מחיר לאורך זמן?</td>
-  <td class="center">פחות מ-5 שעות</td>
-  <td>הנחה: לא שומרים היסטוריה. שמירה של מחיר נוכחי בלבד (costPrice, sellPrice ב-ProductSpec). דרישת היסטוריה תוסיף complexity מיותרת.</td>
-</tr>
-<tr>
-  <td class="num">8</td>
-  <td>מטבע</td>
-  <td>באיזה מטבע לשמור מחירים?</td>
-  <td class="center">פחות מ-5 שעות</td>
-  <td>הנחה: שקל חדש (NIS). לא נשמר שדה מטבע במודל — כל המחירים משתמעים בשקלים.</td>
-</tr>
-<tr>
-  <td class="num">9</td>
-  <td>מוצר ללא מלאי</td>
-  <td>האם מותר שיהיה מוצר בקטלוג ללא אף StockItem?</td>
-  <td class="center">פחות מ-5 שעות</td>
-  <td>הנחה: כן. ניתן להוסיף מוצר לקטלוג (INV-1) לפני קבלת מלאי (INV-2). המוצר יופיע בדוחות עם total=0 וסטטוס OUT.</td>
-</tr>
-<tr>
-  <td class="num">10</td>
-  <td>צירוף מבצעים</td>
-  <td>אם יש מספר מבצעים פעילים על אותו מוצר, האם הם מצטברים?</td>
-  <td class="center">פחות מ-5 שעות</td>
-  <td>הנחה: לא מצטברים. נלקח המבצע הראשון התואם (לפי סדר הוספה). זה מונע חישובים לא-צפויים.</td>
+  <td>היררכיית קטגוריות</td>
+  <td>האם יש מקסימום של שלוש רמות קטגוריה או שהמבנה רקורסיבי ללא הגבלה?</td>
 </tr>
 </tbody>
 </table>
-
-<p class="note">
-<strong>הערה:</strong> הפער בין ה-5 שאלות המקוריות (1-5) ל-10 כאן נובע משאלות נוספות שהתעוררו במהלך המימוש.
-כל השאלות טופלו כהנחות מתועדות כי מועד הפורום (12/4/26) כבר עבר.
-</p>
 
 </body>
 </html>
