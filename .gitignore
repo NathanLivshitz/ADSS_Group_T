@@ -1,0 +1,4 @@
+dev/out/
+build/
+.DS_Store
+*.class
