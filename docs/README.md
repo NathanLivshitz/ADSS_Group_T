@@ -25,5 +25,4 @@ draw.io / Visual Paradigm
 | `contracts/` | חוזה נפרד לכל פעולה (2.1): `contract-orderShortageFromSupplier`, `contract-selectProduct`, `contract-confirmOrder` |
 | `sequence-diagrams/` | תרשים רצף לכל חוזה (2.2) |
 | `class-diagram.pdf / .png / .xml` | תרשים מחלקות מעודכן (3.1) |
-| `data-layer-architecture.pdf / .png` | פירוט שכבת הנתונים (Repository/DAO/DTO, NF-2) |
 | `requirements.pdf` | מסמך דרישות מעודכן (3.2) |
