@@ -95,12 +95,12 @@ public class InventoryMenu {
         int minStock = Integer.parseInt(scanner.nextLine().trim());
 
         int assignedId = service.addProduct(new ProductDTO(0, 0, name, manufacturer, catId, costPrice, sellPrice, minStock, 0));
-        System.out.println("Product added with ID: " + assignedId);
+        System.out.println("Product spec added with ID: " + assignedId);
     }
 
     // INV-2
     private void addStockItem() {
-        System.out.print("Product ID: ");
+        System.out.print("Product spec ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
         ProductDTO product = findProduct(productId);
         if (product == null) return;
@@ -119,11 +119,15 @@ public class InventoryMenu {
 
         service.addStockItem(new StockItemDTO(product.specId(), area, shelf, row, qty, expiry));
         System.out.println("Stock added.");
+        if (expiry != null && LocalDate.parse(expiry).isBefore(LocalDate.now())) {
+            System.out.printf("Warning: added %d expired items for %s. They will appear in defective item location reports.%n",
+                    qty, product.name());
+        }
     }
 
     // INV-2
     private void viewProductStock() {
-        System.out.print("Product ID: ");
+        System.out.print("Product spec ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
 
         List<StockItemDTO> stock = service.getStockForProduct(productId);
@@ -146,7 +150,7 @@ public class InventoryMenu {
 
     // INV-10
     private void updateStock() {
-        System.out.print("Product ID: ");
+        System.out.print("Product spec ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
         System.out.print("Area (STORE/WAREHOUSE): ");
         String area = scanner.nextLine().trim().toUpperCase();
@@ -169,8 +173,8 @@ public class InventoryMenu {
             return;
         }
         for (ProductDTO p : low) {
-            System.out.printf("  [ID=%d specId=%d] %s (%s) — total=%d, min=%d%n",
-                    p.productId(), p.specId(), p.name(), p.manufacturer(),
+            System.out.printf("  [specId=%d] %s (%s) — total=%d, min=%d%n",
+                    p.specId(), p.name(), p.manufacturer(),
                     p.totalQuantity(), p.minStockThreshold());
         }
     }
@@ -211,7 +215,7 @@ public class InventoryMenu {
         int targetCatId = 0;
 
         if (targetType.equals("PRODUCT")) {
-            System.out.print("Product ID: ");
+            System.out.print("Product spec ID: ");
             int productId = Integer.parseInt(scanner.nextLine().trim());
             ProductDTO product = findProduct(productId);
             if (product == null) return;
@@ -252,7 +256,7 @@ public class InventoryMenu {
 
     // INV-5, INV-9
     private void checkEffectivePrice() {
-        System.out.print("Product ID: ");
+        System.out.print("Product spec ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
         double price = service.getEffectivePrice(productId);
         System.out.printf("Effective price: %.2f%n", price);
@@ -260,7 +264,7 @@ public class InventoryMenu {
 
     // INV-7, INV-11
     private void reportDefective() {
-        System.out.print("Product ID: ");
+        System.out.print("Product spec ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
         service.reportDefective(productId, 1, "DEFECTIVE");
         System.out.println("Defective item reported and stock reduced by 1.");
@@ -281,7 +285,7 @@ public class InventoryMenu {
             return;
         }
         for (DefectiveLocationDTO entry : defectives) {
-            System.out.printf("  Product ID %d:%n", entry.productId());
+            System.out.printf("  Product spec ID %d:%n", entry.productId());
             for (StockItemDTO si : entry.locations()) {
                 System.out.printf("    %s shelf=%d row=%d qty=%d%n",
                         si.area(), si.shelf(), si.row(), si.quantity());
@@ -302,7 +306,7 @@ public class InventoryMenu {
             return;
         }
         for (DefectiveReportDTO r : reports) {
-            System.out.printf("  Product ID=%d qty=%d reason=%s date=%s%n",
+            System.out.printf("  Product spec ID=%d qty=%d reason=%s date=%s%n",
                     r.productId(), r.quantity(), r.reason(), r.reportDate());
         }
     }
@@ -328,7 +332,7 @@ public class InventoryMenu {
         List<ProductDTO> items = service.generateInventoryReport(categoryIds);
         System.out.printf("Inventory Report — %s (%d items)%n", LocalDate.now(), items.size());
         for (ProductDTO p : items) {
-            List<StockItemDTO> stock = service.getStockForProduct(p.productId());
+            List<StockItemDTO> stock = service.getStockForProduct(p.specId());
             int storeQty = 0, warehouseQty = 0;
             for (StockItemDTO si : stock) {
                 if ("STORE".equals(si.area())) storeQty += si.quantity();
@@ -336,8 +340,8 @@ public class InventoryMenu {
             }
             int total = storeQty + warehouseQty;
             String status = total == 0 ? "OUT" : total < p.minStockThreshold() ? "LOW" : "OK";
-            System.out.printf("  [ID=%d] %s (%s) — store=%d warehouse=%d total=%d [%s]%n",
-                    p.productId(), p.name(), p.manufacturer(), storeQty, warehouseQty, total, status);
+            System.out.printf("  [specId=%d] %s (%s) — store=%d warehouse=%d total=%d [%s]%n",
+                    p.specId(), p.name(), p.manufacturer(), storeQty, warehouseQty, total, status);
         }
     }
 
@@ -389,7 +393,7 @@ public class InventoryMenu {
         try {
             return service.getProduct(productId);
         } catch (IllegalArgumentException e) {
-            System.out.println("Product not found: " + productId);
+            System.out.println("Product spec not found: " + productId);
             return null;
         }
     }

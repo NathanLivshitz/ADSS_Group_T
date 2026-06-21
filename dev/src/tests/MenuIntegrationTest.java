@@ -17,6 +17,7 @@ public class MenuIntegrationTest {
 
     private String run(String input) throws Exception {
         InventoryController controller = new InventoryController(
+            new ProductSpecRepository(),
             new ProductRepository(new StubProductDAO()),
             new StockItemRepository(new StubStockItemDAO()),
             new CategoryRepository(new StubCategoryDAO()),
@@ -52,7 +53,7 @@ public class MenuIntegrationTest {
             "0"           // exit
         );
         String out = run(input);
-        assertTrue(out.contains("Product added with ID: 1"), "product added");
+        assertTrue(out.contains("Product spec added with ID: 1"), "product spec added");
         assertTrue(out.contains("Stock added"),               "stock added");
         assertTrue(out.contains("qty=20"),                    "stock qty shown");
         assertTrue(out.contains("Total: 20"),                 "total shown");
@@ -130,8 +131,22 @@ public class MenuIntegrationTest {
             "0"
         );
         String out = run(input);
-        assertTrue(out.contains("Product ID 1"), "expired product detected");
+        assertTrue(out.contains("Product spec ID 1"), "expired product detected");
         assertTrue(out.contains("shelf=1"),      "location shown");
+    }
+
+    @Test
+    void testAddingExpiredStockPrintsWarning() throws Exception {
+        String input = String.join("\n",
+            "1",
+            "OldMilk", "Farm", "Dairy", "1.0", "2.0", "5",
+            "2",
+            "1", "STORE", "1", "1", "3", "2000-01-01",
+            "0"
+        );
+        String out = run(input);
+        assertTrue(out.contains("Stock added"), "stock still added");
+        assertTrue(out.contains("Warning: added 3 expired items for OldMilk"), "expired warning shown");
     }
 
     // ── Category add ──────────────────────────────────────────────────────

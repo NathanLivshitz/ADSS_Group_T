@@ -12,6 +12,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         InventoryController controller = new InventoryController(
+            new ProductSpecRepository(),
             new ProductRepository(new StubProductDAO()),
             new StockItemRepository(new StubStockItemDAO()),
             new CategoryRepository(new StubCategoryDAO()),

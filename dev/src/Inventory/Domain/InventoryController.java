@@ -8,17 +8,20 @@ import java.util.*;
 public class InventoryController {
 
     private final IProductRepository productRepo;
+    private final IProductSpecRepository productSpecRepo;
     private final IStockItemRepository stockItemRepo;
     private final ICategoryRepository categoryRepo;
     private final IPromotionRepository promotionRepo;
     private final IDefectiveReportRepository defectiveRepo;
 
     public InventoryController(
+            IProductSpecRepository productSpecRepo,
             IProductRepository productRepo,
             IStockItemRepository stockItemRepo,
             ICategoryRepository categoryRepo,
             IPromotionRepository promotionRepo,
             IDefectiveReportRepository defectiveRepo) {
+        this.productSpecRepo = productSpecRepo;
         this.productRepo   = productRepo;
         this.stockItemRepo = stockItemRepo;
         this.categoryRepo  = categoryRepo;
@@ -28,6 +31,7 @@ public class InventoryController {
 
     public void reset() {
         productRepo.clear();
+        productSpecRepo.clear();
         stockItemRepo.clear();
         categoryRepo.clear();
         promotionRepo.clear();
@@ -40,28 +44,23 @@ public class InventoryController {
         Category category = categoryRepo.findById(dto.categoryId());
         if (category == null)
             throw new IllegalArgumentException("Category not found: " + dto.categoryId());
-        int id = productRepo.nextId();
-        if (productRepo.findById(id) != null)
-            throw new IllegalArgumentException("Product ID " + id + " already exists");
         ProductSpec spec = new ProductSpec(dto.name(), dto.manufacturer(), category,
                 dto.costPrice(), dto.sellPrice(), dto.minStockThreshold());
-        spec.setSpecId(id);
-        productRepo.add(new Product(id, spec));
-        return id;
+        return productSpecRepo.add(spec);
     }
 
-    public ProductDTO getProduct(int id) {
-        Product p = productRepo.findById(id);
-        if (p == null)
-            throw new IllegalArgumentException("Product ID " + id + " not found");
-        return toProductDTO(p);
+    public ProductDTO getProduct(int specId) {
+        ProductSpec spec = productSpecRepo.findById(specId);
+        if (spec == null)
+            throw new IllegalArgumentException("Product spec ID " + specId + " not found");
+        return toProductDTO(spec);
     }
 
     public List<ProductDTO> getLowStockProducts() {
         List<ProductDTO> result = new ArrayList<>();
-        for (Product p : productRepo.findAll()) {
-            if (p.getSpec().getTotalQuantity() < p.getSpec().getMinStockThreshold())
-                result.add(toProductDTO(p));
+        for (ProductSpec spec : productSpecRepo.findAll()) {
+            if (spec.getTotalQuantity() < spec.getMinStockThreshold())
+                result.add(toProductDTO(spec));
         }
         return result;
     }
@@ -69,34 +68,37 @@ public class InventoryController {
     // ── STOCK ────────────────────────────────────────────────
 
     public void addStockItem(StockItemDTO dto) {
-        Product owner = findProductBySpecId(dto.specId());
-        if (owner == null)
+        ProductSpec spec = productSpecRepo.findById(dto.specId());
+        if (spec == null)
             throw new IllegalArgumentException("No product with specId " + dto.specId());
-        ProductSpec spec = owner.getSpec();
         Area area = Area.valueOf(dto.area().toUpperCase());
         LocalDate expiry = (dto.expiryDate() != null && !dto.expiryDate().isEmpty())
                 ? LocalDate.parse(dto.expiryDate()) : null;
-        StockItem item = new StockItem(spec, area, dto.shelf(), dto.row(), dto.quantity(), expiry);
+        List<Integer> productIds = new ArrayList<>();
+        for (int i = 0; i < dto.quantity(); i++) {
+            int productId = productRepo.nextId();
+            productRepo.add(new Product(productId, spec));
+            productIds.add(productId);
+        }
+        StockItem item = new StockItem(spec, area, dto.shelf(), dto.row(), dto.quantity(), expiry, productIds);
         stockItemRepo.add(item);
         spec.adjustQuantity(dto.quantity());
     }
 
-    public List<StockItemDTO> getStockForProduct(int productId) {
-        ProductSpec spec = productRepo.findById(productId) == null ? null
-                : productRepo.findById(productId).getSpec();
+    public List<StockItemDTO> getStockForProduct(int specId) {
+        ProductSpec spec = productSpecRepo.findById(specId);
         if (spec == null)
-            throw new IllegalArgumentException("Product ID " + productId + " not found");
+            throw new IllegalArgumentException("Product spec ID " + specId + " not found");
         List<StockItemDTO> result = new ArrayList<>();
         for (StockItem si : stockItemRepo.findBySpec(spec)) result.add(toStockItemDTO(si));
         return result;
     }
 
-    public void updateQuantity(int productId, String area, int shelf, int row, int delta) {
-        Product p = productRepo.findById(productId);
-        if (p == null)
-            throw new IllegalArgumentException("Product ID " + productId + " not found");
+    public void updateQuantity(int specId, String area, int shelf, int row, int delta) {
+        ProductSpec spec = productSpecRepo.findById(specId);
+        if (spec == null)
+            throw new IllegalArgumentException("Product spec ID " + specId + " not found");
         Area areaEnum = Area.valueOf(area.toUpperCase());
-        ProductSpec spec = p.getSpec();
         StockItem found = null;
         for (StockItem si : stockItemRepo.findBySpec(spec)) {
             if (si.getArea() == areaEnum && si.getShelfNumber() == shelf && si.getRowNumber() == row) {
@@ -104,11 +106,19 @@ public class InventoryController {
             }
         }
         if (found == null)
-            throw new IllegalArgumentException("Location not found for product " + productId);
+            throw new IllegalArgumentException("Location not found for product spec " + specId);
         int newQty = found.getQuantity() + delta;
         if (newQty < 0)
             throw new IllegalArgumentException("Not enough stock. Available: " + found.getQuantity());
-        found.setQuantity(newQty);
+        if (delta > 0) {
+            for (int i = 0; i < delta; i++) {
+                int productId = productRepo.nextId();
+                productRepo.add(new Product(productId, spec));
+                found.addProductId(productId);
+            }
+        } else if (delta < 0) {
+            found.removeProductIds(-delta);
+        }
         spec.adjustQuantity(delta);
     }
 
@@ -142,10 +152,10 @@ public class InventoryController {
         ProductSpec targetSpec = null;
         Category targetCat = null;
         if (dto.targetSpecId() != 0) {
-            Product p = findProductBySpecId(dto.targetSpecId());
-            if (p == null)
+            ProductSpec spec = productSpecRepo.findById(dto.targetSpecId());
+            if (spec == null)
                 throw new IllegalArgumentException("No product with specId " + dto.targetSpecId());
-            targetSpec = p.getSpec();
+            targetSpec = spec;
         } else if (dto.targetCategoryId() != 0) {
             targetCat = categoryRepo.findById(dto.targetCategoryId());
             if (targetCat == null)
@@ -168,10 +178,9 @@ public class InventoryController {
     }
 
     public double getEffectivePrice(int productId) {
-        Product p = productRepo.findById(productId);
-        if (p == null)
-            throw new IllegalArgumentException("Product ID " + productId + " not found");
-        ProductSpec spec = p.getSpec();
+        ProductSpec spec = productSpecRepo.findById(productId);
+        if (spec == null)
+            throw new IllegalArgumentException("Product spec ID " + productId + " not found");
         double bestPrice = spec.getSellPrice();
         for (Promotion promo : promotionRepo.findAll()) {
             if (promo.isActive() && promo.appliesTo(spec)) {
@@ -185,8 +194,8 @@ public class InventoryController {
     // ── DEFECTIVES ───────────────────────────────────────────
 
     public void reportDefective(int productId, int quantity, String reason) {
-        if (productRepo.findById(productId) == null)
-            throw new IllegalArgumentException("Product ID " + productId + " not found");
+        if (productSpecRepo.findById(productId) == null)
+            throw new IllegalArgumentException("Product spec ID " + productId + " not found");
         defectiveRepo.add(new DefectiveReport(productId, quantity, reason, LocalDate.now()));
         removeStockInternal(productId, quantity);
     }
@@ -203,7 +212,7 @@ public class InventoryController {
         }
         for (DefectiveReport r : defectiveRepo.findAll()) {
             int pid = r.getProductId();
-            if (!result.containsKey(pid) && productRepo.findById(pid) != null)
+            if (!result.containsKey(pid) && productSpecRepo.findById(pid) != null)
                 result.put(pid, getStockForProduct(pid));
         }
         return result;
@@ -225,7 +234,10 @@ public class InventoryController {
     public List<ProductDTO> generateInventoryReport(List<Integer> categoryIds) {
         List<Product> items;
         if (categoryIds == null || categoryIds.isEmpty()) {
-            items = new ArrayList<>(productRepo.findAll());
+            items = new ArrayList<>();
+            for (ProductSpec spec : productSpecRepo.findAll()) {
+                items.add(new Product(spec.getSpecId(), spec));
+            }
         } else {
             Set<ProductSpec> specSet = new HashSet<>();
             for (int catId : categoryIds) {
@@ -235,8 +247,8 @@ public class InventoryController {
                 specSet.addAll(cat.getAllProducts());
             }
             items = new ArrayList<>();
-            for (Product p : productRepo.findAll()) {
-                if (specSet.contains(p.getSpec())) items.add(p);
+            for (ProductSpec spec : productSpecRepo.findAll()) {
+                if (specSet.contains(spec)) items.add(new Product(spec.getSpecId(), spec));
             }
         }
         List<ProductDTO> result = new ArrayList<>();
@@ -267,12 +279,15 @@ public class InventoryController {
     }
 
     public void updateShortageReport(int specId, int orderedQty, double unitPrice) {
-        for (Product p : productRepo.findAll()) {
-            if (p.getSpec().getSpecId() == specId) {
-                p.getSpec().setCostPrice(unitPrice);
-                p.getSpec().adjustQuantity(orderedQty);
+        ProductSpec spec = productSpecRepo.findById(specId);
+        if (spec != null) {
+                spec.setCostPrice(unitPrice);
+                for (int i = 0; i < orderedQty; i++) {
+                    int productId = productRepo.nextId();
+                    productRepo.add(new Product(productId, spec));
+                }
+                spec.adjustQuantity(orderedQty);
                 return;
-            }
         }
         throw new IllegalArgumentException("No product found with specId " + specId);
     }
@@ -286,31 +301,26 @@ public class InventoryController {
      * Returns null if no product with that specId exists.
      */
     public ProductDTO getProductBySpecId(int specId) {
-        Product p = findProductBySpecId(specId);
-        return p != null ? toProductDTO(p) : null;
+        ProductSpec spec = productSpecRepo.findById(specId);
+        return spec != null ? toProductDTO(spec) : null;
     }
 
     // ── PRIVATE HELPERS ──────────────────────────────────────
 
     private Product findProductBySpecId(int specId) {
-        for (Product p : productRepo.findAll()) {
-            if (p.getSpec().getSpecId() == specId) return p;
-        }
-        return null;
+        ProductSpec spec = productSpecRepo.findById(specId);
+        return spec != null ? new Product(specId, spec) : null;
     }
 
     private int findProductIdBySpec(ProductSpec spec) {
-        for (Product p : productRepo.findAll()) {
-            if (p.getSpec() == spec) return p.getId();
-        }
-        return -1;
+        return spec != null ? spec.getSpecId() : -1;
     }
 
     private void removeStockInternal(int productId, int quantity) {
-        Product p = productRepo.findById(productId);
-        if (p == null) return;
+        ProductSpec spec = productSpecRepo.findById(productId);
+        if (spec == null) return;
         List<StockItem> store = new ArrayList<>(), warehouse = new ArrayList<>();
-        for (StockItem si : stockItemRepo.findBySpec(p.getSpec())) {
+        for (StockItem si : stockItemRepo.findBySpec(spec)) {
             if (si.getArea() == Area.STORE) store.add(si);
             else warehouse.add(si);
         }
@@ -320,7 +330,7 @@ public class InventoryController {
         for (StockItem si : sorted) {
             if (remaining <= 0) break;
             int take = Math.min(si.getQuantity(), remaining);
-            si.setQuantity(si.getQuantity() - take);
+            si.removeProductIds(take);
             si.getSpec().adjustQuantity(-take);
             remaining -= take;
         }
@@ -330,8 +340,12 @@ public class InventoryController {
 
     private ProductDTO toProductDTO(Product p) {
         ProductSpec s = p.getSpec();
+        return toProductDTO(s);
+    }
+
+    private ProductDTO toProductDTO(ProductSpec s) {
         int catId = s.getCategory() != null ? s.getCategory().getCategoryId() : 0;
-        return new ProductDTO(p.getId(), s.getSpecId(), s.getName(), s.getManufacturer(),
+        return new ProductDTO(0, s.getSpecId(), s.getName(), s.getManufacturer(),
                 catId, s.getCostPrice(), s.getSellPrice(), s.getMinStockThreshold(), s.getTotalQuantity());
     }
 
