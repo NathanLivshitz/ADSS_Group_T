@@ -1,27 +1,16 @@
 package Suppliers.Domain;
 
 public class SupplierOffer {
-
     private final Supplier supplier;
     private final double totalPrice;
 
-    // ── CONSTRUCTOR ───────────────────────────────────────────
-
     public SupplierOffer(Supplier supplier, double totalPrice) {
-        // TODO: validate supplier not null
-        // TODO: validate totalPrice >= 0
-        // TODO: assign fields
+        if (supplier == null) throw new IllegalArgumentException("supplier cannot be null");
+        if (totalPrice < 0) throw new IllegalArgumentException("totalPrice cannot be negative");
+        this.supplier = supplier;
+        this.totalPrice = totalPrice;
     }
 
-    // ── GETTERS ───────────────────────────────────────────────
-
-    public Supplier getSupplier() {
-        // TODO: return supplier
-        return null;
-    }
-
-    public double getTotalPrice() {
-        // TODO: return totalPrice
-        return 0;
-    }
+    public Supplier getSupplier() { return supplier; }
+    public double getTotalPrice() { return totalPrice; }
 }

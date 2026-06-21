@@ -269,6 +269,19 @@ public class InventoryController {
         throw new IllegalArgumentException("No product found with specId " + specId);
     }
 
+    // ── CROSS-MODULE SUPPORT ─────────────────────────────────
+
+    /**
+     * Looks up a product by its specId. Used by InventoryService.selectProduct()
+     * to resolve a specId (from the low-stock list) into a full ProductDTO
+     * so the service can compute requiredQty and forward to SupplierService.
+     * Returns null if no product with that specId exists.
+     */
+    public ProductDTO getProductBySpecId(int specId) {
+        Product p = findProductBySpecId(specId);
+        return p != null ? toProductDTO(p) : null;
+    }
+
     // ── PRIVATE HELPERS ──────────────────────────────────────
 
     private Product findProductBySpecId(int specId) {

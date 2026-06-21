@@ -1,44 +1,21 @@
 package Suppliers.Domain;
 
 public class OrderItem {
-
-    private final int productSpecId;   // links to ProductSpec.specId in Inventory
+    private final int productSpecId;
     private final int quantity;
     private final double unitPrice;
 
-    // ── CONSTRUCTOR ───────────────────────────────────────────
-
     public OrderItem(int productSpecId, int quantity, double unitPrice) {
-        // TODO: validate productSpecId > 0
-        // TODO: validate quantity > 0
-        // TODO: validate unitPrice >= 0
-        // TODO: assign fields
+        if (productSpecId <= 0) throw new IllegalArgumentException("productSpecId must be > 0");
+        if (quantity <= 0) throw new IllegalArgumentException("quantity must be > 0");
+        if (unitPrice < 0) throw new IllegalArgumentException("unitPrice cannot be negative");
+        this.productSpecId = productSpecId;
+        this.quantity = quantity;
+        this.unitPrice = unitPrice;
     }
 
-    // ── PRICING ───────────────────────────────────────────────
-
-    /**
-     * Total cost for this line item: quantity * unitPrice.
-     */
-    public double calculateTotalPrice() {
-        // TODO: return quantity * unitPrice
-        return 0;
-    }
-
-    // ── GETTERS ───────────────────────────────────────────────
-
-    public int getProductSpecId() {
-        // TODO: return productSpecId
-        return 0;
-    }
-
-    public int getQuantity() {
-        // TODO: return quantity
-        return 0;
-    }
-
-    public double getUnitPrice() {
-        // TODO: return unitPrice
-        return 0;
-    }
+    public double calculateTotalPrice() { return quantity * unitPrice; }
+    public int getProductSpecId() { return productSpecId; }
+    public int getQuantity() { return quantity; }
+    public double getUnitPrice() { return unitPrice; }
 }

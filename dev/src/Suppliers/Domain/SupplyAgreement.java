@@ -1,54 +1,25 @@
 package Suppliers.Domain;
 
 public class SupplyAgreement {
-
     private final Supplier supplier;
-    private final int productSpecId;   // links to ProductSpec.specId in Inventory
+    private final int productSpecId;
     private final int minQuantity;
     private final double unitPrice;
 
-    // ── CONSTRUCTOR ───────────────────────────────────────────
-
-    public SupplyAgreement(Supplier supplier, int productSpecId,
-                           int minQuantity, double unitPrice) {
-        // TODO: validate supplier not null
-        // TODO: validate productSpecId > 0
-        // TODO: validate minQuantity > 0
-        // TODO: validate unitPrice >= 0
-        // TODO: assign fields
+    public SupplyAgreement(Supplier supplier, int productSpecId, int minQuantity, double unitPrice) {
+        if (supplier == null) throw new IllegalArgumentException("supplier cannot be null");
+        if (productSpecId <= 0) throw new IllegalArgumentException("productSpecId must be > 0");
+        if (minQuantity <= 0) throw new IllegalArgumentException("minQuantity must be > 0");
+        if (unitPrice < 0) throw new IllegalArgumentException("unitPrice cannot be negative");
+        this.supplier = supplier;
+        this.productSpecId = productSpecId;
+        this.minQuantity = minQuantity;
+        this.unitPrice = unitPrice;
     }
 
-    // ── PRICING ───────────────────────────────────────────────
-
-    /**
-     * Returns the unit price for the given quantity.
-     * Mock: flat price — no tiered pricing in this implementation.
-     * INV-9: cost price is sourced from priceFor() when an order is confirmed.
-     */
-    public double priceFor(int qty) {
-        // TODO: return unitPrice (flat mock — no tiers)
-        return 0;
-    }
-
-    // ── GETTERS ───────────────────────────────────────────────
-
-    public Supplier getSupplier() {
-        // TODO: return supplier
-        return null;
-    }
-
-    public int getProductSpecId() {
-        // TODO: return productSpecId
-        return 0;
-    }
-
-    public int getMinQuantity() {
-        // TODO: return minQuantity
-        return 0;
-    }
-
-    public double getUnitPrice() {
-        // TODO: return unitPrice
-        return 0;
-    }
+    public double priceFor(int qty) { return unitPrice; }
+    public Supplier getSupplier() { return supplier; }
+    public int getProductSpecId() { return productSpecId; }
+    public int getMinQuantity() { return minQuantity; }
+    public double getUnitPrice() { return unitPrice; }
 }
