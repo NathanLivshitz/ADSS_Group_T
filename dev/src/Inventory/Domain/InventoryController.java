@@ -1,119 +1,106 @@
 package Inventory.Domain;
 
+import Inventory.Data.DTO.*;
+import Inventory.Domain.Repository.*;
 import java.time.LocalDate;
 import java.util.*;
 
 public class InventoryController {
-    private final Map<Integer, Product> catalog;
-    private final List<StockItem> stockItems;
-    private final List<Category> rootCategories;
-    private final List<Promotion> promotions;
-    private final List<DefectiveReport> defectiveReports;
 
-    public InventoryController() {
-        this.catalog = new HashMap<>();
-        this.stockItems = new ArrayList<>();
-        this.rootCategories = new ArrayList<>();
-        this.promotions = new ArrayList<>();
-        this.defectiveReports = new ArrayList<>();
+    private final IProductRepository productRepo;
+    private final IStockItemRepository stockItemRepo;
+    private final ICategoryRepository categoryRepo;
+    private final IPromotionRepository promotionRepo;
+    private final IDefectiveReportRepository defectiveRepo;
+
+    public InventoryController(
+            IProductRepository productRepo,
+            IStockItemRepository stockItemRepo,
+            ICategoryRepository categoryRepo,
+            IPromotionRepository promotionRepo,
+            IDefectiveReportRepository defectiveRepo) {
+        this.productRepo   = productRepo;
+        this.stockItemRepo = stockItemRepo;
+        this.categoryRepo  = categoryRepo;
+        this.promotionRepo = promotionRepo;
+        this.defectiveRepo = defectiveRepo;
     }
 
-    /**
-     * Clears all data — catalog, stock, categories, promotions, defective reports.
-     * Used before reloading preloaded data to avoid duplicates.
-     */
     public void reset() {
-        catalog.clear();
-        stockItems.clear();
-        rootCategories.clear();
-        promotions.clear();
-        defectiveReports.clear();
+        productRepo.clear();
+        stockItemRepo.clear();
+        categoryRepo.clear();
+        promotionRepo.clear();
+        defectiveRepo.clear();
     }
 
     // ── CATALOG ──────────────────────────────────────────────
 
-    /**
-     * Menu 1: Add product
-     * INV-1: Maintain product catalog.
-     * Input: Product(id, ProductSpec(name, manufacturer, category, costPrice, sellPrice, minStock))
-     * Throws: if product is null or ID already exists.
-     */
-    public void addProduct(Product product) {
-        if (product == null)
-            throw new IllegalArgumentException("Product must not be null");
-        if (catalog.containsKey(product.getId()))
-            throw new IllegalArgumentException("Product ID " + product.getId() + " already exists");
-        catalog.put(product.getId(), product);
+    public int addProduct(ProductDTO dto) {
+        Category category = categoryRepo.findById(dto.categoryId());
+        if (category == null)
+            throw new IllegalArgumentException("Category not found: " + dto.categoryId());
+        int id = productRepo.nextId();
+        if (productRepo.findById(id) != null)
+            throw new IllegalArgumentException("Product ID " + id + " already exists");
+        ProductSpec spec = new ProductSpec(dto.name(), dto.manufacturer(), category,
+                dto.costPrice(), dto.sellPrice(), dto.minStockThreshold());
+        spec.setSpecId(id);
+        productRepo.add(new Product(id, spec));
+        return id;
     }
 
-    /**
-     * Used by: Menu 2 (add stock), Menu 7 (add promotion), Menu 9 (check price)
-     * Looks up a product by ID. Not a standalone menu option.
-     * Throws: if product ID not found.
-     */
-    public Product getProduct(int id) {
-        Product p = catalog.get(id);
+    public ProductDTO getProduct(int id) {
+        Product p = productRepo.findById(id);
         if (p == null)
             throw new IllegalArgumentException("Product ID " + id + " not found");
-        return p;
+        return toProductDTO(p);
     }
 
-    // ── STOCK ────────────────────────────────────────────────
-
-    /**
-     * Menu 2: Add stock to product
-     * INV-2: Track quantities by exact location.
-     * Input: StockItem(spec, area, shelf, row, quantity, expiryDate)
-     * Throws: if item is null or spec not in catalog.
-     */
-    public void addStockItem(StockItem item) {
-        if (item == null)
-            throw new IllegalArgumentException("StockItem must not be null");
-        boolean specInCatalog = false;
-        for (Product p : catalog.values()) {
-            if (p.getSpec() == item.getSpec()) {
-                specInCatalog = true;
-                break;
-            }
-        }
-        if (!specInCatalog)
-            throw new IllegalArgumentException("StockItem's spec does not belong to any product in the catalog");
-        stockItems.add(item);
-    }
-
-    /**
-     * Menu 3: View product locations & quantities
-     * INV-2: Where is each product, store qty, warehouse qty, total.
-     * Input: productId
-     * Returns: list of StockItems for this product (filter by area for store/warehouse breakdown).
-     */
-    public List<StockItem> getStockForProduct(int productId) {
-        ProductSpec spec = getProduct(productId).getSpec();
-        List<StockItem> result = new ArrayList<>();
-        for (StockItem si : stockItems) {
-            if (si.getSpec() == spec) {
-                result.add(si);
-            }
+    public List<ProductDTO> getLowStockProducts() {
+        List<ProductDTO> result = new ArrayList<>();
+        for (Product p : productRepo.findAll()) {
+            if (p.getSpec().getTotalQuantity() < p.getSpec().getMinStockThreshold())
+                result.add(toProductDTO(p));
         }
         return result;
     }
 
-    /**
-     * Menu 4: Update stock
-     * INV-10: Update stock when received, sold, or expired.
-     * Input: productId, area, shelf, row, delta (positive=add, negative=remove)
-     * Throws: if area null, product not found, location not found, or quantity would go negative.
-     */
-    public void updateQuantity(int productId, Area area, int shelf, int row, int delta) {
-        if (area == null)
-            throw new IllegalArgumentException("Area must not be null");
-        ProductSpec spec = getProduct(productId).getSpec();
+    // ── STOCK ────────────────────────────────────────────────
+
+    public void addStockItem(StockItemDTO dto) {
+        Product owner = findProductBySpecId(dto.specId());
+        if (owner == null)
+            throw new IllegalArgumentException("No product with specId " + dto.specId());
+        ProductSpec spec = owner.getSpec();
+        Area area = Area.valueOf(dto.area().toUpperCase());
+        LocalDate expiry = (dto.expiryDate() != null && !dto.expiryDate().isEmpty())
+                ? LocalDate.parse(dto.expiryDate()) : null;
+        StockItem item = new StockItem(spec, area, dto.shelf(), dto.row(), dto.quantity(), expiry);
+        stockItemRepo.add(item);
+        spec.adjustQuantity(dto.quantity());
+    }
+
+    public List<StockItemDTO> getStockForProduct(int productId) {
+        ProductSpec spec = productRepo.findById(productId) == null ? null
+                : productRepo.findById(productId).getSpec();
+        if (spec == null)
+            throw new IllegalArgumentException("Product ID " + productId + " not found");
+        List<StockItemDTO> result = new ArrayList<>();
+        for (StockItem si : stockItemRepo.findBySpec(spec)) result.add(toStockItemDTO(si));
+        return result;
+    }
+
+    public void updateQuantity(int productId, String area, int shelf, int row, int delta) {
+        Product p = productRepo.findById(productId);
+        if (p == null)
+            throw new IllegalArgumentException("Product ID " + productId + " not found");
+        Area areaEnum = Area.valueOf(area.toUpperCase());
+        ProductSpec spec = p.getSpec();
         StockItem found = null;
-        for (StockItem si : stockItems) {
-            if (si.getSpec() == spec && si.getArea() == area
-                    && si.getShelfNumber() == shelf && si.getRowNumber() == row) {
-                found = si;
-                break;
+        for (StockItem si : stockItemRepo.findBySpec(spec)) {
+            if (si.getArea() == areaEnum && si.getShelfNumber() == shelf && si.getRowNumber() == row) {
+                found = si; break;
             }
         }
         if (found == null)
@@ -122,89 +109,74 @@ public class InventoryController {
         if (newQty < 0)
             throw new IllegalArgumentException("Not enough stock. Available: " + found.getQuantity());
         found.setQuantity(newQty);
-    }
-
-    // ── ALERTS ───────────────────────────────────────────────
-
-    /**
-     * Menu 5: Low stock alerts
-     * INV-3: Proactive stock alerts.
-     * Returns: products where total quantity across all StockItems < minStockThreshold.
-     */
-    public List<Product> getLowStockProducts() {
-        List<Product> result = new ArrayList<>();
-        for (Product p : catalog.values()) {
-            if (getTotalQuantity(p.getId()) < p.getSpec().getMinStockThreshold()) {
-                result.add(p);
-            }
-        }
-        return result;
+        spec.adjustQuantity(delta);
     }
 
     // ── CATEGORIES ───────────────────────────────────────────
 
-    /**
-     * Menu 6: Add category
-     * INV-4: Hierarchical categories.
-     * Input: Category (with optional parent). Only root categories are added here;
-     *        sub-categories auto-register via Category constructor.
-     */
-    public void addCategory(Category c) {
-        if (c == null)
-            throw new IllegalArgumentException("Category must not be null");
-        rootCategories.add(c);
+    public int addCategory(String name, int parentCategoryId) {
+        Category parent = null;
+        if (parentCategoryId != 0) {
+            parent = categoryRepo.findById(parentCategoryId);
+            if (parent == null)
+                throw new IllegalArgumentException("Parent category not found: " + parentCategoryId);
+        }
+        Category cat = new Category(name, parent);
+        return categoryRepo.add(cat);
     }
 
-    /**
-     * Used by: Menu 6 (find parent), Menu 7 (category promotion), Menu 13 (report filter)
-     * INV-4: Returns root categories for tree traversal.
-     */
-    public List<Category> getRootCategories() {
-        return Collections.unmodifiableList(rootCategories);
+    public List<CategoryDTO> getRootCategories() {
+        List<CategoryDTO> result = new ArrayList<>();
+        for (Category c : categoryRepo.findAllRoots()) result.add(toCategoryDTO(c));
+        return result;
+    }
+
+    public CategoryDTO findCategoryByName(String name) {
+        Category c = categoryRepo.findByName(name);
+        return c != null ? toCategoryDTO(c) : null;
     }
 
     // ── PROMOTIONS ───────────────────────────────────────────
 
-    /**
-     * Menu 7: Add promotion
-     * INV-5: Promotions with discounts on products/categories with date ranges.
-     * Input: Promotion(discountPercent, startDate, endDate, targetSpec OR targetCategory)
-     */
-    public void addPromotion(Promotion p) {
-        if (p == null)
-            throw new IllegalArgumentException("Promotion must not be null");
-        promotions.add(p);
-    }
-
-    /**
-     * Menu 8: View active promotions
-     * INV-5: Returns all promotions where today is within [startDate, endDate].
-     */
-    public List<Promotion> getActivePromotions() {
-        List<Promotion> active = new ArrayList<>();
-        for (Promotion p : promotions) {
-            if (p.isActive()) {
-                active.add(p);
-            }
+    public void addPromotion(PromotionDTO dto) {
+        ProductSpec targetSpec = null;
+        Category targetCat = null;
+        if (dto.targetSpecId() != 0) {
+            Product p = findProductBySpecId(dto.targetSpecId());
+            if (p == null)
+                throw new IllegalArgumentException("No product with specId " + dto.targetSpecId());
+            targetSpec = p.getSpec();
+        } else if (dto.targetCategoryId() != 0) {
+            targetCat = categoryRepo.findById(dto.targetCategoryId());
+            if (targetCat == null)
+                throw new IllegalArgumentException("Category not found: " + dto.targetCategoryId());
+        } else {
+            throw new IllegalArgumentException("Promotion must target a product spec or a category");
         }
-        return active;
+        Promotion promo = new Promotion(dto.discountPercent(),
+                LocalDate.parse(dto.startDate()), LocalDate.parse(dto.endDate()),
+                targetSpec, targetCat);
+        promotionRepo.add(promo);
     }
 
-    /**
-     * Menu 9: Check effective price
-     * INV-5, INV-9: Returns sell price after first matching active promotion discount.
-     * Input: productId
-     * Returns: discounted price if active promotion applies, otherwise sell price.
-     */
+    public List<PromotionDTO> getActivePromotions() {
+        List<PromotionDTO> result = new ArrayList<>();
+        for (Promotion p : promotionRepo.findAll()) {
+            if (p.isActive()) result.add(toPromotionDTO(p));
+        }
+        return result;
+    }
+
     public double getEffectivePrice(int productId) {
-        ProductSpec spec = getProduct(productId).getSpec();
+        Product p = productRepo.findById(productId);
+        if (p == null)
+            throw new IllegalArgumentException("Product ID " + productId + " not found");
+        ProductSpec spec = p.getSpec();
         double bestPrice = spec.getSellPrice();
-        for (Promotion p : promotions) {
-            if (p.isActive() && p.appliesTo(spec)) {
-                double promoPrice = p.getEffectivePrice(spec);
-                if (promoPrice < bestPrice) {
-                    bestPrice = promoPrice;
-                }
+        for (Promotion promo : promotionRepo.findAll()) {
+            if (promo.isActive() && promo.appliesTo(spec)) {
+                double promoPrice = promo.getEffectivePrice(spec);
+                if (promoPrice < bestPrice) bestPrice = promoPrice;
             }
         }
         return bestPrice;
@@ -212,170 +184,159 @@ public class InventoryController {
 
     // ── DEFECTIVES ───────────────────────────────────────────
 
-    /**
-     * Menu 10: Report defective/expired
-     * INV-7: Employees report defective/expired items.
-     * INV-11: Auto reduce quantity (drains store-first, then warehouse).
-     * Input: productId, quantity, reason ("DEFECTIVE" or "EXPIRED")
-     * Throws: if product not found or insufficient stock.
-     */
     public void reportDefective(int productId, int quantity, String reason) {
-        getProduct(productId);
-        defectiveReports.add(new DefectiveReport(productId, quantity, reason, LocalDate.now()));
-        removeStock(productId, quantity);
+        if (productRepo.findById(productId) == null)
+            throw new IllegalArgumentException("Product ID " + productId + " not found");
+        defectiveRepo.add(new DefectiveReport(productId, quantity, reason, LocalDate.now()));
+        removeStockInternal(productId, quantity);
     }
 
-    /**
-     * Menu 11: Locate defective items
-     * INV-7: Maps each defective product ID to its current stock locations.
-     * Returns: productId to List of StockItem for products that have been reported defective.
-     */
-    public Map<Integer, List<StockItem>> getDefectiveItemsWithLocations() {
-        Map<Integer, List<StockItem>> result = new HashMap<>();
-        for (DefectiveReport r : defectiveReports) {
-            if (!result.containsKey(r.getProductId()) && catalog.containsKey(r.getProductId())) {
-                result.put(r.getProductId(), getStockForProduct(r.getProductId()));
-            }
+    public Map<Integer, List<StockItemDTO>> getDefectiveItemsWithLocations() {
+        Map<Integer, List<StockItemDTO>> result = new HashMap<>();
+        for (DefectiveReport r : defectiveRepo.findAll()) {
+            int pid = r.getProductId();
+            if (!result.containsKey(pid) && productRepo.findById(pid) != null)
+                result.put(pid, getStockForProduct(pid));
         }
         return result;
     }
 
-    /**
-     * Menu 12: Defective report by dates
-     * INV-8: Periodic defect reports filtered by date range.
-     * Input: from date, to date (inclusive)
-     * Throws: if dates null or from after to.
-     */
-    public List<DefectiveReport> getDefectiveReports(LocalDate from, LocalDate to) {
+    public List<DefectiveReportDTO> getDefectiveReports(LocalDate from, LocalDate to) {
         if (from == null || to == null)
             throw new IllegalArgumentException("Date range cannot be null");
         if (from.isAfter(to))
             throw new IllegalArgumentException("From date must be before or equal to to date");
-        List<DefectiveReport> result = new ArrayList<>();
-        for (DefectiveReport r : defectiveReports) {
-            if (!r.getReportDate().isBefore(from) && !r.getReportDate().isAfter(to)) {
-                result.add(r);
-            }
-        }
+        List<DefectiveReportDTO> result = new ArrayList<>();
+        for (DefectiveReport r : defectiveRepo.findByDateRange(from, to))
+            result.add(toDefectiveReportDTO(r));
         return result;
     }
 
     // ── REPORTS ──────────────────────────────────────────────
 
-    /**
-     * Menu 13: Generate inventory report
-     * INV-6: Inventory reports filterable by categories.
-     * Input: reportDate, categoriesFilter (null or empty = all products)
-     * Returns: InventoryReport with products matching the category filter.
-     */
-    public InventoryReport generateInventoryReport(LocalDate reportDate, List<Category> categoriesFilter) {
+    public List<ProductDTO> generateInventoryReport(List<Integer> categoryIds) {
         List<Product> items;
-        if (categoriesFilter == null || categoriesFilter.isEmpty()) {
-            items = new ArrayList<>(catalog.values());
+        if (categoryIds == null || categoryIds.isEmpty()) {
+            items = new ArrayList<>(productRepo.findAll());
         } else {
-            for (Category filterCat : categoriesFilter) {
-                if (!containsCategory(filterCat)) {
-                    throw new IllegalArgumentException("Category not found: " + filterCat.getName());
-                }
-            }
             Set<ProductSpec> specSet = new HashSet<>();
-            for (Category c : categoriesFilter) {
-                specSet.addAll(c.getAllProducts());
+            for (int catId : categoryIds) {
+                Category cat = categoryRepo.findById(catId);
+                if (cat == null)
+                    throw new IllegalArgumentException("Category not found: " + catId);
+                specSet.addAll(cat.getAllProducts());
             }
             items = new ArrayList<>();
-            for (Product p : catalog.values()) {
-                if (specSet.contains(p.getSpec())) {
-                    items.add(p);
-                }
+            for (Product p : productRepo.findAll()) {
+                if (specSet.contains(p.getSpec())) items.add(p);
             }
         }
-        return new InventoryReport(reportDate,
-                categoriesFilter != null ? categoriesFilter : new ArrayList<>(), items);
+        List<ProductDTO> result = new ArrayList<>();
+        for (Product p : items) result.add(toProductDTO(p));
+        return result;
     }
 
-    /**
-     * Auto-remove expired stock items.
-     * INV-11: Automatically reduces quantity when items are expired.
-     * Scans all StockItems, sets expired ones to qty=0, creates defective reports.
-     * Returns: number of items removed.
-     */
+    // ── STOCK MANAGEMENT ─────────────────────────────────────
+
     public int removeExpiredStock() {
         int totalRemoved = 0;
         LocalDate today = LocalDate.now();
-        ArrayList<StockItem> toRemove = new ArrayList<StockItem>();
-        for (StockItem si : stockItems) {
+        List<StockItem> toRemove = new ArrayList<>();
+        for (StockItem si : stockItemRepo.findAll()) {
             if (si.getExpiryDate() != null && si.getExpiryDate().isBefore(today) && si.getQuantity() > 0) {
                 int qty = si.getQuantity();
                 int productId = findProductIdBySpec(si.getSpec());
                 if (productId != -1) {
-                    defectiveReports.add(new DefectiveReport(productId, qty, "EXPIRED", today));
+                    defectiveRepo.add(new DefectiveReport(productId, qty, "EXPIRED", today));
+                    si.getSpec().adjustQuantity(-qty);
                     totalRemoved += qty;
                 }
                 toRemove.add(si);
             }
         }
-        stockItems.removeAll(toRemove);
+        for (StockItem si : toRemove) si.setQuantity(0);
         return totalRemoved;
     }
 
-    private boolean containsCategory(Category target) {
-        for (Category root : rootCategories) {
-            if (containsCategoryRecursive(root, target)) return true;
+    public void updateShortageReport(int specId, int orderedQty, double unitPrice) {
+        for (Product p : productRepo.findAll()) {
+            if (p.getSpec().getSpecId() == specId) {
+                p.getSpec().setCostPrice(unitPrice);
+                p.getSpec().adjustQuantity(orderedQty);
+                return;
+            }
         }
-        return false;
+        throw new IllegalArgumentException("No product found with specId " + specId);
     }
 
-    private boolean containsCategoryRecursive(Category current, Category target) {
-        if (current == target) return true;
-        for (Category sub : current.getSubCategories()) {
-            if (containsCategoryRecursive(sub, target)) return true;
+    // ── PRIVATE HELPERS ──────────────────────────────────────
+
+    private Product findProductBySpecId(int specId) {
+        for (Product p : productRepo.findAll()) {
+            if (p.getSpec().getSpecId() == specId) return p;
         }
-        return false;
+        return null;
     }
 
     private int findProductIdBySpec(ProductSpec spec) {
-        for (Map.Entry<Integer, Product> entry : catalog.entrySet()) {
-            if (entry.getValue().getSpec() == spec) {
-                return entry.getKey();
-            }
+        for (Product p : productRepo.findAll()) {
+            if (p.getSpec() == spec) return p.getId();
         }
         return -1;
     }
 
-    // ── INTERNAL ─────────────────────────────────────────────
-
-    private int getTotalQuantity(int productId) {
-        int total = 0;
-        for (StockItem si : getStockForProduct(productId)) {
-            total += si.getQuantity();
+    private void removeStockInternal(int productId, int quantity) {
+        Product p = productRepo.findById(productId);
+        if (p == null) return;
+        List<StockItem> store = new ArrayList<>(), warehouse = new ArrayList<>();
+        for (StockItem si : stockItemRepo.findBySpec(p.getSpec())) {
+            if (si.getArea() == Area.STORE) store.add(si);
+            else warehouse.add(si);
         }
-        return total;
-    }
-
-    private void removeStock(int productId, int quantity) {
-        List<StockItem> storeItems = new ArrayList<>();
-        List<StockItem> warehouseItems = new ArrayList<>();
-        for (StockItem si : getStockForProduct(productId)) {
-            if (si.getArea() == Area.STORE) {
-                storeItems.add(si);
-            } else {
-                warehouseItems.add(si);
-            }
-        }
-
-        List<StockItem> sorted = new ArrayList<>();
-        sorted.addAll(storeItems);
-        sorted.addAll(warehouseItems);
-
+        List<StockItem> sorted = new ArrayList<>(store);
+        sorted.addAll(warehouse);
         int remaining = quantity;
-        for (StockItem item : sorted) {
+        for (StockItem si : sorted) {
             if (remaining <= 0) break;
-            int take = Math.min(item.getQuantity(), remaining);
-            item.setQuantity(item.getQuantity() - take);
+            int take = Math.min(si.getQuantity(), remaining);
+            si.setQuantity(si.getQuantity() - take);
+            si.getSpec().adjustQuantity(-take);
             remaining -= take;
         }
         if (remaining > 0)
-            throw new IllegalArgumentException(
-                    "Not enough total stock to remove " + quantity + " units");
+            throw new IllegalArgumentException("Not enough total stock to remove " + quantity + " units");
+    }
+
+    private ProductDTO toProductDTO(Product p) {
+        ProductSpec s = p.getSpec();
+        int catId = s.getCategory() != null ? s.getCategory().getCategoryId() : 0;
+        return new ProductDTO(p.getId(), s.getSpecId(), s.getName(), s.getManufacturer(),
+                catId, s.getCostPrice(), s.getSellPrice(), s.getMinStockThreshold(), s.getTotalQuantity());
+    }
+
+    private StockItemDTO toStockItemDTO(StockItem si) {
+        String expiry = si.getExpiryDate() != null ? si.getExpiryDate().toString() : null;
+        return new StockItemDTO(si.getSpec().getSpecId(), si.getArea().name(),
+                si.getShelfNumber(), si.getRowNumber(), si.getQuantity(), expiry);
+    }
+
+    private CategoryDTO toCategoryDTO(Category c) {
+        int parentId = c.getParent() != null ? c.getParent().getCategoryId() : 0;
+        return new CategoryDTO(c.getCategoryId(), c.getName(), parentId);
+    }
+
+    private PromotionDTO toPromotionDTO(Promotion p) {
+        int specId   = p.getTargetProduct() != null ? p.getTargetProduct().getSpecId() : 0;
+        int catId    = p.getTargetCategory() != null ? p.getTargetCategory().getCategoryId() : 0;
+        String pName = p.getTargetProduct() != null ? p.getTargetProduct().getName() : null;
+        String cName = p.getTargetCategory() != null ? p.getTargetCategory().getName() : null;
+        return new PromotionDTO(p.getDiscountPercent(),
+                p.getStartDate().toString(), p.getEndDate().toString(),
+                specId, catId, pName, cName);
+    }
+
+    private DefectiveReportDTO toDefectiveReportDTO(DefectiveReport r) {
+        return new DefectiveReportDTO(r.getProductId(), r.getQuantity(),
+                r.getReason(), r.getReportDate().toString());
     }
 }

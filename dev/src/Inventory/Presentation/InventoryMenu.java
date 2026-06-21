@@ -1,14 +1,10 @@
 package Inventory.Presentation;
 
-import Inventory.Domain.*;
+import Inventory.Data.DTO.*;
 import Inventory.Data.PreloadData;
 import Inventory.Service.InventoryService;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class InventoryMenu {
     private final InventoryService service;
@@ -75,16 +71,14 @@ public class InventoryMenu {
 
     // INV-1
     private void addProduct() {
-        System.out.print("Product ID: ");
-        int id = Integer.parseInt(scanner.nextLine().trim());
         System.out.print("Name: ");
         String name = scanner.nextLine().trim();
         System.out.print("Manufacturer: ");
         String manufacturer = scanner.nextLine().trim();
         System.out.print("Category path (c1,c2,c3): ");
         String catPath = scanner.nextLine().trim();
-        Category category = findOrCreateCategoryPath(catPath);
-        if (category == null) {
+        int catId = findOrCreateCategoryPath(catPath);
+        if (catId == -1) {
             System.out.println("Invalid category path.");
             return;
         }
@@ -95,21 +89,19 @@ public class InventoryMenu {
         System.out.print("Min stock threshold: ");
         int minStock = Integer.parseInt(scanner.nextLine().trim());
 
-        ProductSpec spec = new ProductSpec(name, manufacturer, category, costPrice, sellPrice, minStock);
-        Product product = new Product(id, spec);
-        service.addProduct(product);
-        System.out.println("Product added.");
+        int assignedId = service.addProduct(new ProductDTO(0, 0, name, manufacturer, catId, costPrice, sellPrice, minStock, 0));
+        System.out.println("Product added with ID: " + assignedId);
     }
 
     // INV-2
     private void addStockItem() {
         System.out.print("Product ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
-        Product product = findProduct(productId);
+        ProductDTO product = findProduct(productId);
         if (product == null) return;
 
         System.out.print("Area (STORE/WAREHOUSE): ");
-        Area area = Area.valueOf(scanner.nextLine().trim().toUpperCase());
+        String area = scanner.nextLine().trim().toUpperCase();
         System.out.print("Shelf number: ");
         int shelf = Integer.parseInt(scanner.nextLine().trim());
         System.out.print("Row number: ");
@@ -118,10 +110,9 @@ public class InventoryMenu {
         int qty = Integer.parseInt(scanner.nextLine().trim());
         System.out.print("Expiry date (YYYY-MM-DD or empty): ");
         String expiryStr = scanner.nextLine().trim();
-        LocalDate expiry = expiryStr.isEmpty() ? null : LocalDate.parse(expiryStr);
+        String expiry = expiryStr.isEmpty() ? null : expiryStr;
 
-        StockItem item = new StockItem(product.getSpec(), area, shelf, row, qty, expiry);
-        service.addStockItem(item);
+        service.addStockItem(new StockItemDTO(product.specId(), area, shelf, row, qty, expiry));
         System.out.println("Stock added.");
     }
 
@@ -130,19 +121,19 @@ public class InventoryMenu {
         System.out.print("Product ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
 
-        List<StockItem> stock = service.getStockForProduct(productId);
+        List<StockItemDTO> stock = service.getStockForProduct(productId);
         if (stock.isEmpty()) {
             System.out.println("No stock found.");
             return;
         }
 
         int storeQty = 0, warehouseQty = 0;
-        for (StockItem si : stock) {
+        for (StockItemDTO si : stock) {
             System.out.printf("  %s shelf=%d row=%d qty=%d expiry=%s%n",
-                    si.getArea(), si.getShelfNumber(), si.getRowNumber(),
-                    si.getQuantity(), si.getExpiryDate() != null ? si.getExpiryDate() : "N/A");
-            if (si.getArea() == Area.STORE) storeQty += si.getQuantity();
-            else warehouseQty += si.getQuantity();
+                    si.area(), si.shelf(), si.row(), si.quantity(),
+                    si.expiryDate() != null ? si.expiryDate() : "N/A");
+            if ("STORE".equals(si.area())) storeQty += si.quantity();
+            else warehouseQty += si.quantity();
         }
         System.out.printf("Store: %d | Warehouse: %d | Total: %d%n",
                 storeQty, warehouseQty, storeQty + warehouseQty);
@@ -153,7 +144,7 @@ public class InventoryMenu {
         System.out.print("Product ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
         System.out.print("Area (STORE/WAREHOUSE): ");
-        Area area = Area.valueOf(scanner.nextLine().trim().toUpperCase());
+        String area = scanner.nextLine().trim().toUpperCase();
         System.out.print("Shelf number: ");
         int shelf = Integer.parseInt(scanner.nextLine().trim());
         System.out.print("Row number: ");
@@ -167,19 +158,15 @@ public class InventoryMenu {
 
     // INV-3
     private void lowStockAlerts() {
-        List<Product> low = service.getLowStockProducts();
+        List<ProductDTO> low = service.getLowStockProducts();
         if (low.isEmpty()) {
             System.out.println("No low stock products.");
             return;
         }
-        for (Product p : low) {
-            ProductSpec spec = p.getSpec();
-            List<StockItem> stock = service.getStockForProduct(p.getId());
-            int total = 0;
-            for (StockItem si : stock) { total += si.getQuantity(); }
-            System.out.printf("  [ID=%d] %s (%s) — total=%d, min=%d%n",
-                    p.getId(), spec.getName(), spec.getManufacturer(),
-                    total, spec.getMinStockThreshold());
+        for (ProductDTO p : low) {
+            System.out.printf("  [ID=%d specId=%d] %s (%s) — total=%d, min=%d%n",
+                    p.productId(), p.specId(), p.name(), p.manufacturer(),
+                    p.totalQuantity(), p.minStockThreshold());
         }
     }
 
@@ -190,20 +177,18 @@ public class InventoryMenu {
         System.out.print("Parent category name (or empty for root): ");
         String parentName = scanner.nextLine().trim();
 
-        Category parent = null;
+        int parentId = 0;
         if (!parentName.isEmpty()) {
-            parent = findCategory(parentName);
+            CategoryDTO parent = service.findCategoryByName(parentName);
             if (parent == null) {
                 System.out.println("Parent category not found.");
                 return;
             }
+            parentId = parent.categoryId();
         }
 
-        Category category = new Category(name, parent);
-        if (parent == null) {
-            service.addCategory(category);
-        }
-        System.out.println("Category added.");
+        int assignedId = service.addCategory(name, parentId);
+        System.out.println("Category added with ID: " + assignedId);
     }
 
     // INV-5
@@ -211,52 +196,52 @@ public class InventoryMenu {
         System.out.print("Discount percent: ");
         double discount = Double.parseDouble(scanner.nextLine().trim());
         System.out.print("Start date (YYYY-MM-DD): ");
-        LocalDate start = LocalDate.parse(scanner.nextLine().trim());
+        String start = scanner.nextLine().trim();
         System.out.print("End date (YYYY-MM-DD): ");
-        LocalDate end = LocalDate.parse(scanner.nextLine().trim());
+        String end = scanner.nextLine().trim();
         System.out.print("Target type (PRODUCT/CATEGORY): ");
         String targetType = scanner.nextLine().trim().toUpperCase();
 
-        ProductSpec targetSpec = null;
-        Category targetCat = null;
+        int targetSpecId = 0;
+        int targetCatId = 0;
 
         if (targetType.equals("PRODUCT")) {
             System.out.print("Product ID: ");
             int productId = Integer.parseInt(scanner.nextLine().trim());
-            Product product = findProduct(productId);
+            ProductDTO product = findProduct(productId);
             if (product == null) return;
-            targetSpec = product.getSpec();
+            targetSpecId = product.specId();
         } else if (targetType.equals("CATEGORY")) {
             System.out.print("Category name: ");
             String catName = scanner.nextLine().trim();
-            targetCat = findCategory(catName);
-            if (targetCat == null) {
+            CategoryDTO cat = service.findCategoryByName(catName);
+            if (cat == null) {
                 System.out.println("Category not found.");
                 return;
             }
+            targetCatId = cat.categoryId();
         } else {
             System.out.println("Invalid target type.");
             return;
         }
 
-        Promotion promo = new Promotion(discount, start, end, targetSpec, targetCat);
-        service.addPromotion(promo);
+        service.addPromotion(new PromotionDTO(discount, start, end, targetSpecId, targetCatId, null, null));
         System.out.println("Promotion added.");
     }
 
     // INV-5
     private void viewActivePromotions() {
-        List<Promotion> active = service.getActivePromotions();
+        List<PromotionDTO> active = service.getActivePromotions();
         if (active.isEmpty()) {
             System.out.println("No active promotions.");
             return;
         }
-        for (Promotion p : active) {
-            String target = p.getTargetProduct() != null
-                    ? "Product: " + p.getTargetProduct().getName()
-                    : "Category: " + p.getTargetCategory().getName();
+        for (PromotionDTO p : active) {
+            String target = p.targetSpecId() != 0
+                    ? "Product: " + p.targetProductName()
+                    : "Category: " + p.targetCategoryName();
             System.out.printf("  %.0f%% off — %s to %s — %s%n",
-                    p.getDiscountPercent(), p.getStartDate(), p.getEndDate(), target);
+                    p.discountPercent(), p.startDate(), p.endDate(), target);
         }
     }
 
@@ -272,33 +257,29 @@ public class InventoryMenu {
     private void reportDefective() {
         System.out.print("Product ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
-
         service.reportDefective(productId, 1, "DEFECTIVE");
         System.out.println("Defective item reported and stock reduced by 1.");
     }
 
-    // INV-11 — auto-remove expired stock
+    // INV-11
     private void removeExpiredStock() {
         int removed = service.removeExpiredStock();
-        if (removed == 0) {
-            System.out.println("No expired stock found.");
-        } else {
-            System.out.println(removed + " expired items removed from stock.");
-        }
+        if (removed == 0) System.out.println("No expired stock found.");
+        else System.out.println(removed + " expired items removed from stock.");
     }
 
     // INV-7
     private void locateDefectiveItems() {
-        Map<Integer, List<StockItem>> defectives = service.getDefectiveItemsWithLocations();
+        Map<Integer, List<StockItemDTO>> defectives = service.getDefectiveItemsWithLocations();
         if (defectives.isEmpty()) {
             System.out.println("No defective items found.");
             return;
         }
-        for (Map.Entry<Integer, List<StockItem>> entry : defectives.entrySet()) {
+        for (Map.Entry<Integer, List<StockItemDTO>> entry : defectives.entrySet()) {
             System.out.printf("  Product ID %d:%n", entry.getKey());
-            for (StockItem si : entry.getValue()) {
+            for (StockItemDTO si : entry.getValue()) {
                 System.out.printf("    %s shelf=%d row=%d qty=%d%n",
-                        si.getArea(), si.getShelfNumber(), si.getRowNumber(), si.getQuantity());
+                        si.area(), si.shelf(), si.row(), si.quantity());
             }
         }
     }
@@ -310,14 +291,14 @@ public class InventoryMenu {
         System.out.print("To date (YYYY-MM-DD): ");
         LocalDate to = LocalDate.parse(scanner.nextLine().trim());
 
-        List<DefectiveReport> reports = service.getDefectiveReports(from, to);
+        List<DefectiveReportDTO> reports = service.getDefectiveReports(from, to);
         if (reports.isEmpty()) {
             System.out.println("No defective reports in this period.");
             return;
         }
-        for (DefectiveReport r : reports) {
+        for (DefectiveReportDTO r : reports) {
             System.out.printf("  Product ID=%d qty=%d reason=%s date=%s%n",
-                    r.getProductId(), r.getQuantity(), r.getReason(), r.getReportDate());
+                    r.productId(), r.quantity(), r.reason(), r.reportDate());
         }
     }
 
@@ -326,39 +307,32 @@ public class InventoryMenu {
         System.out.print("Filter by categories? (y/n): ");
         String filterChoice = scanner.nextLine().trim().toLowerCase();
 
-        List<Category> filter = null;
+        List<Integer> categoryIds = null;
         if (filterChoice.equals("y")) {
-            filter = new ArrayList<>();
+            categoryIds = new ArrayList<>();
             System.out.println("Enter category names (empty line to finish):");
             while (true) {
                 String catName = scanner.nextLine().trim();
                 if (catName.isEmpty()) break;
-                Category cat = findCategory(catName);
-                if (cat == null) {
-                    System.out.println("Category '" + catName + "' not found, skipping.");
-                } else {
-                    filter.add(cat);
-                }
+                CategoryDTO cat = service.findCategoryByName(catName);
+                if (cat == null) System.out.println("Category '" + catName + "' not found, skipping.");
+                else categoryIds.add(cat.categoryId());
             }
         }
 
-        InventoryReport report = service.generateInventoryReport(LocalDate.now(), filter);
-        System.out.printf("Inventory Report — %s (%d items)%n",
-                report.getReportDate(), report.getItems().size());
-        for (Product p : report.getItems()) {
-            ProductSpec spec = p.getSpec();
-            List<StockItem> stock = service.getStockForProduct(p.getId());
-            int storeQty = 0;
-            int warehouseQty = 0;
-            for (StockItem si : stock) {
-                if (si.getArea() == Area.STORE) storeQty += si.getQuantity();
-                else warehouseQty += si.getQuantity();
+        List<ProductDTO> items = service.generateInventoryReport(categoryIds);
+        System.out.printf("Inventory Report — %s (%d items)%n", LocalDate.now(), items.size());
+        for (ProductDTO p : items) {
+            List<StockItemDTO> stock = service.getStockForProduct(p.productId());
+            int storeQty = 0, warehouseQty = 0;
+            for (StockItemDTO si : stock) {
+                if ("STORE".equals(si.area())) storeQty += si.quantity();
+                else warehouseQty += si.quantity();
             }
             int total = storeQty + warehouseQty;
-            String status = total == 0 ? "OUT" : total < spec.getMinStockThreshold() ? "LOW" : "OK";
+            String status = total == 0 ? "OUT" : total < p.minStockThreshold() ? "LOW" : "OK";
             System.out.printf("  [ID=%d] %s (%s) — store=%d warehouse=%d total=%d [%s]%n",
-                    p.getId(), spec.getName(), spec.getManufacturer(),
-                    storeQty, warehouseQty, total, status);
+                    p.productId(), p.name(), p.manufacturer(), storeQty, warehouseQty, total, status);
         }
     }
 
@@ -369,7 +343,7 @@ public class InventoryMenu {
 
     // ── HELPERS ──────────────────────────────────────────────
 
-    private Product findProduct(int productId) {
+    private ProductDTO findProduct(int productId) {
         try {
             return service.getProduct(productId);
         } catch (IllegalArgumentException e) {
@@ -378,54 +352,21 @@ public class InventoryMenu {
         }
     }
 
-    private Category findCategory(String name) {
-        for (Category root : service.getRootCategories()) {
-            Category found = findCategoryRecursive(root, name);
-            if (found != null) return found;
-        }
-        return null;
-    }
-
-    private Category findOrCreateCategoryPath(String path) {
+    private int findOrCreateCategoryPath(String path) {
         String[] parts = path.split(",");
-        if (parts.length == 0) return null;
+        if (parts.length == 0) return -1;
 
-        Category current = null;
-        for (int i = 0; i < parts.length; i++) {
-            String name = parts[i].trim();
-            if (name.isEmpty()) return null;
-
-            if (i == 0) {
-                // Find or create root category
-                current = findCategory(name);
-                if (current == null) {
-                    current = new Category(name);
-                    service.addCategory(current);
-                }
+        int parentId = 0;
+        for (String part : parts) {
+            String name = part.trim();
+            if (name.isEmpty()) return -1;
+            CategoryDTO existing = service.findCategoryByName(name);
+            if (existing != null) {
+                parentId = existing.categoryId();
             } else {
-                // Find or create sub-category under current
-                Category child = null;
-                for (Category sub : current.getSubCategories()) {
-                    if (sub.getName().equalsIgnoreCase(name)) {
-                        child = sub;
-                        break;
-                    }
-                }
-                if (child == null) {
-                    child = new Category(name, current);
-                }
-                current = child;
+                parentId = service.addCategory(name, parentId);
             }
         }
-        return current;
-    }
-
-    private Category findCategoryRecursive(Category current, String name) {
-        if (current.getName().equalsIgnoreCase(name)) return current;
-        for (Category sub : current.getSubCategories()) {
-            Category found = findCategoryRecursive(sub, name);
-            if (found != null) return found;
-        }
-        return null;
+        return parentId;
     }
 }

@@ -8,6 +8,12 @@ public class ProductSpec {
     private double sellPrice;
     private final int minStockThreshold;
 
+    // ── IDENTITY (GAP-3 diagram amendment) ───────────────────
+    private int specId;          // surrogate key — assigned by repository after add()
+
+    // ── QUANTITY CACHE (GAP-7) ────────────────────────────────
+    private int totalQuantity;   // kept current by InventoryController after every stock mutation
+
     public ProductSpec(String name, String manufacturer,
                        Category category, double costPrice, double sellPrice,
                        int minStockThreshold) {
@@ -58,5 +64,45 @@ public class ProductSpec {
             throw new IllegalArgumentException("Cost price cannot be negative");
         }
         this.costPrice = costPrice;
+    }
+
+    // ── IDENTITY ──────────────────────────────────────────────
+
+    /**
+     * GAP-3: Surrogate key for ProductSpec.
+     * Called by repository immediately after the spec is registered.
+     */
+    public int getSpecId() {
+        // TODO: return specId
+        return specId;
+    }
+
+    public void setSpecId(int specId) {
+        if (specId <= 0) throw new IllegalArgumentException("specId must be > 0");
+        this.specId = specId;
+    }
+
+    // ── QUANTITY CACHE ────────────────────────────────────────
+
+    /**
+     * GAP-7: Total units across all StockItems for this spec.
+     * InventoryController calls adjustQuantity() after every stock mutation
+     * so this value is always current — no repo lookup needed.
+     */
+    public int getTotalQuantity() {
+        // TODO: return totalQuantity
+        return totalQuantity;
+    }
+
+    /**
+     * Called by InventoryController after: addStockItem, updateQuantity,
+     * reportDefective, removeExpiredStock.
+     * delta positive = stock added, negative = stock removed.
+     * Throws if the result would go below zero.
+     */
+    public void adjustQuantity(int delta) {
+        if (totalQuantity + delta < 0)
+            throw new IllegalArgumentException("Stock would go negative: current=" + totalQuantity + " delta=" + delta);
+        totalQuantity += delta;
     }
 }

@@ -1,15 +1,14 @@
 package Inventory.Data;
 
-import Inventory.Domain.*;
-import java.time.LocalDate;
+import Inventory.Data.DTO.*;
+import Inventory.Domain.InventoryController;
 
 public class PreloadData {
     private final InventoryController controller;
 
     public PreloadData(InventoryController controller) {
-        if (controller == null) {
+        if (controller == null)
             throw new IllegalArgumentException("Controller must not be null");
-        }
         this.controller = controller;
     }
 
@@ -17,94 +16,49 @@ public class PreloadData {
         controller.reset();
 
         // ── CATEGORIES ──────────────────────────────────────
-        // Dairy Products > Milk > By Size
-        Category dairy = new Category("Dairy Products");
-        controller.addCategory(dairy);
-        Category milk = new Category("Milk", dairy);
-        Category milkBySize = new Category("By Size", milk);
+        int dairyId        = controller.addCategory("Dairy Products", 0);
+        int milkId         = controller.addCategory("Milk", dairyId);
+        int milkBySizeId   = controller.addCategory("By Size", milkId);
 
-        // Toiletries > Shampoo > By Size
-        Category toiletries = new Category("Toiletries");
-        controller.addCategory(toiletries);
-        Category shampoo = new Category("Shampoo", toiletries);
-        Category shampooBySize = new Category("By Size", shampoo);
+        int toiletriesId   = controller.addCategory("Toiletries", 0);
+        int shampooId      = controller.addCategory("Shampoo", toiletriesId);
+        int shampooBySizeId = controller.addCategory("By Size", shampooId);
 
-        // Snacks > Chips > By Brand
-        Category snacks = new Category("Snacks");
-        controller.addCategory(snacks);
-        Category chips = new Category("Chips", snacks);
-        Category chipsByBrand = new Category("By Brand", chips);
+        int snacksId       = controller.addCategory("Snacks", 0);
+        int chipsId        = controller.addCategory("Chips", snacksId);
+        int chipsByBrandId = controller.addCategory("By Brand", chipsId);
 
         // ── PRODUCTS ────────────────────────────────────────
-        // 1. Tnuva 3% Milk 1L
-        ProductSpec milkSpec1L = new ProductSpec("Tnuva 3% Milk 1L", "Tnuva",
-                milkBySize, 4.5, 6.9, 15);
-        Product milk1L = new Product(1, milkSpec1L);
-        controller.addProduct(milk1L);
+        int milk1LId  = controller.addProduct(new ProductDTO(0, 0, "Tnuva 3% Milk 1L",   "Tnuva", milkBySizeId,    4.5, 6.9,  15, 0));
+        int milk500Id = controller.addProduct(new ProductDTO(0, 0, "Tnuva 3% Milk 500ml", "Tnuva", milkBySizeId,    3.0, 4.9,  10, 0));
+        int shampooId2 = controller.addProduct(new ProductDTO(0, 0, "Pinuk Shampoo 250ml", "Pinuk", shampooBySizeId, 8.0, 14.9,  8, 0));
+        int bambaId   = controller.addProduct(new ProductDTO(0, 0, "Bamba 80g",            "Osem",  chipsByBrandId,  2.5, 4.5,  20, 0));
+        int bissliId  = controller.addProduct(new ProductDTO(0, 0, "Bissli 70g",           "Osem",  chipsByBrandId,  2.0, 3.9,  12, 0));
 
-        // 2. Tnuva 3% Milk 500ml
-        ProductSpec milkSpec500 = new ProductSpec("Tnuva 3% Milk 500ml", "Tnuva",
-                milkBySize, 3.0, 4.9, 10);
-        Product milk500 = new Product(2, milkSpec500);
-        controller.addProduct(milk500);
-
-        // 3. Pinuk Shampoo 250ml
-        ProductSpec shampooSpec = new ProductSpec("Pinuk Shampoo 250ml", "Pinuk",
-                shampooBySize, 8.0, 14.9, 8);
-        Product shampoo250 = new Product(3, shampooSpec);
-        controller.addProduct(shampoo250);
-
-        // 4. Bamba 80g
-        ProductSpec bambaSpec = new ProductSpec("Bamba 80g", "Osem",
-                chipsByBrand, 2.5, 4.5, 20);
-        Product bamba = new Product(4, bambaSpec);
-        controller.addProduct(bamba);
-
-        // 5. Bissli 70g
-        ProductSpec bissliSpec = new ProductSpec("Bissli 70g", "Osem",
-                chipsByBrand, 2.0, 3.9, 12);
-        Product bissli = new Product(5, bissliSpec);
-        controller.addProduct(bissli);
+        // Retrieve assigned specIds for stock item creation
+        int milk1LSpec  = controller.getProduct(milk1LId).specId();
+        int milk500Spec = controller.getProduct(milk500Id).specId();
+        int shampooSpec = controller.getProduct(shampooId2).specId();
+        int bambaSpec   = controller.getProduct(bambaId).specId();
+        int bissliSpec  = controller.getProduct(bissliId).specId();
 
         // ── STOCK ITEMS ─────────────────────────────────────
-        // Tnuva 3% Milk 1L
-        controller.addStockItem(new StockItem(milkSpec1L, Area.STORE,
-                2, 1, 20, LocalDate.of(2026, 7, 1)));
-        controller.addStockItem(new StockItem(milkSpec1L, Area.WAREHOUSE,
-                1, 3, 50, LocalDate.of(2026, 7, 15)));
-
-        // Tnuva 3% Milk 500ml
-        controller.addStockItem(new StockItem(milkSpec500, Area.STORE,
-                2, 2, 15, LocalDate.of(2026, 7, 1)));
-        controller.addStockItem(new StockItem(milkSpec500, Area.WAREHOUSE,
-                1, 3, 30, LocalDate.of(2026, 7, 10)));
-
-        // Pinuk Shampoo 250ml
-        controller.addStockItem(new StockItem(shampooSpec, Area.STORE,
-                5, 1, 10, null));
-        controller.addStockItem(new StockItem(shampooSpec, Area.WAREHOUSE,
-                3, 1, 25, null));
-
-        // Bamba 80g
-        controller.addStockItem(new StockItem(bambaSpec, Area.STORE,
-                4, 3, 40, LocalDate.of(2026, 9, 1)));
-        controller.addStockItem(new StockItem(bambaSpec, Area.WAREHOUSE,
-                2, 5, 100, LocalDate.of(2026, 10, 1)));
-
-        // Bissli 70g (LOW STOCK: total=8 < min=12)
-        controller.addStockItem(new StockItem(bissliSpec, Area.STORE,
-                4, 4, 5, LocalDate.of(2026, 8, 1)));
-        controller.addStockItem(new StockItem(bissliSpec, Area.WAREHOUSE,
-                2, 5, 3, LocalDate.of(2026, 8, 15)));
+        controller.addStockItem(new StockItemDTO(milk1LSpec,  "STORE",     2, 1, 20,  "2026-07-01"));
+        controller.addStockItem(new StockItemDTO(milk1LSpec,  "WAREHOUSE", 1, 3, 50,  "2026-07-15"));
+        controller.addStockItem(new StockItemDTO(milk500Spec, "STORE",     2, 2, 15,  "2026-07-01"));
+        controller.addStockItem(new StockItemDTO(milk500Spec, "WAREHOUSE", 1, 3, 30,  "2026-07-10"));
+        controller.addStockItem(new StockItemDTO(shampooSpec, "STORE",     5, 1, 10,  null));
+        controller.addStockItem(new StockItemDTO(shampooSpec, "WAREHOUSE", 3, 1, 25,  null));
+        controller.addStockItem(new StockItemDTO(bambaSpec,   "STORE",     4, 3, 40,  "2026-09-01"));
+        controller.addStockItem(new StockItemDTO(bambaSpec,   "WAREHOUSE", 2, 5, 100, "2026-10-01"));
+        controller.addStockItem(new StockItemDTO(bissliSpec,  "STORE",     4, 4, 5,   "2026-08-01"));
+        controller.addStockItem(new StockItemDTO(bissliSpec,  "WAREHOUSE", 2, 5, 3,   "2026-08-15"));
 
         // ── PROMOTIONS ──────────────────────────────────────
         // 10% off all Dairy products, April 1-30
-        controller.addPromotion(new Promotion(10.0,
-                LocalDate.of(2026, 4, 1), LocalDate.of(2026, 4, 30),
-                null, dairy));
+        controller.addPromotion(new PromotionDTO(10.0, "2026-04-01", "2026-04-30", 0, dairyId, null, null));
 
         // ── DEFECTIVE REPORTS ───────────────────────────────
-        // 3 units of Tnuva 3% Milk 1L reported expired on April 10
-        controller.reportDefective(1, 3, "EXPIRED");
+        controller.reportDefective(milk1LId, 3, "EXPIRED");
     }
 }
