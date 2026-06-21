@@ -1,6 +1,6 @@
 package Inventory.Data.DAO;
 
-import Inventory.Data.DTO.CategoryDTO;
+import Inventory.DTO.CategoryDTO;
 import java.util.List;
 
 public interface ICategoryDAO {

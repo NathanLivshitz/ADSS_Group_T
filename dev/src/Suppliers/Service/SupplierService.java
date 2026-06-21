@@ -1,6 +1,8 @@
 package Suppliers.Service;
 
 import Suppliers.Domain.*;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 
 public class SupplierService {
@@ -31,4 +33,23 @@ public class SupplierService {
     public Supplier addSupplier(int id, String name) { return supplierSystem.addSupplier(id, name); }
 
     public void addAgreement(SupplyAgreement a) { supplierSystem.addAgreement(a); }
+
+    public void addSchedule(DeliverySchedule d) { supplierSystem.addSchedule(d); }
+
+    public List<DayOfWeek> getDeliveryDays(int supplierId) {
+        return supplierSystem.getFixedDeliveryDays(supplierId);
+    }
+
+    public List<SupplyAgreement> getAgreementsForSupplier(int supplierId) {
+        return supplierSystem.getAgreementsForSupplier(supplierId);
+    }
+
+    public List<Supplier> getSuppliersWithSchedules() {
+        return supplierSystem.getSuppliersWithSchedules();
+    }
+
+    public Order createPeriodicOrder(int supplierId, List<OrderItem> items, LocalDate deliveryDate) {
+        Order order = Order.createPeriodic(supplierId, items, deliveryDate);
+        return supplierSystem.registerAndTransmitOrder(order);
+    }
 }

@@ -1,8 +1,9 @@
 package Inventory.Presentation;
 
-import Inventory.Data.DTO.*;
+import Inventory.DTO.*;
 import Inventory.Data.PreloadData;
 import Inventory.Service.InventoryService;
+import Shared.DTO.*;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -39,6 +40,8 @@ public class InventoryMenu {
                     case "13": defectiveReportByDates(); break;
                     case "14": generateInventoryReport(); break;
                     case "15": loadTestData(); break;
+                    case "16": orderDueToShortage(); break;
+                    case "17": orderOnTimePeriod(); break;
                     case "0":  running = false; break;
                     default:   System.out.println("Invalid option."); break;
                 }
@@ -65,6 +68,8 @@ public class InventoryMenu {
         System.out.println("13. Defective report by dates");
         System.out.println("14. Generate inventory report");
         System.out.println("15. Load test data");
+        System.out.println("16. Order due to shortage");
+        System.out.println("17. Periodic order from supplier");
         System.out.println("0.  Exit");
         System.out.print("Choose: ");
     }
@@ -270,14 +275,14 @@ public class InventoryMenu {
 
     // INV-7
     private void locateDefectiveItems() {
-        Map<Integer, List<StockItemDTO>> defectives = service.getDefectiveItemsWithLocations();
+        List<DefectiveLocationDTO> defectives = service.getDefectiveItemsWithLocations();
         if (defectives.isEmpty()) {
             System.out.println("No defective items found.");
             return;
         }
-        for (Map.Entry<Integer, List<StockItemDTO>> entry : defectives.entrySet()) {
-            System.out.printf("  Product ID %d:%n", entry.getKey());
-            for (StockItemDTO si : entry.getValue()) {
+        for (DefectiveLocationDTO entry : defectives) {
+            System.out.printf("  Product ID %d:%n", entry.productId());
+            for (StockItemDTO si : entry.locations()) {
                 System.out.printf("    %s shelf=%d row=%d qty=%d%n",
                         si.area(), si.shelf(), si.row(), si.quantity());
             }
@@ -339,6 +344,43 @@ public class InventoryMenu {
     private void loadTestData() {
         preloadData.load();
         System.out.println("Test data loaded (previous data cleared).");
+    }
+
+    // UC-f
+    private void orderDueToShortage() {
+        List<ProductDTO> shortage = service.orderShortageFromSupplier();
+        if (shortage.isEmpty()) { System.out.println("No low-stock products."); return; }
+        System.out.println("Low-stock products:");
+        for (ProductDTO p : shortage)
+            System.out.printf("  [specId=%d] %s — qty=%d, min=%d%n",
+                    p.specId(), p.name(), p.totalQuantity(), p.minStockThreshold());
+        System.out.print("Enter specId to order: ");
+        int specId = Integer.parseInt(scanner.nextLine().trim());
+        OrderProposalDTO proposal = service.selectProduct(specId);
+        System.out.printf("Proposal #%d: supplier=%d, qty=%d, price/unit=%.2f%n",
+                proposal.proposalId(), proposal.supplierId(),
+                proposal.requiredQty(), proposal.unitPrice());
+        System.out.print("Confirm? (y/n): ");
+        if (!scanner.nextLine().trim().equalsIgnoreCase("y")) { System.out.println("Cancelled."); return; }
+        OrderSummaryDTO order = service.confirmOrder(proposal.proposalId());
+        System.out.printf("Order #%d sent. Total: %.2f%n", order.orderId(), order.totalPrice());
+    }
+
+    // UC-e
+    private void orderOnTimePeriod() {
+        List<SupplierScheduleDTO> scheduled = service.getSuppliersWithSchedules();
+        if (scheduled.isEmpty()) { System.out.println("No suppliers with fixed delivery schedules."); return; }
+        List<String> preview = service.describePeriodicOrders();
+        if (preview.isEmpty()) { System.out.println("No periodic orders needed right now."); return; }
+        System.out.println("Proposed periodic orders:");
+        for (String line : preview) System.out.println("  " + line);
+        System.out.print("Approve and send all? (y/n): ");
+        if (!scanner.nextLine().trim().equalsIgnoreCase("y")) { System.out.println("Cancelled."); return; }
+        List<OrderSummaryDTO> placed = service.submitAllPeriodicOrders();
+        System.out.printf("%d periodic order(s) sent.%n", placed.size());
+        for (OrderSummaryDTO o : placed)
+            System.out.printf("  Order #%d → supplier %d, delivery %s, total %.2f%n",
+                    o.orderId(), o.supplierId(), o.expectedDeliveryDate(), o.totalPrice());
     }
 
     // ── HELPERS ──────────────────────────────────────────────

@@ -1,6 +1,6 @@
 package Inventory.Data.DAO;
 
-import Inventory.Data.DTO.StockItemDTO;
+import Inventory.DTO.StockItemDTO;
 import java.util.List;
 
 public interface IStockItemDAO {

@@ -1,6 +1,6 @@
 package Inventory.Data;
 
-import Inventory.Data.DTO.*;
+import Inventory.DTO.*;
 import Inventory.Domain.InventoryController;
 
 public class PreloadData {

@@ -1,6 +1,6 @@
 package Inventory.Data.DAO;
 
-import Inventory.Data.DTO.PromotionDTO;
+import Inventory.DTO.PromotionDTO;
 import java.util.List;
 
 public interface IPromotionDAO {

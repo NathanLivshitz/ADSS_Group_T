@@ -1,7 +1,7 @@
 package Inventory.Data.DAO.Stub;
 
 import Inventory.Data.DAO.IProductDAO;
-import Inventory.Data.DTO.ProductDTO;
+import Inventory.DTO.ProductDTO;
 import java.util.*;
 
 public class StubProductDAO implements IProductDAO {

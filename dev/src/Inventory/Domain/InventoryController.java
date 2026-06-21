@@ -1,6 +1,6 @@
 package Inventory.Domain;
 
-import Inventory.Data.DTO.*;
+import Inventory.DTO.*;
 import Inventory.Domain.Repository.*;
 import java.time.LocalDate;
 import java.util.*;
@@ -193,6 +193,14 @@ public class InventoryController {
 
     public Map<Integer, List<StockItemDTO>> getDefectiveItemsWithLocations() {
         Map<Integer, List<StockItemDTO>> result = new HashMap<>();
+        LocalDate today = LocalDate.now();
+        for (StockItem si : stockItemRepo.findAll()) {
+            if (si.getExpiryDate() != null && si.getExpiryDate().isBefore(today) && si.getQuantity() > 0) {
+                int pid = findProductIdBySpec(si.getSpec());
+                if (pid != -1)
+                    result.computeIfAbsent(pid, k -> new ArrayList<>()).add(toStockItemDTO(si));
+            }
+        }
         for (DefectiveReport r : defectiveRepo.findAll()) {
             int pid = r.getProductId();
             if (!result.containsKey(pid) && productRepo.findById(pid) != null)

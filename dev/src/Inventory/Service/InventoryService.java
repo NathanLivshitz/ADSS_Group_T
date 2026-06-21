@@ -1,12 +1,13 @@
 package Inventory.Service;
 
-import Inventory.Data.DTO.*;
+import Inventory.DTO.*;
 import Inventory.Domain.InventoryController;
-import Suppliers.Domain.OrderProposal;
-import Suppliers.Domain.Order;
-import Suppliers.Domain.OrderItem;
+import Shared.DTO.*;
+import Suppliers.Domain.*;
 import Suppliers.Service.SupplierService;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 public class InventoryService {
@@ -17,11 +18,25 @@ public class InventoryService {
         if (controller == null)
             throw new IllegalArgumentException("controller cannot be null");
         this.controller = controller;
+        this.supplierService = defaultSupplierService();
     }
 
     public InventoryService(InventoryController controller, SupplierService supplierService) {
         this(controller);
         this.supplierService = supplierService;
+    }
+
+    private static SupplierService defaultSupplierService() {
+        SupplierController sc = new SupplierController();
+        Supplier s1 = sc.addSupplier(1, "ACME Supplies");
+        Supplier s2 = sc.addSupplier(2, "Global Foods");
+        sc.addSchedule(new DeliverySchedule(s1, DayOfWeek.MONDAY));
+        sc.addSchedule(new DeliverySchedule(s2, DayOfWeek.WEDNESDAY));
+        sc.addAgreement(new SupplyAgreement(s1, 1, 10, 5.00));
+        sc.addAgreement(new SupplyAgreement(s1, 2, 5,  8.50));
+        sc.addAgreement(new SupplyAgreement(s2, 1, 10, 4.80));
+        sc.addAgreement(new SupplyAgreement(s2, 3, 20, 3.00));
+        return new SupplierService(sc);
     }
 
     // ── Catalog ────────────────────────────────────────────
@@ -94,8 +109,11 @@ public class InventoryService {
         return controller.removeExpiredStock();
     }
 
-    public Map<Integer, List<StockItemDTO>> getDefectiveItemsWithLocations() {
-        return controller.getDefectiveItemsWithLocations();
+    public List<DefectiveLocationDTO> getDefectiveItemsWithLocations() {
+        List<DefectiveLocationDTO> result = new ArrayList<>();
+        for (Map.Entry<Integer, List<StockItemDTO>> e : controller.getDefectiveItemsWithLocations().entrySet())
+            result.add(new DefectiveLocationDTO(e.getKey(), e.getValue()));
+        return result;
     }
 
     public List<DefectiveReportDTO> getDefectiveReports(LocalDate from, LocalDate to) {
@@ -123,7 +141,7 @@ public class InventoryService {
      * Computes requiredQty, forwards to SupplierService to find cheapest supplier
      * and create an OrderProposal. Returns the proposal for user approval.
      */
-    public OrderProposal selectProduct(int specId) {
+    public OrderProposalDTO selectProduct(int specId) {
         if (supplierService == null)
             throw new IllegalStateException("SupplierService not wired");
         ProductDTO product = controller.getProductBySpecId(specId);
@@ -132,7 +150,8 @@ public class InventoryService {
         int requiredQty = product.minStockThreshold() - product.totalQuantity();
         if (requiredQty <= 0)
             throw new IllegalArgumentException("Product specId=" + specId + " is not below threshold");
-        return supplierService.createOrderProposal(specId, requiredQty);
+        OrderProposal p = supplierService.createOrderProposal(specId, requiredQty);
+        return new OrderProposalDTO(p.getOrderProposalId(), p.getSupplierId(), p.getRequiredQty(), p.getPrice());
     }
 
     /**
@@ -140,15 +159,104 @@ public class InventoryService {
      * Creates and transmits the order via SupplierService, then updates
      * cost price and total quantity in the inventory (updateShortageReport).
      */
-    public Order confirmOrder(int orderProposalId) {
+    public OrderSummaryDTO confirmOrder(int orderProposalId) {
         if (supplierService == null)
             throw new IllegalStateException("SupplierService not wired");
         Order order = supplierService.createOrder(orderProposalId);
-        for (OrderItem item : order.getItems()) {
-            controller.updateShortageReport(
-                    item.getProductSpecId(), item.getQuantity(), item.getUnitPrice());
+        for (OrderItem item : order.getItems())
+            controller.updateShortageReport(item.getProductSpecId(), item.getQuantity(), item.getUnitPrice());
+        return new OrderSummaryDTO(order.getOrderId(), order.getSupplierId(), order.getItems().size(),
+                order.getTotalPrice(), order.getOrderType().toString(),
+                order.getExpectedDeliveryDate().toString());
+    }
+
+    /** Returns one SupplierScheduleDTO per supplier that has fixed delivery days. */
+    public List<SupplierScheduleDTO> getSuppliersWithSchedules() {
+        if (supplierService == null)
+            throw new IllegalStateException("SupplierService not wired");
+        List<SupplierScheduleDTO> result = new ArrayList<>();
+        for (Supplier s : supplierService.getSuppliersWithSchedules()) {
+            List<String> days = new ArrayList<>();
+            for (DayOfWeek d : supplierService.getDeliveryDays(s.getSupplierID()))
+                days.add(d.toString());
+            result.add(new SupplierScheduleDTO(s.getSupplierID(), s.getSupplierName(), days));
         }
-        return order;
+        return result;
+    }
+
+    /**
+     * UC-e preview: returns a human-readable summary of what periodic orders would be
+     * generated right now (no side effects). Used to show the user before confirming.
+     */
+    public List<String> describePeriodicOrders() {
+        if (supplierService == null)
+            throw new IllegalStateException("SupplierService not wired");
+        List<String> lines = new ArrayList<>();
+        List<ProductDTO> lowStock = controller.getLowStockProducts();
+        for (Supplier s : supplierService.getSuppliersWithSchedules()) {
+            LocalDate nextDelivery = nextDeliveryDate(s.getSupplierID());
+            List<SupplyAgreement> agreements = supplierService.getAgreementsForSupplier(s.getSupplierID());
+            List<String> items = new ArrayList<>();
+            for (ProductDTO p : lowStock) {
+                for (SupplyAgreement a : agreements) {
+                    if (a.getProductSpecId() == p.specId()) {
+                        int qty = p.minStockThreshold() - p.totalQuantity() + 1;
+                        items.add(String.format("specId=%d qty=%d price=%.2f", p.specId(), qty, a.priceFor(qty)));
+                        break;
+                    }
+                }
+            }
+            if (!items.isEmpty())
+                lines.add(String.format("Supplier [%d] %s — delivery %s — items: %s",
+                        s.getSupplierID(), s.getSupplierName(), nextDelivery, items));
+        }
+        return lines;
+    }
+
+    /**
+     * UC-e submit: creates and transmits periodic orders for all scheduled suppliers
+     * whose agreements cover at least one low-stock product.
+     */
+    public List<OrderSummaryDTO> submitAllPeriodicOrders() {
+        if (supplierService == null)
+            throw new IllegalStateException("SupplierService not wired");
+        List<OrderSummaryDTO> placed = new ArrayList<>();
+        List<ProductDTO> lowStock = controller.getLowStockProducts();
+        for (Supplier s : supplierService.getSuppliersWithSchedules()) {
+            LocalDate nextDelivery = nextDeliveryDate(s.getSupplierID());
+            List<SupplyAgreement> agreements = supplierService.getAgreementsForSupplier(s.getSupplierID());
+            List<OrderItem> items = new ArrayList<>();
+            for (ProductDTO p : lowStock) {
+                for (SupplyAgreement a : agreements) {
+                    if (a.getProductSpecId() == p.specId()) {
+                        int qty = p.minStockThreshold() - p.totalQuantity() + 1;
+                        items.add(new OrderItem(p.specId(), qty, a.priceFor(qty)));
+                        break;
+                    }
+                }
+            }
+            if (items.isEmpty()) continue;
+            Order order = supplierService.createPeriodicOrder(s.getSupplierID(), items, nextDelivery);
+            for (OrderItem item : order.getItems())
+                controller.updateShortageReport(item.getProductSpecId(), item.getQuantity(), item.getUnitPrice());
+            placed.add(new OrderSummaryDTO(order.getOrderId(), order.getSupplierId(), order.getItems().size(),
+                    order.getTotalPrice(), order.getOrderType().toString(),
+                    order.getExpectedDeliveryDate().toString()));
+        }
+        return placed;
+    }
+
+    private LocalDate nextDeliveryDate(int supplierId) {
+        List<DayOfWeek> days = supplierService.getDeliveryDays(supplierId);
+        if (days.isEmpty())
+            throw new IllegalStateException("Supplier " + supplierId + " has no delivery days");
+        LocalDate today = LocalDate.now();
+        LocalDate earliest = null;
+        for (DayOfWeek day : days) {
+            LocalDate next = today.with(TemporalAdjusters.next(day)); // always tomorrow+
+            if (earliest == null || next.isBefore(earliest)) earliest = next;
+        }
+        return earliest;
     }
 
     // ── Reset ──────────────────────────────────────────────

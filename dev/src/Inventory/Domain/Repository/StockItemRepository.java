@@ -1,7 +1,7 @@
 package Inventory.Domain.Repository;
 
 import Inventory.Data.DAO.IStockItemDAO;
-import Inventory.Data.DTO.StockItemDTO;
+import Inventory.DTO.StockItemDTO;
 import Inventory.Domain.ProductSpec;
 import Inventory.Domain.StockItem;
 import java.util.*;

@@ -1,4 +1,4 @@
-package Inventory.Data.DTO;
+package Inventory.DTO;
 
 public record PromotionDTO(
     double discountPercent,

@@ -76,4 +76,21 @@ public class SupplierController {
         if (d == null) throw new IllegalArgumentException("schedule cannot be null");
         schedules.add(d);
     }
+
+    public List<SupplyAgreement> getAgreementsForSupplier(int supplierId) {
+        List<SupplyAgreement> result = new ArrayList<>();
+        for (SupplyAgreement a : agreements)
+            if (a.getSupplier().getSupplierID() == supplierId) result.add(a);
+        return result;
+    }
+
+    public List<Supplier> getSuppliersWithSchedules() {
+        Set<Integer> seen = new HashSet<>();
+        List<Supplier> result = new ArrayList<>();
+        for (DeliverySchedule d : schedules) {
+            int id = d.getSupplier().getSupplierID();
+            if (seen.add(id)) result.add(d.getSupplier());
+        }
+        return result;
+    }
 }

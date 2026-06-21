@@ -1,7 +1,7 @@
 package Inventory.Domain.Repository;
 
 import Inventory.Data.DAO.IPromotionDAO;
-import Inventory.Data.DTO.PromotionDTO;
+import Inventory.DTO.PromotionDTO;
 import Inventory.Domain.Promotion;
 import java.util.*;
 

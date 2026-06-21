@@ -37,6 +37,12 @@ public class Order {
                 LocalDate.now(), LocalDate.now().plusDays(7));
     }
 
+    public static Order createPeriodic(int supplierId, List<OrderItem> items, LocalDate deliveryDate) {
+        return new Order(0, supplierId, new java.util.ArrayList<>(items),
+                OrderStatus.DRAFT, OrderType.PERIODIC,
+                LocalDate.now(), deliveryDate);
+    }
+
     public void changeStatus(OrderStatus s) {
         if (s == null) throw new IllegalArgumentException("status cannot be null");
         this.status = s;

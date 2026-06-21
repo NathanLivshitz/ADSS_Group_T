@@ -1,7 +1,7 @@
 package Inventory.Data.DAO.Stub;
 
 import Inventory.Data.DAO.ICategoryDAO;
-import Inventory.Data.DTO.CategoryDTO;
+import Inventory.DTO.CategoryDTO;
 import java.util.*;
 
 public class StubCategoryDAO implements ICategoryDAO {

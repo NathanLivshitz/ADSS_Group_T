@@ -1,7 +1,7 @@
 package Inventory.Data.DAO.Stub;
 
 import Inventory.Data.DAO.IPromotionDAO;
-import Inventory.Data.DTO.PromotionDTO;
+import Inventory.DTO.PromotionDTO;
 import java.util.*;
 
 public class StubPromotionDAO implements IPromotionDAO {

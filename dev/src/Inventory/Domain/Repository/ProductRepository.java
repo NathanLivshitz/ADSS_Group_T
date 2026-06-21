@@ -1,7 +1,7 @@
 package Inventory.Domain.Repository;
 
 import Inventory.Data.DAO.IProductDAO;
-import Inventory.Data.DTO.ProductDTO;
+import Inventory.DTO.ProductDTO;
 import Inventory.Domain.Category;
 import Inventory.Domain.Product;
 import Inventory.Domain.ProductSpec;

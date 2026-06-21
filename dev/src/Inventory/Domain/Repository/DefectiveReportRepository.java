@@ -1,7 +1,7 @@
 package Inventory.Domain.Repository;
 
 import Inventory.Data.DAO.IDefectiveReportDAO;
-import Inventory.Data.DTO.DefectiveReportDTO;
+import Inventory.DTO.DefectiveReportDTO;
 import Inventory.Domain.DefectiveReport;
 import java.time.LocalDate;
 import java.util.*;
