@@ -2,3 +2,27 @@ dev/out/
 build/
 .DS_Store
 *.class
+docs/*.md
+docs/**/*.md
+
+# IDE
+.classpath
+.project
+.settings/
+*.iml
+.idea/
+
+# Windows metadata
+*.Zone.Identifier
+*:Zone.Identifier
+
+# Archives
+*.zip
+
+# Loose files in docs root (submission docs live in docs/Inventory-Suppliers/ and docs/Employees-Deliveries/)
+docs/*.pdf
+docs/*.drawio
+docs/*.pptx
+docs/*.zip
+docs/[*
+docs/תרשימי*/
