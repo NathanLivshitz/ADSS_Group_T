@@ -99,6 +99,8 @@ public class InventoryMenu {
 
         int assignedId = service.addProduct(new ProductDTO(0, 0, name, manufacturer, catId, costPrice, sellPrice, minStock, 0));
         System.out.println("Product spec added with ID: " + assignedId);
+        if (sellPrice < costPrice)
+            System.out.printf("Warning: sell price %.2f is below cost price %.2f.%n", sellPrice, costPrice);
     }
 
     // INV-2

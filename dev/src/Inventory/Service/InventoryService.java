@@ -36,6 +36,10 @@ public class InventoryService {
         sc.addAgreement(new SupplyAgreement(s1, 2, 5,  8.50));
         sc.addAgreement(new SupplyAgreement(s2, 1, 10, 4.80));
         sc.addAgreement(new SupplyAgreement(s2, 3, 20, 3.00));
+        // Bissli (specId 5) is the low-stock item in the demo data; two suppliers
+        // at different prices so the shortage/periodic order can pick the cheaper one.
+        sc.addAgreement(new SupplyAgreement(s1, 5, 12, 3.50));
+        sc.addAgreement(new SupplyAgreement(s2, 5, 12, 3.20));
         return new SupplierService(sc);
     }
 
