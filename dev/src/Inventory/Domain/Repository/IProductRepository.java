@@ -19,7 +19,7 @@ public interface IProductRepository {
 
     /**
      * Looks up a product by its ID.
-     * Returns null if not found — caller is responsible for null check.
+     * Returns null if not found - caller is responsible for null check.
      */
     Product findById(int id);
 

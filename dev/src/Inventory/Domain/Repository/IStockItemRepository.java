@@ -14,7 +14,7 @@ public interface IStockItemRepository {
 
     /**
      * Returns all StockItems whose spec reference matches the given spec.
-     * Identity comparison (==), not equals() — one spec object per product.
+     * Identity comparison (==), not equals() - one spec object per product.
      * Called by InventoryController.getStockForProduct() and removeStock().
      */
     List<StockItem> findBySpec(ProductSpec spec);

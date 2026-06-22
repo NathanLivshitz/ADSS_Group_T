@@ -207,7 +207,7 @@ public class InventoryService {
                 }
             }
             if (!items.isEmpty())
-                lines.add(String.format("Supplier [%d] %s — delivery %s — items: %s",
+                lines.add(String.format("Supplier [%d] %s - delivery %s - items: %s",
                         s.getSupplierID(), s.getSupplierName(), nextDelivery, items));
         }
         return lines;

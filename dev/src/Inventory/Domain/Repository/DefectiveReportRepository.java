@@ -41,6 +41,21 @@ public class DefectiveReportRepository implements IDefectiveReportRepository {
         reports.clear();
     }
 
+    // Rebuilds in-memory DefectiveReport objects from defective_reports.
+    // No inter-repository dependencies.
+    public void hydrate() {
+        List<DefectiveReportDTO> dtos = dao.findAll();
+        for (DefectiveReportDTO dto : dtos) {
+            DefectiveReport r = new DefectiveReport(
+                dto.productId(),
+                dto.quantity(),
+                dto.reason(),
+                LocalDate.parse(dto.reportDate())
+            );
+            reports.add(r);
+        }
+    }
+
     private DefectiveReportDTO toDTO(DefectiveReport r) {
         return new DefectiveReportDTO(r.getProductId(), r.getQuantity(),
                 r.getReason(), r.getReportDate().toString());

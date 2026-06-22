@@ -10,7 +10,7 @@ public class Category {
     private List<ProductSpec> products;
 
     // ── IDENTITY (GAP-3 diagram amendment) ───────────────────
-    private int categoryId;     // surrogate key — assigned by repository after add()
+    private int categoryId;     // surrogate key - assigned by repository after add()
 
     public Category(String name) {
         this(name, null);

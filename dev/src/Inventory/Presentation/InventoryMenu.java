@@ -5,6 +5,7 @@ import Inventory.Data.PreloadData;
 import Inventory.Service.InventoryService;
 import Shared.DTO.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 public class InventoryMenu {
@@ -47,6 +48,8 @@ public class InventoryMenu {
                 }
             } catch (IllegalArgumentException e) {
                 System.out.println("Error: " + e.getMessage());
+            } catch (DateTimeParseException e) {
+                System.out.println("Error: invalid date format, expected YYYY-MM-DD.");
             }
         }
     }
@@ -173,7 +176,7 @@ public class InventoryMenu {
             return;
         }
         for (ProductDTO p : low) {
-            System.out.printf("  [specId=%d] %s (%s) — total=%d, min=%d%n",
+            System.out.printf("  [specId=%d] %s (%s) - total=%d, min=%d%n",
                     p.specId(), p.name(), p.manufacturer(),
                     p.totalQuantity(), p.minStockThreshold());
         }
@@ -249,7 +252,7 @@ public class InventoryMenu {
             String target = p.targetSpecId() != 0
                     ? "Product: " + p.targetProductName()
                     : "Category: " + p.targetCategoryName();
-            System.out.printf("  %.0f%% off — %s to %s — %s%n",
+            System.out.printf("  %.0f%% off - %s to %s - %s%n",
                     p.discountPercent(), p.startDate(), p.endDate(), target);
         }
     }
@@ -330,7 +333,7 @@ public class InventoryMenu {
         }
 
         List<ProductDTO> items = service.generateInventoryReport(categoryIds);
-        System.out.printf("Inventory Report — %s (%d items)%n", LocalDate.now(), items.size());
+        System.out.printf("Inventory Report - %s (%d items)%n", LocalDate.now(), items.size());
         for (ProductDTO p : items) {
             List<StockItemDTO> stock = service.getStockForProduct(p.specId());
             int storeQty = 0, warehouseQty = 0;
@@ -340,7 +343,7 @@ public class InventoryMenu {
             }
             int total = storeQty + warehouseQty;
             String status = total == 0 ? "OUT" : total < p.minStockThreshold() ? "LOW" : "OK";
-            System.out.printf("  [specId=%d] %s (%s) — store=%d warehouse=%d total=%d [%s]%n",
+            System.out.printf("  [specId=%d] %s (%s) - store=%d warehouse=%d total=%d [%s]%n",
                     p.specId(), p.name(), p.manufacturer(), storeQty, warehouseQty, total, status);
         }
     }
@@ -356,7 +359,7 @@ public class InventoryMenu {
         if (shortage.isEmpty()) { System.out.println("No low-stock products."); return; }
         System.out.println("Low-stock products:");
         for (ProductDTO p : shortage)
-            System.out.printf("  [specId=%d] %s — qty=%d, min=%d%n",
+            System.out.printf("  [specId=%d] %s - qty=%d, min=%d%n",
                     p.specId(), p.name(), p.totalQuantity(), p.minStockThreshold());
         System.out.print("Enter specId to order: ");
         int specId = Integer.parseInt(scanner.nextLine().trim());
@@ -383,7 +386,7 @@ public class InventoryMenu {
         List<OrderSummaryDTO> placed = service.submitAllPeriodicOrders();
         System.out.printf("%d periodic order(s) sent.%n", placed.size());
         for (OrderSummaryDTO o : placed)
-            System.out.printf("  Order #%d → supplier %d, delivery %s, total %.2f%n",
+            System.out.printf("  Order #%d -> supplier %d, delivery %s, total %.2f%n",
                     o.orderId(), o.supplierId(), o.expectedDeliveryDate(), o.totalPrice());
     }
 

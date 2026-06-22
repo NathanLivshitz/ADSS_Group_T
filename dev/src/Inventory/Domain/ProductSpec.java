@@ -9,7 +9,7 @@ public class ProductSpec {
     private final int minStockThreshold;
 
     // ── IDENTITY (GAP-3 diagram amendment) ───────────────────
-    private int specId;          // surrogate key — assigned by repository after add()
+    private int specId;          // surrogate key - assigned by repository after add()
 
     // ── QUANTITY CACHE (GAP-7) ────────────────────────────────
     private int totalQuantity;   // kept current by InventoryController after every stock mutation
@@ -87,7 +87,7 @@ public class ProductSpec {
     /**
      * GAP-7: Total units across all StockItems for this spec.
      * InventoryController calls adjustQuantity() after every stock mutation
-     * so this value is always current — no repo lookup needed.
+     * so this value is always current - no repo lookup needed.
      */
     public int getTotalQuantity() {
         // TODO: return totalQuantity

@@ -3,5 +3,5 @@ package Inventory.DTO;
 public record CategoryDTO(
     int categoryId,
     String categoryName,
-    int parentCategoryId  // -1 for root categories
+    int parentCategoryId  // 0 for root categories (no parent)
 ) {}

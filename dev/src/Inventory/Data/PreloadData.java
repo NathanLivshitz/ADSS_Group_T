@@ -2,6 +2,8 @@ package Inventory.Data;
 
 import Inventory.DTO.*;
 import Inventory.Domain.InventoryController;
+import Inventory.Data.DB.DatabaseConnection;
+import java.sql.SQLException;
 
 public class PreloadData {
     private final InventoryController controller;
@@ -10,6 +12,20 @@ public class PreloadData {
         if (controller == null)
             throw new IllegalArgumentException("Controller must not be null");
         this.controller = controller;
+    }
+
+    /**
+     * Wipes the database and loads fresh seed data.
+     * Safe to call at any time; truncates all tables before seeding so that
+     * both the SQLite store and the in-memory state are reset consistently.
+     */
+    public void loadFresh() {
+        try {
+            DatabaseConnection.truncateAll();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to truncate database before preload", e);
+        }
+        load();
     }
 
     public void load() {
@@ -55,8 +71,8 @@ public class PreloadData {
         controller.addStockItem(new StockItemDTO(bissliSpec,  "WAREHOUSE", 2, 5, 3,   "2026-08-15"));
 
         // ── PROMOTIONS ──────────────────────────────────────
-        // 10% off all Dairy products, April 1-30
-        controller.addPromotion(new PromotionDTO(10.0, "2026-04-01", "2026-04-30", 0, dairyId, null, null));
+        // 10% off all Dairy products for the full year
+        controller.addPromotion(new PromotionDTO(10.0, "2026-01-01", "2026-12-31", 0, dairyId, null, null));
 
         // ── DEFECTIVE REPORTS ───────────────────────────────
         controller.reportDefective(milk1LId, 3, "EXPIRED");

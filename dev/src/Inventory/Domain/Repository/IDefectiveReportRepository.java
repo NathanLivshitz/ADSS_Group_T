@@ -20,7 +20,7 @@ public interface IDefectiveReportRepository {
 
     /**
      * Returns reports whose reportDate falls within [from, to] inclusive.
-     * Date filtering happens here — DAO will mirror this with a WHERE clause.
+     * Date filtering happens here - DAO will mirror this with a WHERE clause.
      * Called by InventoryController.getDefectiveReports(from, to).
      */
     List<DefectiveReport> findByDateRange(LocalDate from, LocalDate to);

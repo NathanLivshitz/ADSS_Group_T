@@ -1,8 +1,13 @@
+package tests;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-import Inventory.Domain.*;
+import Inventory.DTO.*;
+import Inventory.Domain.InventoryController;
+import Inventory.Domain.Repository.*;
+import Inventory.Data.DAO.Stub.*;
 import Inventory.Service.InventoryService;
 import java.time.LocalDate;
 import java.util.List;
@@ -11,17 +16,27 @@ class InventoryServiceTest {
 
     private InventoryController controller;
     private InventoryService service;
-    private Category dairy;
-    private ProductSpec milkSpec;
-    private Product milkProduct;
+    private int dairyId;
+    private int milkSpecId;
+
+    private static InventoryController freshController() {
+        return new InventoryController(
+            new ProductSpecRepository(),
+            new ProductRepository(new StubProductDAO()),
+            new StockItemRepository(new StubStockItemDAO()),
+            new CategoryRepository(new StubCategoryDAO()),
+            new PromotionRepository(new StubPromotionDAO()),
+            new DefectiveReportRepository(new StubDefectiveReportDAO())
+        );
+    }
 
     @BeforeEach
     void setUp() {
-        controller = new InventoryController();
+        controller = freshController();
         service = new InventoryService(controller);
-        dairy = new Category("Dairy");
-        milkSpec = new ProductSpec("Tnuva 3% 1L", "Tnuva", dairy, 4.5, 6.9, 10);
-        milkProduct = new Product(1, milkSpec);
+        dairyId = service.addCategory("Dairy", 0);
+        milkSpecId = service.addProduct(
+            new ProductDTO(0, 0, "Tnuva 3% 1L", "Tnuva", dairyId, 4.5, 6.9, 10, 0));
     }
 
     @Test
@@ -31,77 +46,72 @@ class InventoryServiceTest {
 
     @Test
     void addAndGetProduct() {
-        service.addProduct(milkProduct);
-        assertEquals(1, service.getProduct(1).getId());
+        ProductDTO p = service.getProduct(milkSpecId);
+        assertEquals("Tnuva 3% 1L", p.name());
+        assertEquals(milkSpecId, p.specId());
     }
 
     @Test
     void addStockAndGetForProduct() {
-        service.addProduct(milkProduct);
-        service.addStockItem(new StockItem(milkSpec, Area.STORE, 2, 1, 20, null));
-        List<StockItem> stock = service.getStockForProduct(1);
+        service.addStockItem(new StockItemDTO(milkSpecId, "STORE", 2, 1, 20, null));
+        List<StockItemDTO> stock = service.getStockForProduct(milkSpecId);
         assertEquals(1, stock.size());
-        assertEquals(20, stock.get(0).getQuantity());
+        assertEquals(20, stock.get(0).quantity());
     }
 
     @Test
     void updateQuantityReducesStock() {
-        service.addProduct(milkProduct);
-        service.addStockItem(new StockItem(milkSpec, Area.STORE, 2, 1, 20, null));
-        service.updateQuantity(1, Area.STORE, 2, 1, -5);
-        assertEquals(15, service.getStockForProduct(1).get(0).getQuantity());
+        service.addStockItem(new StockItemDTO(milkSpecId, "STORE", 2, 1, 20, null));
+        service.updateQuantity(milkSpecId, "STORE", 2, 1, -5);
+        assertEquals(15, service.getStockForProduct(milkSpecId).get(0).quantity());
     }
 
     @Test
     void lowStockAlertsShowUnderMin() {
-        service.addProduct(milkProduct);
-        service.addStockItem(new StockItem(milkSpec, Area.STORE, 1, 1, 5, null));
+        // min threshold = 10, stock = 5 -> should be low
+        service.addStockItem(new StockItemDTO(milkSpecId, "STORE", 1, 1, 5, null));
         assertEquals(1, service.getLowStockProducts().size());
     }
 
     @Test
     void promotionReducesEffectivePrice() {
-        service.addProduct(milkProduct);
-        Promotion promo = new Promotion(10.0,
-                LocalDate.now().minusDays(1),
-                LocalDate.now().plusDays(5),
-                milkSpec, null);
-        service.addPromotion(promo);
-        assertEquals(6.21, service.getEffectivePrice(1), 0.001);
+        service.addPromotion(new PromotionDTO(
+            10.0,
+            LocalDate.now().minusDays(1).toString(),
+            LocalDate.now().plusDays(5).toString(),
+            milkSpecId, 0, null, null));
+        assertEquals(6.21, service.getEffectivePrice(milkSpecId), 0.001);
     }
 
     @Test
     void effectivePriceWithoutPromotionEqualsSellPrice() {
-        service.addProduct(milkProduct);
-        assertEquals(6.9, service.getEffectivePrice(1), 0.001);
+        assertEquals(6.9, service.getEffectivePrice(milkSpecId), 0.001);
     }
 
     @Test
     void reportDefectiveReducesStock() {
-        service.addProduct(milkProduct);
-        service.addStockItem(new StockItem(milkSpec, Area.STORE, 1, 1, 10, null));
-        service.reportDefective(1, 3, "DEFECTIVE");
-        assertEquals(7, service.getStockForProduct(1).get(0).getQuantity());
+        service.addStockItem(new StockItemDTO(milkSpecId, "STORE", 1, 1, 10, null));
+        service.reportDefective(milkSpecId, 3, "DEFECTIVE");
+        assertEquals(7, service.getStockForProduct(milkSpecId).get(0).quantity());
     }
 
     @Test
     void reportDefectiveRejectsNegativeQuantity() {
-        service.addProduct(milkProduct);
         assertThrows(IllegalArgumentException.class,
-                () -> service.reportDefective(1, -1, "DEFECTIVE"));
+            () -> service.reportDefective(milkSpecId, -1, "DEFECTIVE"));
     }
 
     @Test
     void inventoryReportReturnsAllProducts() {
-        service.addProduct(milkProduct);
-        InventoryReport report = service.generateInventoryReport(LocalDate.now(), null);
-        assertEquals(1, report.getItems().size());
+        List<ProductDTO> report = service.generateInventoryReport(null);
+        assertEquals(1, report.size());
+        assertEquals(milkSpecId, report.get(0).specId());
     }
 
     @Test
     void resetClearsCatalog() {
-        service.addProduct(milkProduct);
         service.reset();
-        assertThrows(IllegalArgumentException.class, () -> service.getProduct(1));
+        final int id = milkSpecId;
+        assertThrows(IllegalArgumentException.class, () -> service.getProduct(id));
     }
 }
