@@ -35,9 +35,8 @@ public class ProductSpecRepository implements IProductSpecRepository {
         nextSpecId = 1;
     }
 
-    // Rebuilds in-memory ProductSpec objects from the product_specs table.
-    // categoryDao is unused directly; kept for signature symmetry with Main wiring.
-    // dedup guard prevents double-registration into category.products.
+    // categoryDao unused here; kept for wiring symmetry with Main.
+    // skips specIds already loaded (dedup guard).
     public void hydrate(IProductDAO productDao, ICategoryDAO categoryDao,
                         Map<Integer, Category> categoryMap) {
         List<ProductDTO> dtos = productDao.findAll();

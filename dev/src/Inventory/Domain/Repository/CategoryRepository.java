@@ -15,8 +15,7 @@ public class CategoryRepository implements ICategoryRepository {
         this.dao = dao;
     }
 
-    // Rebuilds in-memory state from the database.
-    // findAll() orders by category_id ASC so parents always arrive before children.
+    // rebuilds in-memory state; findAll() returns rows ASC so parents arrive first
     public void hydrate() {
         List<CategoryDTO> dtos = dao.findAll();
         int maxId = 0;
@@ -32,7 +31,6 @@ public class CategoryRepository implements ICategoryRepository {
         if (maxId > 0) nextCategoryId = maxId + 1;
     }
 
-    // Unmodifiable view of the category map; used during hydration wiring.
     public Map<Integer, Category> getAllCategoriesMap() {
         return Collections.unmodifiableMap(categories);
     }

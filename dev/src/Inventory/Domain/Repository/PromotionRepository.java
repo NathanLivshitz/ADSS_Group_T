@@ -33,8 +33,7 @@ public class PromotionRepository implements IPromotionRepository {
         promotions.clear();
     }
 
-    // Rebuilds in-memory Promotion objects from the promotions table.
-    // specRepo and categoryRepo must be fully hydrated first.
+    // specRepo and categoryRepo must be hydrated first
     public void hydrate(IProductSpecRepository specRepo, ICategoryRepository categoryRepo) {
         List<PromotionDTO> dtos = dao.findAll();
         for (PromotionDTO dto : dtos) {

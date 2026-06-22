@@ -48,10 +48,8 @@ public class StockItemRepository implements IStockItemRepository {
         stockItems.clear();
     }
 
-    // Rebuilds in-memory StockItem objects from the stock_items table.
-    // specRepo must be fully hydrated first; same object references are reused
-    // so that findBySpec() identity (==) comparisons continue to work.
-    // productIds are transient; each StockItem starts with an empty list.
+    // specRepo must be hydrated first; reuses same spec references so findBySpec() (==) works.
+    // productIds are transient - each item starts with an empty list.
     public void hydrate(IProductSpecRepository specRepo) {
         List<StockItemDTO> dtos = dao.findAll();
         for (StockItemDTO dto : dtos) {

@@ -40,7 +40,6 @@ class InventoryControllerTest {
         bySizeId = controller.addCategory("By Size", milkId);
     }
 
-    // helper: add the standard milk product spec and return its specId
     private int addMilk() {
         return controller.addProduct(
             new ProductDTO(0, 0, "Tnuva 3% 1L", "Tnuva", bySizeId, 4.5, 6.9, 15, 0));
@@ -58,8 +57,7 @@ class InventoryControllerTest {
 
     @Test
     void addProductDuplicateIdThrows() {
-        // Two products with the same name/mfr/category are allowed (different specs),
-        // but adding a product with a non-existent categoryId must throw.
+        // non-existent categoryId must throw
         assertThrows(IllegalArgumentException.class, () ->
             controller.addProduct(new ProductDTO(0, 0, "Other", "Mfg", 9999, 1.0, 2.0, 5, 0)));
     }

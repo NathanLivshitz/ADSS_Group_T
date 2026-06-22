@@ -44,8 +44,7 @@ public class ProductRepository implements IProductRepository {
         nextProductId = 1;
     }
 
-    // Rebuilds in-memory Product objects from the product_specs table.
-    // specRepo must be fully hydrated first so specs can be looked up by specId.
+    // specRepo must be hydrated first
     public void hydrate(IProductSpecRepository specRepo) {
         List<ProductDTO> dtos = dao.findAll();
         int maxProductId = 0;

@@ -5,15 +5,12 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-// Single SQLite connection factory for the Inventory system.
-// get() opens a fresh connection each call; caller owns close.
-// Schema init is idempotent (CREATE TABLE IF NOT EXISTS) on first call.
+// SQLite connection factory. get() opens a fresh connection; caller must close.
 public class DatabaseConnection {
 
     private static final String DB_URL = "jdbc:sqlite:inventory.db";
     private static boolean initialized = false;
 
-    // Opens a JDBC connection. Caller must close it.
     public static synchronized Connection get() throws SQLException {
         if (!initialized) {
             try {
@@ -30,7 +27,7 @@ public class DatabaseConnection {
         return conn;
     }
 
-    // Deletes all rows in child-before-parent order inside one transaction.
+    // removes all rows child-before-parent so FK constraints don't fire
     public static synchronized void truncateAll() throws SQLException {
         try (Connection conn = get()) {
             conn.setAutoCommit(false);
@@ -44,8 +41,6 @@ public class DatabaseConnection {
             conn.commit();
         }
     }
-
-    // ── Private ──────────────────────────────────────────────────────────────
 
     private static void initSchema(Connection conn) throws SQLException {
         conn.setAutoCommit(false);

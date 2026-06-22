@@ -50,9 +50,8 @@ public class PersistenceRoundTripTest {
 
     @Test
     void productDaoRoundTrip() {
-        // category row required for FK sanity (not enforced by sqlite in this schema but good practice)
         SqliteCategoryDAO catDao = new SqliteCategoryDAO();
-        catDao.insert(new CategoryDTO(1, "Root", 0));
+        catDao.insert(new CategoryDTO(1, "Root", 0)); // FK sanity
 
         SqliteProductDAO dao = new SqliteProductDAO();
         ProductDTO dto = new ProductDTO(0, 5, "Milk 3%", "Tnuva", 1, 4.50, 6.90, 15, 0);
