@@ -227,10 +227,10 @@ public class PersistenceRoundTripTest {
         assertEquals("Milk 3%", rehydratedSpec.getName());
         assertEquals(6.90, rehydratedSpec.getSellPrice(), 0.001);
 
-        // persisted row keeps the originally-inserted quantity (removals not written back)
+        // persisted row reflects the defective removal (write-through on update)
         List<StockItemDTO> persistedStock = stockDao2.findBySpecId(specId);
-        assertEquals(1, persistedStock.size(), "one stock_items row was inserted");
-        assertEquals(20, persistedStock.get(0).quantity(), "original inserted quantity");
+        assertEquals(1, persistedStock.size(), "one stock_items row exists");
+        assertEquals(18, persistedStock.get(0).quantity(), "quantity reflects the persisted removal (20 - 2)");
 
         // promotion round-tripped
         List<Promotion> promos = promoRepo2.findAll();

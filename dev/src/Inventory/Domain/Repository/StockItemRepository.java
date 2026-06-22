@@ -24,6 +24,12 @@ public class StockItemRepository implements IStockItemRepository {
     }
 
     @Override
+    public void updateQuantity(StockItem item) {
+        dao.updateQuantity(item.getSpec().getSpecId(), item.getArea().name(),
+                item.getShelfNumber(), item.getRowNumber(), item.getQuantity());
+    }
+
+    @Override
     public List<StockItem> findBySpec(ProductSpec spec) {
         List<StockItem> result = new ArrayList<>();
         for (StockItem si : stockItems) {

@@ -13,6 +13,12 @@ public interface IStockItemRepository {
     void add(StockItem item);
 
     /**
+     * Persists the current quantity of an existing stock item.
+     * Called by InventoryController.updateQuantity().
+     */
+    void updateQuantity(StockItem item);
+
+    /**
      * Returns all StockItems whose spec reference matches the given spec.
      * Identity comparison (==), not equals() - one spec object per product.
      * Called by InventoryController.getStockForProduct() and removeStock().

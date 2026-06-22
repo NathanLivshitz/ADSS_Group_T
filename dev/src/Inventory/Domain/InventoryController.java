@@ -120,6 +120,7 @@ public class InventoryController {
             found.removeProductIds(-delta);
         }
         spec.adjustQuantity(delta);
+        stockItemRepo.updateQuantity(found);
     }
 
     // ── CATEGORIES ───────────────────────────────────────────
@@ -274,7 +275,10 @@ public class InventoryController {
                 toRemove.add(si);
             }
         }
-        for (StockItem si : toRemove) si.setQuantity(0);
+        for (StockItem si : toRemove) {
+            si.setQuantity(0);
+            stockItemRepo.updateQuantity(si);
+        }
         return totalRemoved;
     }
 
@@ -332,6 +336,7 @@ public class InventoryController {
             int take = Math.min(si.getQuantity(), remaining);
             si.removeProductIds(take);
             si.getSpec().adjustQuantity(-take);
+            stockItemRepo.updateQuantity(si);
             remaining -= take;
         }
         if (remaining > 0)
