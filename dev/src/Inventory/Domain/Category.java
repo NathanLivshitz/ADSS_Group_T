@@ -9,7 +9,7 @@ public class Category {
     private List<Category> subCategories;
     private List<ProductSpec> products;
 
-    // ── IDENTITY (GAP-3 diagram amendment) ───────────────────
+    // ── IDENTITY ───────────────────
     private int categoryId;     // surrogate key - assigned by repository after add()
 
     public Category(String name) {
@@ -47,13 +47,12 @@ public class Category {
     // ── IDENTITY ──────────────────────────────────────────────
 
     /**
-     * GAP-3: Surrogate key for Category.
+     * Surrogate key for Category.
      * Called by repository immediately after the category is registered.
      * Load order rule: categories must be inserted/loaded in ascending categoryId
      * order so that parentCategoryId is always resolvable in a single forward pass.
      */
     public int getCategoryId() {
-        // TODO: return categoryId
         return categoryId;
     }
 

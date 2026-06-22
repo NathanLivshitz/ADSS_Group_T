@@ -24,7 +24,7 @@ public interface IProductRepository {
     Product findById(int id);
 
     /**
-     * GAP-4: Returns all products.
+     * Returns all products.
      * Required by InventoryController.generateInventoryReport().
      */
     List<Product> findAll();
