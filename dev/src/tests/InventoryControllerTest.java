@@ -23,9 +23,9 @@ class InventoryControllerTest {
 
     private InventoryController freshController() {
         return new InventoryController(
-            new ProductSpecRepository(),
-            new ProductRepository(new StubProductDAO()),
-            new StockItemRepository(new StubStockItemDAO()),
+            new ProductSpecRepository(new StubProductDAO()),
+            new ProductRepository(new StubProductInstanceDAO(), new StubProductDAO()),
+            new StockItemRepository(new StubStockItemDAO(), new StubStockItemProductsDAO()),
             new CategoryRepository(new StubCategoryDAO()),
             new PromotionRepository(new StubPromotionDAO()),
             new DefectiveReportRepository(new StubDefectiveReportDAO())
@@ -263,7 +263,7 @@ class InventoryControllerTest {
         List<DefectiveReportDTO> reports = controller.getDefectiveReports(
             today.minusDays(1), today.plusDays(1));
         assertEquals(1, reports.size());
-        assertEquals(specId, reports.get(0).productId());
+        assertEquals(specId, reports.get(0).specId());
         assertEquals(3, reports.get(0).quantity());
         assertEquals("EXPIRED", reports.get(0).reason());
 

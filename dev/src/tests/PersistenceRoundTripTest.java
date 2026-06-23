@@ -57,7 +57,7 @@ public class PersistenceRoundTripTest {
         ProductDTO dto = new ProductDTO(0, 5, "Milk 3%", "Tnuva", 1, 4.50, 6.90, 15, 0);
         dao.insert(dto);
 
-        ProductDTO found = dao.findById(0);
+        ProductDTO found = dao.findById(5);
         assertNotNull(found);
         assertEquals(5, found.specId());
         assertEquals("Milk 3%", found.name());
@@ -124,7 +124,7 @@ public class PersistenceRoundTripTest {
         List<DefectiveReportDTO> all = dao.findAll();
         assertEquals(1, all.size());
         DefectiveReportDTO back = all.get(0);
-        assertEquals(3, back.productId());
+        assertEquals(3, back.specId());
         assertEquals(2, back.quantity());
         assertEquals("DEFECTIVE", back.reason());
         assertEquals("2025-06-01", back.reportDate());
@@ -162,14 +162,16 @@ public class PersistenceRoundTripTest {
         // -- first set: create via Sqlite DAOs / repositories -----------------
         SqliteCategoryDAO catDao1 = new SqliteCategoryDAO();
         SqliteProductDAO prodDao1 = new SqliteProductDAO();
+        SqliteProductInstanceDAO prodInstDao1 = new SqliteProductInstanceDAO();
         SqliteStockItemDAO stockDao1 = new SqliteStockItemDAO();
+        SqliteStockItemProductsDAO stockProdDao1 = new SqliteStockItemProductsDAO();
         SqlitePromotionDAO promoDao1 = new SqlitePromotionDAO();
         SqliteDefectiveReportDAO defDao1 = new SqliteDefectiveReportDAO();
 
         CategoryRepository catRepo1 = new CategoryRepository(catDao1);
-        ProductSpecRepository specRepo1 = new ProductSpecRepository();
-        ProductRepository productRepo1 = new ProductRepository(prodDao1);
-        StockItemRepository stockRepo1 = new StockItemRepository(stockDao1);
+        ProductSpecRepository specRepo1 = new ProductSpecRepository(prodDao1);
+        ProductRepository productRepo1 = new ProductRepository(prodInstDao1, prodDao1);
+        StockItemRepository stockRepo1 = new StockItemRepository(stockDao1, stockProdDao1);
         PromotionRepository promoRepo1 = new PromotionRepository(promoDao1);
         DefectiveReportRepository defRepo1 = new DefectiveReportRepository(defDao1);
 
@@ -195,17 +197,22 @@ public class PersistenceRoundTripTest {
         // -- second set: fresh repos hydrated from DB -------------------------
         SqliteCategoryDAO catDao2 = new SqliteCategoryDAO();
         SqliteProductDAO prodDao2 = new SqliteProductDAO();
+        SqliteProductInstanceDAO prodInstDao2 = new SqliteProductInstanceDAO();
         SqliteStockItemDAO stockDao2 = new SqliteStockItemDAO();
+        SqliteStockItemProductsDAO stockProdDao2 = new SqliteStockItemProductsDAO();
         SqlitePromotionDAO promoDao2 = new SqlitePromotionDAO();
         SqliteDefectiveReportDAO defDao2 = new SqliteDefectiveReportDAO();
 
         CategoryRepository catRepo2 = new CategoryRepository(catDao2);
         catRepo2.hydrate();
 
-        ProductSpecRepository specRepo2 = new ProductSpecRepository();
-        specRepo2.hydrate(prodDao2, catDao2, catRepo2.getAllCategoriesMap());
+        ProductSpecRepository specRepo2 = new ProductSpecRepository(prodDao2);
+        specRepo2.hydrate(catDao2, catRepo2.getAllCategoriesMap());
 
-        StockItemRepository stockRepo2 = new StockItemRepository(stockDao2);
+        ProductRepository productRepo2 = new ProductRepository(prodInstDao2, prodDao2);
+        productRepo2.hydrate(specRepo2);
+
+        StockItemRepository stockRepo2 = new StockItemRepository(stockDao2, stockProdDao2);
         stockRepo2.hydrate(specRepo2);
 
         PromotionRepository promoRepo2 = new PromotionRepository(promoDao2);

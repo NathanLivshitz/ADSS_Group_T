@@ -6,8 +6,8 @@ import java.util.List;
 public interface IProductRepository {
 
     /**
-     * Returns the next available product ID without consuming it.
-     * Called by InventoryController before constructing a Product (id is final).
+     * Returns the next available product ID (peek — does not consume).
+     * Call add() to advance the counter.
      */
     int nextId();
 
@@ -34,4 +34,10 @@ public interface IProductRepository {
      * Called by InventoryController.reset().
      */
     void clear();
+
+    /**
+     * Persists updated costPrice and totalQuantity for a product spec to the database.
+     * Called after updateShortageReport to ensure DB reflects the in-memory change.
+     */
+    void persistUpdate(int specId, double costPrice, int totalQuantity);
 }

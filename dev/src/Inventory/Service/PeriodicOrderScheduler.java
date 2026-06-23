@@ -6,7 +6,9 @@ import Shared.DTO.SupplierScheduleDTO;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -32,6 +34,10 @@ public class PeriodicOrderScheduler implements Runnable {
     private final InventoryService service;
     private final SchedulerConfig  config;
     private volatile boolean running = true;
+
+    // supplierId → delivery date for which we already placed an order this window.
+    // Cleared implicitly when nextDeliveryDate() advances past the recorded date.
+    private final Map<Integer, LocalDate> lastOrderedDelivery = new HashMap<>();
 
     public PeriodicOrderScheduler(InventoryService service, SchedulerConfig config) {
         if (service == null) throw new IllegalArgumentException("service cannot be null");
@@ -68,14 +74,22 @@ public class PeriodicOrderScheduler implements Runnable {
             LocalDate next = nextDeliveryDate(supplier.deliveryDays());
             if (next == null || next.isAfter(cutoff)) continue;
 
+            // Skip if we already placed an order for this exact delivery date.
+            // When the delivery date advances, nextDeliveryDate() returns a new date
+            // and the guard clears naturally.
+            if (next.equals(lastOrderedDelivery.get(supplier.supplierId()))) continue;
+
             List<OrderSummaryDTO> placed =
                 service.checkAndPlacePeriodicOrders(supplier.supplierId());
 
-            for (OrderSummaryDTO o : placed) {
-                System.out.printf(
-                    "[Scheduler] Auto-order #%d → supplier %d (%s), delivery %s, total %.2f%n",
-                    o.orderId(), o.supplierId(), supplier.name(),
-                    o.expectedDeliveryDate(), o.totalPrice());
+            if (!placed.isEmpty()) {
+                lastOrderedDelivery.put(supplier.supplierId(), next);
+                for (OrderSummaryDTO o : placed) {
+                    System.out.printf(
+                        "[Scheduler] Auto-order #%d → supplier %d (%s), delivery %s, total %.2f%n",
+                        o.orderId(), o.supplierId(), supplier.name(),
+                        o.expectedDeliveryDate(), o.totalPrice());
+                }
             }
         }
     }

@@ -61,8 +61,8 @@ class PeriodicOrderSchedulerTest {
         Supplier global = sc.addSupplier(2, "Global Foods");
         sc.addSchedule(new DeliverySchedule(acme, java.time.DayOfWeek.MONDAY));
         sc.addSchedule(new DeliverySchedule(global, java.time.DayOfWeek.WEDNESDAY));
-        SupplierService seededSupplierService = new SupplierService(sc);
 
+        SupplierService seededSupplierService = new SupplierService(sc);
         service = new InventoryService(controller, seededSupplierService);
 
         int dairyId = service.addCategory("Dairy", 0);
@@ -76,8 +76,8 @@ class PeriodicOrderSchedulerTest {
         service.addStockItem(new StockItemDTO(milkSpecId, "STORE", 2, 1, 3, null));
         service.addStockItem(new StockItemDTO(chipsSpecId, "STORE", 4, 3, 25, null));
 
-        // Supplier agreement: ACME supplies milk
-        seededSupplierService.addAgreement(new SupplyAgreement(acme, milkSpecId, 10, 5.00));
+        // Supplier agreement: ACME supplies milk (seed via controller — SupplierService is DTO-only)
+        sc.addAgreement(new SupplyAgreement(acme, milkSpecId, 10, 5.00));
     }
 
     // helper: find DB row by spec_id (findById queries product_id PK, not spec_id)

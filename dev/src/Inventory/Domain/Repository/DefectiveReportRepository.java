@@ -45,7 +45,7 @@ public class DefectiveReportRepository implements IDefectiveReportRepository {
         List<DefectiveReportDTO> dtos = dao.findAll();
         for (DefectiveReportDTO dto : dtos) {
             DefectiveReport r = new DefectiveReport(
-                dto.productId(),
+                dto.specId(),
                 dto.quantity(),
                 dto.reason(),
                 LocalDate.parse(dto.reportDate())

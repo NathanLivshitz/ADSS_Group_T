@@ -18,7 +18,7 @@ public class SqliteDefectiveReportDAO implements IDefectiveReportDAO {
         String sql = "INSERT INTO defective_reports (product_id, quantity, reason, report_date) VALUES (?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.get();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, dto.productId());
+            ps.setInt(1, dto.specId());
             ps.setInt(2, dto.quantity());
             ps.setString(3, dto.reason());
             ps.setString(4, dto.reportDate());

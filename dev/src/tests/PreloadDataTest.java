@@ -19,9 +19,9 @@ class PreloadDataTest {
     @BeforeEach
     void setUp() {
         controller = new InventoryController(
-            new ProductSpecRepository(),
-            new ProductRepository(new StubProductDAO()),
-            new StockItemRepository(new StubStockItemDAO()),
+            new ProductSpecRepository(new StubProductDAO()),
+            new ProductRepository(new StubProductInstanceDAO(), new StubProductDAO()),
+            new StockItemRepository(new StubStockItemDAO(), new StubStockItemProductsDAO()),
             new CategoryRepository(new StubCategoryDAO()),
             new PromotionRepository(new StubPromotionDAO()),
             new DefectiveReportRepository(new StubDefectiveReportDAO())
@@ -189,7 +189,7 @@ class PreloadDataTest {
         List<DefectiveReportDTO> reports = controller.getDefectiveReports(
                 LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31));
         assertEquals(1, reports.size());
-        assertEquals(1, reports.get(0).productId());
+        assertEquals(1, reports.get(0).specId());
         assertEquals(3, reports.get(0).quantity());
         assertEquals("EXPIRED", reports.get(0).reason());
     }

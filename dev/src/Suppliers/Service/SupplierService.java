@@ -80,9 +80,19 @@ public class SupplierService {
 
     // ── AGREEMENTS & SCHEDULES ───────────────────────────────
 
-    public void addAgreement(SupplyAgreement a) { supplierSystem.addAgreement(a); }
+    /** Add a supply agreement via DTO — no Suppliers.Domain types cross the boundary. */
+    public void addAgreement(SupplyAgreementDTO dto) {
+        Supplier s = findSupplierById(dto.supplierId());
+        if (s == null) throw new IllegalArgumentException("Supplier not found: " + dto.supplierId());
+        supplierSystem.addAgreement(new SupplyAgreement(s, dto.productSpecId(), dto.minQuantity(), dto.unitPrice()));
+    }
 
-    public void addSchedule(DeliverySchedule d) { supplierSystem.addSchedule(d); }
+    /** Add a delivery schedule day via DTO-safe params. dayOfWeek must be a valid DayOfWeek name. */
+    public void addSchedule(int supplierId, String dayOfWeek) {
+        Supplier s = findSupplierById(supplierId);
+        if (s == null) throw new IllegalArgumentException("Supplier not found: " + supplierId);
+        supplierSystem.addSchedule(new DeliverySchedule(s, DayOfWeek.valueOf(dayOfWeek)));
+    }
 
     public List<DayOfWeek> getDeliveryDays(int supplierId) {
         return supplierSystem.getFixedDeliveryDays(supplierId);
@@ -130,6 +140,13 @@ public class SupplierService {
                 .map(Enum::name)
                 .collect(Collectors.toList());
         return new SupplierScheduleDTO(s.getSupplierID(), s.getSupplierName(), days);
+    }
+
+    private Supplier findSupplierById(int supplierId) {
+        for (Supplier s : supplierSystem.getSuppliers()) {
+            if (s.getSupplierID() == supplierId) return s;
+        }
+        return null;
     }
 
     private SupplyAgreementDTO toSupplyAgreementDTO(SupplyAgreement a) {

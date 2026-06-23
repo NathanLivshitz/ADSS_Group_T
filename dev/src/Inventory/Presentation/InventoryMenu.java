@@ -290,7 +290,7 @@ public class InventoryMenu {
             return;
         }
         for (DefectiveLocationDTO entry : defectives) {
-            System.out.printf("  Product spec ID %d:%n", entry.productId());
+            System.out.printf("  Product spec ID %d:%n", entry.specId());
             for (StockItemDTO si : entry.locations()) {
                 System.out.printf("    %s shelf=%d row=%d qty=%d%n",
                         si.area(), si.shelf(), si.row(), si.quantity());
@@ -312,7 +312,7 @@ public class InventoryMenu {
         }
         for (DefectiveReportDTO r : reports) {
             System.out.printf("  Product spec ID=%d qty=%d reason=%s date=%s%n",
-                    r.productId(), r.quantity(), r.reason(), r.reportDate());
+                    r.specId(), r.quantity(), r.reason(), r.reportDate());
         }
     }
 
