@@ -357,7 +357,7 @@ public class InventoryMenu {
 
     // UC-f
     private void orderDueToShortage() {
-        List<ProductDTO> shortage = service.orderShortageFromSupplier();
+        List<ProductDTO> shortage = service.getLowStockProducts();
         if (shortage.isEmpty()) { System.out.println("No low-stock products."); return; }
         System.out.println("Low-stock products:");
         for (ProductDTO p : shortage)

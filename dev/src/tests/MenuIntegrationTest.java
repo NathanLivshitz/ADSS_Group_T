@@ -9,22 +9,34 @@ import Inventory.Data.DAO.Stub.*;
 import Inventory.Service.InventoryService;
 import Inventory.Data.PreloadData;
 import Inventory.Presentation.InventoryMenu;
+import Suppliers.Domain.*;
+import Suppliers.Service.SupplierService;
 
 import java.io.*;
+import java.time.DayOfWeek;
 import java.util.Scanner;
 
 public class MenuIntegrationTest {
 
-    private String run(String input) throws Exception {
-        InventoryController controller = new InventoryController(
-            new ProductSpecRepository(),
-            new ProductRepository(new StubProductDAO()),
-            new StockItemRepository(new StubStockItemDAO()),
+    private static InventoryController freshController() {
+        return new InventoryController(
+            new ProductSpecRepository(new StubProductDAO()),
+            new ProductRepository(new StubProductInstanceDAO(), new StubProductDAO()),
+            new StockItemRepository(new StubStockItemDAO(), new StubStockItemProductsDAO()),
             new CategoryRepository(new StubCategoryDAO()),
             new PromotionRepository(new StubPromotionDAO()),
             new DefectiveReportRepository(new StubDefectiveReportDAO())
         );
-        InventoryService service = new InventoryService(controller);
+    }
+
+    /** Run menu with default (no-supplier) InventoryService. */
+    private String run(String input) throws Exception {
+        InventoryController controller = freshController();
+        return run(input, controller, new InventoryService(controller));
+    }
+
+    /** Run menu with a caller-supplied InventoryService (allows injecting seeded SupplierService). */
+    private String run(String input, InventoryController controller, InventoryService service) throws Exception {
         PreloadData preloadData = new PreloadData(controller);
         Scanner scanner = new Scanner(new ByteArrayInputStream(input.getBytes()));
 
@@ -37,6 +49,21 @@ public class MenuIntegrationTest {
             System.setOut(original);
         }
         return capture.toString();
+    }
+
+    /**
+     * Builds a SupplierService seeded with one supplier (id=1) that has:
+     *  - a supply agreement for specId=1 at 5.00/unit, min qty 1
+     *  - a delivery schedule on every day of the week (so periodic orders always trigger)
+     */
+    private SupplierService seededSupplierService(int specId) {
+        SupplierController sc = new SupplierController();
+        Supplier acme = sc.addSupplier(1, "ACME");
+        sc.addAgreement(new SupplyAgreement(acme, specId, 1, 5.00));
+        for (DayOfWeek day : DayOfWeek.values()) {
+            sc.addSchedule(new DeliverySchedule(acme, day));
+        }
+        return new SupplierService(sc);
     }
 
     // ── Add product + stock + view ─────────────────────────────────────────
@@ -81,39 +108,45 @@ public class MenuIntegrationTest {
 
     @Test
     void testOrderDueToShortage() throws Exception {
-        // Product gets specId=1; supplier has agreement for specId=1
+        // specId=1 is assigned to the first product added with a fresh stub DAO
+        InventoryController controller = freshController();
+        InventoryService service = new InventoryService(controller, seededSupplierService(1));
+
         String input = String.join("\n",
-            "1",          // add product specId=1, min=10
+            "1",          // add product → specId=1, min=10
             "Milk", "Tnuva", "Dairy", "3.0", "6.0", "10",
-            "2",          // add stock qty=5 (low stock)
+            "2",          // add stock qty=5 (below min → low stock)
             "1", "STORE", "1", "1", "5", "",
             "16",         // order due to shortage
-            "1",          // pick specId=1
+            "1",          // enter specId=1
             "y",          // confirm
             "0"
         );
-        String out = run(input);
-        assertTrue(out.contains("Proposal"),        "proposal shown");
-        assertTrue(out.contains("supplier="),       "supplier shown");
-        assertTrue(out.contains("Order #"),         "order placed");
-        assertTrue(out.contains("sent"),            "order sent");
+        String out = run(input, controller, service);
+        assertTrue(out.contains("Proposal"),  "proposal shown");
+        assertTrue(out.contains("supplier="), "supplier shown");
+        assertTrue(out.contains("Order #"),   "order placed");
+        assertTrue(out.contains("sent"),      "order sent");
     }
 
     // ── Periodic order (UC-e) ──────────────────────────────────────────────
 
     @Test
     void testPeriodicOrder() throws Exception {
-        // Product gets specId=1; ACME (supplier 1) has agreement for specId=1
+        // specId=1 is assigned to the first product added with a fresh stub DAO
+        InventoryController controller = freshController();
+        InventoryService service = new InventoryService(controller, seededSupplierService(1));
+
         String input = String.join("\n",
-            "1",          // add product specId=1, min=10
+            "1",          // add product → specId=1, min=10
             "Milk", "Tnuva", "Dairy", "3.0", "6.0", "10",
-            "2",          // add stock qty=5 (low stock)
+            "2",          // add stock qty=5 (below min → low stock)
             "1", "STORE", "1", "1", "5", "",
             "17",         // periodic order
             "y",          // confirm
             "0"
         );
-        String out = run(input);
+        String out = run(input, controller, service);
         assertTrue(out.contains("Proposed periodic orders"), "preview shown");
         assertTrue(out.contains("periodic order(s) sent"),   "order(s) sent");
     }
