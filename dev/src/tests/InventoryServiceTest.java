@@ -21,9 +21,9 @@ class InventoryServiceTest {
 
     private static InventoryController freshController() {
         return new InventoryController(
-            new ProductSpecRepository(),
-            new ProductRepository(new StubProductDAO()),
-            new StockItemRepository(new StubStockItemDAO()),
+            new ProductSpecRepository(new StubProductDAO()),
+            new ProductRepository(new StubProductInstanceDAO(), new StubProductDAO()),
+            new StockItemRepository(new StubStockItemDAO(), new StubStockItemProductsDAO()),
             new CategoryRepository(new StubCategoryDAO()),
             new PromotionRepository(new StubPromotionDAO()),
             new DefectiveReportRepository(new StubDefectiveReportDAO())

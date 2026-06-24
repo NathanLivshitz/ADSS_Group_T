@@ -10,12 +10,18 @@ import java.util.*;
 public class ProductSpecRepository implements IProductSpecRepository {
     private final Map<Integer, ProductSpec> specs = new LinkedHashMap<>();
     private int nextSpecId = 1;
+    private final IProductDAO dao;
+
+    public ProductSpecRepository(IProductDAO dao) {
+        this.dao = dao;
+    }
 
     @Override
     public int add(ProductSpec spec) {
         int id = nextSpecId++;
         spec.setSpecId(id);
         specs.put(id, spec);
+        dao.insert(toDTO(spec));
         return id;
     }
 
@@ -37,9 +43,8 @@ public class ProductSpecRepository implements IProductSpecRepository {
 
     // categoryDao unused here; kept for wiring symmetry with Main.
     // skips specIds already loaded (dedup guard).
-    public void hydrate(IProductDAO productDao, ICategoryDAO categoryDao,
-                        Map<Integer, Category> categoryMap) {
-        List<ProductDTO> dtos = productDao.findAll();
+    public void hydrate(ICategoryDAO categoryDao, Map<Integer, Category> categoryMap) {
+        List<ProductDTO> dtos = dao.findAll();
         int maxSpecId = 0;
         for (ProductDTO dto : dtos) {
             if (specs.containsKey(dto.specId())) continue;
@@ -54,5 +59,11 @@ public class ProductSpecRepository implements IProductSpecRepository {
             if (dto.specId() > maxSpecId) maxSpecId = dto.specId();
         }
         if (maxSpecId > 0) nextSpecId = maxSpecId + 1;
+    }
+
+    private ProductDTO toDTO(ProductSpec s) {
+        int catId = s.getCategory() != null ? s.getCategory().getCategoryId() : 0;
+        return new ProductDTO(0, s.getSpecId(), s.getName(), s.getManufacturer(),
+                catId, s.getCostPrice(), s.getSellPrice(), s.getMinStockThreshold(), s.getTotalQuantity());
     }
 }

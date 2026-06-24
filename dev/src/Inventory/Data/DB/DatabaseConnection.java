@@ -34,7 +34,9 @@ public class DatabaseConnection {
             try (Statement st = conn.createStatement()) {
                 st.executeUpdate("DELETE FROM defective_reports");
                 st.executeUpdate("DELETE FROM promotions");
+                st.executeUpdate("DELETE FROM stock_item_products");
                 st.executeUpdate("DELETE FROM stock_items");
+                st.executeUpdate("DELETE FROM products");
                 st.executeUpdate("DELETE FROM product_specs");
                 st.executeUpdate("DELETE FROM categories");
             }
@@ -57,8 +59,7 @@ public class DatabaseConnection {
 
             st.executeUpdate(
                 "CREATE TABLE IF NOT EXISTS product_specs (" +
-                "    product_id          INTEGER PRIMARY KEY," +
-                "    spec_id             INTEGER NOT NULL," +
+                "    spec_id             INTEGER PRIMARY KEY," +
                 "    name                TEXT    NOT NULL," +
                 "    manufacturer        TEXT    NOT NULL," +
                 "    category_id         INTEGER NOT NULL," +
@@ -66,6 +67,13 @@ public class DatabaseConnection {
                 "    sell_price          REAL    NOT NULL," +
                 "    min_stock_threshold INTEGER NOT NULL," +
                 "    total_quantity      INTEGER NOT NULL DEFAULT 0" +
+                ")"
+            );
+
+            st.executeUpdate(
+                "CREATE TABLE IF NOT EXISTS products (" +
+                "    product_id INTEGER PRIMARY KEY," +
+                "    spec_id    INTEGER NOT NULL REFERENCES product_specs(spec_id)" +
                 ")"
             );
 
@@ -78,6 +86,18 @@ public class DatabaseConnection {
                 "    quantity    INTEGER NOT NULL DEFAULT 0," +
                 "    expiry_date TEXT," +
                 "    PRIMARY KEY (spec_id, area, shelf, row)" +
+                ")"
+            );
+
+            st.executeUpdate(
+                "CREATE TABLE IF NOT EXISTS stock_item_products (" +
+                "    spec_id     INTEGER NOT NULL," +
+                "    area        TEXT    NOT NULL," +
+                "    shelf       INTEGER NOT NULL," +
+                "    row         INTEGER NOT NULL," +
+                "    product_id  INTEGER NOT NULL REFERENCES products(product_id)," +
+                "    PRIMARY KEY (spec_id, area, shelf, row, product_id)," +
+                "    FOREIGN KEY (spec_id, area, shelf, row) REFERENCES stock_items(spec_id, area, shelf, row)" +
                 ")"
             );
 

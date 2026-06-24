@@ -16,20 +16,19 @@ public class SqliteProductDAO implements IProductDAO {
     @Override
     public void insert(ProductDTO dto) {
         String sql = "INSERT OR REPLACE INTO product_specs " +
-                "(product_id, spec_id, name, manufacturer, category_id, " +
+                "(spec_id, name, manufacturer, category_id, " +
                 "cost_price, sell_price, min_stock_threshold, total_quantity) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.get();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, dto.productId());
-            ps.setInt(2, dto.specId());
-            ps.setString(3, dto.name());
-            ps.setString(4, dto.manufacturer());
-            ps.setInt(5, dto.categoryId());
-            ps.setDouble(6, dto.costPrice());
-            ps.setDouble(7, dto.sellPrice());
-            ps.setInt(8, dto.minStockThreshold());
-            ps.setInt(9, dto.totalQuantity());
+            ps.setInt(1, dto.specId());
+            ps.setString(2, dto.name());
+            ps.setString(3, dto.manufacturer());
+            ps.setInt(4, dto.categoryId());
+            ps.setDouble(5, dto.costPrice());
+            ps.setDouble(6, dto.sellPrice());
+            ps.setInt(7, dto.minStockThreshold());
+            ps.setInt(8, dto.totalQuantity());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("SqliteProductDAO.insert failed", e);
@@ -37,13 +36,13 @@ public class SqliteProductDAO implements IProductDAO {
     }
 
     @Override
-    public ProductDTO findById(int productId) {
-        String sql = "SELECT product_id, spec_id, name, manufacturer, category_id, " +
+    public ProductDTO findById(int specId) {
+        String sql = "SELECT spec_id, name, manufacturer, category_id, " +
                 "cost_price, sell_price, min_stock_threshold, total_quantity " +
-                "FROM product_specs WHERE product_id = ?";
+                "FROM product_specs WHERE spec_id = ?";
         try (Connection conn = DatabaseConnection.get();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, productId);
+            ps.setInt(1, specId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return mapRow(rs);
@@ -57,9 +56,9 @@ public class SqliteProductDAO implements IProductDAO {
 
     @Override
     public List<ProductDTO> findAll() {
-        String sql = "SELECT product_id, spec_id, name, manufacturer, category_id, " +
+        String sql = "SELECT spec_id, name, manufacturer, category_id, " +
                 "cost_price, sell_price, min_stock_threshold, total_quantity " +
-                "FROM product_specs ORDER BY product_id ASC";
+                "FROM product_specs ORDER BY spec_id ASC";
         List<ProductDTO> result = new ArrayList<>();
         try (Connection conn = DatabaseConnection.get();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -76,29 +75,42 @@ public class SqliteProductDAO implements IProductDAO {
     @Override
     public void update(ProductDTO dto) {
         String sql = "UPDATE product_specs " +
-                "SET spec_id = ?, name = ?, manufacturer = ?, category_id = ?, " +
+                "SET name = ?, manufacturer = ?, category_id = ?, " +
                 "cost_price = ?, sell_price = ?, min_stock_threshold = ?, total_quantity = ? " +
-                "WHERE product_id = ?";
+                "WHERE spec_id = ?";
         try (Connection conn = DatabaseConnection.get();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, dto.specId());
-            ps.setString(2, dto.name());
-            ps.setString(3, dto.manufacturer());
-            ps.setInt(4, dto.categoryId());
-            ps.setDouble(5, dto.costPrice());
-            ps.setDouble(6, dto.sellPrice());
-            ps.setInt(7, dto.minStockThreshold());
-            ps.setInt(8, dto.totalQuantity());
-            ps.setInt(9, dto.productId());
+            ps.setString(1, dto.name());
+            ps.setString(2, dto.manufacturer());
+            ps.setInt(3, dto.categoryId());
+            ps.setDouble(4, dto.costPrice());
+            ps.setDouble(5, dto.sellPrice());
+            ps.setInt(6, dto.minStockThreshold());
+            ps.setInt(7, dto.totalQuantity());
+            ps.setInt(8, dto.specId());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("SqliteProductDAO.update failed", e);
         }
     }
 
+    @Override
+    public void updateSpec(int specId, double costPrice, int totalQuantity) {
+        String sql = "UPDATE product_specs SET cost_price = ?, total_quantity = ? WHERE spec_id = ?";
+        try (Connection conn = DatabaseConnection.get();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, costPrice);
+            ps.setInt(2, totalQuantity);
+            ps.setInt(3, specId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("SqliteProductDAO.updateSpec failed", e);
+        }
+    }
+
     private ProductDTO mapRow(ResultSet rs) throws SQLException {
         return new ProductDTO(
-            rs.getInt("product_id"),
+            0,
             rs.getInt("spec_id"),
             rs.getString("name"),
             rs.getString("manufacturer"),
