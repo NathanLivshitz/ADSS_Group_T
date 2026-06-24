@@ -1,8 +1,10 @@
 package presentation;
 
 import domain.*;
+
 import java.util.List;
 import java.util.Scanner;
+
 import static presentation.InputValidation.*;
 
 public class EmployeeView {
@@ -51,7 +53,7 @@ public class EmployeeView {
                     viewFullShiftBoard();
                     break;
                 case "4":
-                    if (employee.isShiftManager()) {
+                    if (employee instanceof ShiftManager) {
                         shiftManagerMenu(scanner, employee);
                     }
                     else
@@ -201,7 +203,7 @@ public class EmployeeView {
             return;
         }
 
-        java.util.List<String> printedDays = new java.util.ArrayList<>();
+        List<String> printedDays = new java.util.ArrayList<>();
 
         for (Availability a : availabilitiesList) {
             String day = a.getDay();
@@ -231,7 +233,7 @@ public class EmployeeView {
         List<ShiftAssignment> assignments = manager.getAssignments();
 
         boolean found = false;
-        java.util.List<String> printedDays = new java.util.ArrayList<>();
+        List<String> printedDays = new java.util.ArrayList<>();
 
         for (ShiftAssignment sa : assignments) {
             if (sa.getEmployee().getId().equals(employee.getId())) {
@@ -370,8 +372,12 @@ public class EmployeeView {
         System.out.println("\n--- Employee Details ---");
         System.out.println("Name: " + employee.getName());
         System.out.println("ID: " + employee.getId());
-        System.out.println("Is shift manager: " + employee.isShiftManager());
+        System.out.println("Is shift manager: " + (employee instanceof ShiftManager));
         System.out.println("Roles: " + employee.getRoles());
-}
+        if (employee instanceof Driver) {
+            Driver driver = (Driver) employee;
+            System.out.println("License type: " + driver.getLicenseType());
+        }
+    }
 
 }

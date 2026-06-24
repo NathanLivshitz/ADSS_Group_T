@@ -1,9 +1,11 @@
 package presentation;
 
 import domain.*;
-import static presentation.InputValidation.*;
+
 import java.util.List;
 import java.util.Scanner;
+
+import static presentation.InputValidation.*;
 
 public class ManagerView {
     private Manager manager;
@@ -16,7 +18,7 @@ public class ManagerView {
     public void showMenu(Scanner scanner) {
         System.out.println("\nEnter password: ");
         String inputPassword = scanner.nextLine();
-        while (!inputPassword.equals(this.password)){
+        while (!inputPassword.equals(this.password)) {
             System.out.println("Incorrect password. Try again:");
             inputPassword = scanner.nextLine();
         }
@@ -80,35 +82,65 @@ public class ManagerView {
 
     private void addNewEmployee(Scanner scanner) {
         System.out.println("\nAdd new employee:");
+        System.out.println("Enter 0 at any point to cancel and go back");
         boolean success = false;
 
         while (!success) {
             try {
                 System.out.print("Employee name: ");
                 String name = scanner.nextLine();
+                if (name.equals("0"))
+                    return;
 
                 System.out.print("ID: ");
                 String id = getValidNumericString(scanner);
+                if (id.equals("0"))
+                    return;
 
                 System.out.print("Bank account number: ");
                 String bankAccount = getValidNumericString(scanner);
+                if (bankAccount.equals("0"))
+                    return;
 
                 System.out.print("Employment type (Full-time / Part-time):");
                 String employmentType = getValidEmploymentType(scanner);
+                if (employmentType.equals("0"))
+                    return;
 
                 System.out.print("Salary type (Hourly / Global): ");
                 String salaryType = getValidSalaryType(scanner);
+                if (salaryType.equals("0"))
+                    return;
 
                 System.out.print("Salary amount: ");
                 double salary = getValidDouble(scanner);
+                if (salary == 0.0)
+                    return;
 
                 System.out.print("Vacation days: ");
                 int vacationDays = getValidInt(scanner);
+                if (vacationDays == 0)
+                    return;
 
                 EmploymentConditions conditions = new EmploymentConditions(employmentType, salaryType, salary,
                         new java.util.Date(), vacationDays);
 
-                Employee newEmployee = new Employee(name, id, bankAccount, conditions);
+                Employee newEmployee;
+                System.out.println("Is this employee a driver? (yes/no): ");
+                String isDriver = scanner.nextLine();
+
+                if (isDriver.equalsIgnoreCase("yes")) {
+                    System.out.print("License type: ");
+                    String licenseType = scanner.nextLine();
+                    if (licenseType.equals("0"))
+                        return;
+
+                    newEmployee = new Driver(name, id, bankAccount, conditions, licenseType);
+                }
+                else {
+                    newEmployee = new Employee(name, id, bankAccount, conditions);
+                }
+
                 manager.addEmployee(newEmployee);
 
                 System.out.println("Employee " + name + " added successfully");
@@ -116,8 +148,7 @@ public class ManagerView {
             }
             catch (NumberFormatException e) {
                 System.out.println("Invalid input");
-            }
-            catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             }
         }
@@ -139,14 +170,16 @@ public class ManagerView {
             System.out.println("1. Update bank account");
             System.out.println("2. Update employment conditions");
             System.out.println("3. Update employee roles");
-            System.out.println("4. Grant/revoke shift manager certification");
-            System.out.println("5. Back");
+            System.out.println("4. Update driver license type");
+            System.out.println("5. Grant/revoke shift manager certification");
+            System.out.println("6. Back");
 
             String choice = scanner.nextLine();
             switch (choice) {
                 case "1":
                     System.out.print("New bank account: ");
                     String newBankAccount = getValidNumericString(scanner);
+
                     manager.updateBankAccount(id, newBankAccount);
                     System.out.println("Bank account updated.");
                     break;
@@ -157,9 +190,12 @@ public class ManagerView {
                     updateEmployeeRoles(scanner, id);
                     break;
                 case "4":
-                    updateShiftManagementStatus(scanner, id);
+                    updateDriverLicenseType(scanner, id);
                     break;
                 case "5":
+                    updateShiftManagementStatus(scanner, id);
+                    break;
+                case "6":
                     editing = false;
                     break;
                 default:
@@ -216,8 +252,7 @@ public class ManagerView {
             }
             catch (NumberFormatException e) {
                 System.out.println("Invalid input");
-            }
-            catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             }
 
@@ -260,8 +295,7 @@ public class ManagerView {
         try {
             manager.addRoleToEmployee(role, id);
             System.out.println("Role added successfully");
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -278,15 +312,14 @@ public class ManagerView {
         try {
             manager.removeRoleToEmployee(role, id);
             System.out.println("Role removed successfully");
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }
     }
 
     private void updateShiftManagementStatus(Scanner scanner, String id) {
         Employee employee = manager.searchEmployee(id);
-        boolean isShiftManager = employee.isShiftManager();
+        boolean isShiftManager = (employee instanceof ShiftManager);
         System.out.println("The current status is:" + isShiftManager);
         System.out.println("Would you like to change it?");
         System.out.println("1. Yes");
@@ -296,8 +329,7 @@ public class ManagerView {
         if (choice.equals("1")) {
             manager.updateShiftManagerStatus(employee.getId(), !isShiftManager);
             System.out.println("Status changed successfully");
-        }
-        else {
+        } else {
             System.out.println("Status didn't change");
         }
     }
@@ -320,8 +352,7 @@ public class ManagerView {
                     List<Employee> allEmployees = manager.getEmployees();
                     if (allEmployees.isEmpty()) {
                         System.out.println("No employees in the system.");
-                    }
-                    else {
+                    } else {
                         for (Employee employee : allEmployees) {
                             showEmployeeDetails(employee.getId());
                             System.out.println("---------------------------");
@@ -349,8 +380,12 @@ public class ManagerView {
         System.out.println("Salary type: " + employee.getEmploymentConditions().getSalaryType());
         System.out.println("Salary: " + employee.getEmploymentConditions().getSalary());
         System.out.println("Vacation days: " + employee.getEmploymentConditions().getVacationDays());
-        System.out.println("Is shift manager: " + employee.isShiftManager());
+        System.out.println("Is shift manager: " + (employee instanceof ShiftManager));
         System.out.println("Roles: " + employee.getRoles());
+        if (employee instanceof Driver) {
+            Driver driver = (Driver) employee;
+            System.out.println("License type: " + driver.getLicenseType());
+        }
     }
 
     private void fireEmployee(Scanner scanner) {
@@ -359,8 +394,7 @@ public class ManagerView {
         try {
             manager.removeEmployee(id);
             System.out.println("Employee with ID " + id + " is fired");
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -373,7 +407,9 @@ public class ManagerView {
             System.out.println("2. Assignment (assign, edit, remove, replace manager)");
             System.out.println("3. System settings (closed days, weekly deadline)");
             System.out.println("4. View employee availability");
-            System.out.println("5. Back");
+            System.out.println("5. Add new store role");
+            System.out.println("6. Validate delivery shift requirements");
+            System.out.println("7. Back");
 
             String choice = scanner.nextLine();
             switch (choice) {
@@ -390,6 +426,12 @@ public class ManagerView {
                     EmployeesAvailability(scanner);
                     break;
                 case "5":
+                    addNewStoreRole(scanner);
+                    break;
+                case "6":
+                    validateDeliveryShiftRequirements(scanner);
+                    break;
+                case "7":
                     shiftsMenu = false;
                     break;
                 default:
@@ -473,8 +515,7 @@ public class ManagerView {
             }
             handleShiftAssignment(morningShift, scanner);
             handleShiftAssignment(eveningShift, scanner);
-        }
-        else {
+        } else {
             Shift shift = manager.searchShift(day, type);
             if (shift == null) {
                 System.out.println("Shift not found");
@@ -484,36 +525,96 @@ public class ManagerView {
         }
     }
 
+    private void addNewStoreRole(Scanner scanner) {
+        System.out.print("Enter new role name: ");
+        String roleName = scanner.nextLine();
+
+        try {
+            manager.addStoreRole(new Role(roleName));
+            System.out.println("Role added successfully.");
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     private void handleShiftAssignment(Shift shift, Scanner scanner) {
         System.out.println("\n========================================");
-        System.out.println("  CURRENT SHIFT: " + shift.getDay().toUpperCase() + " | " + shift.getShiftType().toUpperCase());
+        System.out.println(
+                "  CURRENT SHIFT: " + shift.getDay().toUpperCase() + " | " + shift.getShiftType().toUpperCase());
         System.out.println("========================================");
 
         boolean needsManager = (shift.getShiftManager() == null);
         displayShiftStatus(shift, needsManager);
+
+        System.out.print("\nEnter Employee ID to assign: ");
+        String id = getValidNumericString(scanner);
 
         if (!needsManager && isShiftFull(shift)) {
             System.out.println("Shift is completely full! No further assignments needed.");
             return;
         }
 
-        System.out.print("\nEnter Employee ID to assign: ");
-        String id = getValidNumericString(scanner);
-
         Employee employee = manager.searchEmployee(id);
         if (employee == null) {
             System.out.println("Employee not found");
             return;
         }
-        if (needsManager && !employee.isShiftManager()) {
+
+        if (needsManager && !(employee instanceof ShiftManager)) {
             System.out.println("The first person assigned MUST be a shift manager.");
             return;
         }
 
-        Role selectedRole = selectRoleForShift(shift, scanner);
-        if (selectedRole == null)
+        Role selectedRole = null;
+
+        if (needsManager) {
+            System.out.println("Do you want to assign a work role to this shift manager?");
+            System.out.println("1. Yes");
+            System.out.println("2. No");
+
+            String roleChoice = scanner.nextLine();
+
+            if (roleChoice.equals("1")) {
+                selectedRole = selectRoleForShift(shift, scanner);
+                if (selectedRole == null) {
+                    return;
+                }
+            } else if (roleChoice.equals("2")) {
+                selectedRole = null;
+            } else {
+                System.out.println("Invalid selection.");
+                return;
+            }
+
+            handleAssignmentWithOverride(employee, selectedRole, shift, true, scanner);
             return;
-        handleAssignmentWithOverride(employee, selectedRole, shift, needsManager, scanner);
+        }
+
+        if (shift.getShiftManager() != null && shift.getShiftManager().equals(employee)) {
+            selectedRole = selectRoleForShift(shift, scanner);
+            if (selectedRole == null) {
+                return;
+            }
+
+            try {
+                manager.addRoleToExistingShiftManager(employee.getId(), selectedRole, shift);
+                System.out.println("Work role added to shift manager successfully!");
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
+            }
+            return;
+        }
+        if (isShiftFull(shift)) {
+            System.out.println("Shift is completely full! No further assignments needed.");
+            return;
+        }
+
+        selectedRole = selectRoleForShift(shift, scanner);
+        if (selectedRole == null) {
+            return;
+        }
+
+        handleAssignmentWithOverride(employee, selectedRole, shift, false, scanner);
     }
 
     private void displayShiftStatus(Shift shift, boolean needsManager) {
@@ -521,14 +622,14 @@ public class ManagerView {
             System.out.println("MANAGER REQUIRED: This shift has no Shift Manager.");
             List<Employee> availableManagers = manager.getAvailableManagersForShift(shift);
             if (availableManagers.isEmpty())
-                System.out.println("Notice: No managers are available. You can override and force-assign any certified manager.");
+                System.out.println(
+                        "Notice: No managers are available. You can override and force-assign any certified manager.");
             else {
                 System.out.println("Available Shift Managers:");
                 for (Employee employee : availableManagers)
                     System.out.println("- " + employee.getName() + " (ID: " + employee.getId() + ")");
             }
-        }
-        else {
+        } else {
             System.out.println("Shift Manager: " + shift.getShiftManager().getName());
             System.out.println("--- Remaining Roles ---");
             for (Role role : manager.getStoreRoles()) {
@@ -564,30 +665,33 @@ public class ManagerView {
         return roles.get(choice - 1);
     }
 
-    private void handleAssignmentWithOverride(Employee emp, Role role, Shift shift, boolean makeManager, Scanner scanner) {
+    private void handleAssignmentWithOverride(Employee emp, Role role, Shift shift, boolean makeManager,
+                                              Scanner scanner) {
         boolean isOverride = false;
+
         if (!manager.isEmployeeAvailableForShift(emp, shift)) {
             System.out.println("Warning: Employee is NOT available for this shift.");
             System.out.println("Do you want to perform an OVERRIDE assignment?");
             System.out.println("1. Yes");
             System.out.println("2. No");
+
             if (!scanner.nextLine().equals("1")) {
                 System.out.println("Assignment cancelled");
                 return;
             }
+
             isOverride = true;
         }
+
         try {
             if (makeManager) {
                 manager.assignShiftManagerToShift(emp.getId(), role, shift, isOverride);
                 System.out.println("Shift Manager assigned successfully!");
-            }
-            else {
+            } else {
                 manager.assignEmployeeToShift(emp.getId(), role, shift, isOverride);
                 System.out.println("Employee assigned successfully!");
             }
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -699,18 +803,16 @@ public class ManagerView {
                     int choice = getValidInt(scanner);
                     if (choice == 0) {
                         addingRoles = false;
-                    }
-                    else
-                        if (choice > 0 && choice <= roles.size()) {
-                            Role selectedRole = roles.get(choice - 1);
-                            System.out.print("Enter required number of employees for role '" + selectedRole.getRoleName() + "': ");
-                            int count = getValidInt(scanner);
+                    } else if (choice > 0 && choice <= roles.size()) {
+                        Role selectedRole = roles.get(choice - 1);
+                        System.out.print(
+                                "Enter required number of employees for role '" + selectedRole.getRoleName() + "': ");
+                        int count = getValidInt(scanner);
 
-                            morning.addRoleRequirement(selectedRole, count);
-                            evening.addRoleRequirement(selectedRole, count);
-                            System.out.println("Requirement added");
-                        }
-                    else {
+                        morning.addRoleRequirement(selectedRole, count);
+                        evening.addRoleRequirement(selectedRole, count);
+                        System.out.println("Requirement added");
+                    } else {
                         System.out.println("Invalid selection");
                     }
                 }
@@ -718,8 +820,7 @@ public class ManagerView {
                 manager.addShift(evening);
                 System.out.println("Double shift created and saved successfully! (Morning & Evening)");
 
-            }
-            else {
+            } else {
                 if (manager.searchShift(day, type) != null) {
                     System.out.println("Error: Shift already exists for this day.");
                     return;
@@ -742,7 +843,8 @@ public class ManagerView {
                         addingRoles = false;
                     } else if (choice > 0 && choice <= roles.size()) {
                         Role selectedRole = roles.get(choice - 1);
-                        System.out.print("Enter required number of employees for role '" + selectedRole.getRoleName() + "': ");
+                        System.out.print(
+                                "Enter required number of employees for role '" + selectedRole.getRoleName() + "': ");
                         int count = getValidInt(scanner);
 
                         newShift.addRoleRequirement(selectedRole, count);
@@ -754,8 +856,7 @@ public class ManagerView {
                 manager.addShift(newShift);
                 System.out.println("Shift created and saved successfully!");
             }
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -790,24 +891,39 @@ public class ManagerView {
         String id = scanner.nextLine();
 
         Employee emp = manager.searchEmployee(id);
-        if (emp == null || !emp.isShiftManager()) {
+        if (emp == null || !(emp instanceof ShiftManager)) {
             System.out.println("Employee not found or is not a shift manager.");
             return;
         }
+        Role selectedRole = null;
 
-        System.out.println("Select Role for the Manager:");
-        List<Role> roles = manager.getStoreRoles();
-        for (int i = 0; i < roles.size(); i++) {
-            Role role = roles.get(i);
-            int rem = manager.getRemainingSpotsForRole(shift, role);
-            System.out.println((i + 1) + ". " + role.getRoleName() + " (" + rem + " spots left)");
-        }
-        int choice = getValidInt(scanner);
-        if (choice <= 0 || choice > roles.size()) {
-            System.out.println("Invalid choice");
+        System.out.println("Do you want to assign a work role to this shift manager?");
+        System.out.println("1. Yes");
+        System.out.println("2. No");
+
+        String roleChoice = scanner.nextLine();
+
+        if (roleChoice.equals("1")) {
+            System.out.println("Select Role for the Manager:");
+            List<Role> roles = manager.getStoreRoles();
+            for (int i = 0; i < roles.size(); i++) {
+                Role role = roles.get(i);
+                int rem = manager.getRemainingSpotsForRole(shift, role);
+                System.out.println((i + 1) + ". " + role.getRoleName() + " (" + rem + " spots left)");
+            }
+            int choice = getValidInt(scanner);
+            if (choice <= 0 || choice > roles.size()) {
+                System.out.println("Invalid choice");
+                return;
+            }
+            selectedRole = roles.get(choice - 1);
+
+        } else if (roleChoice.equals("2")) {
+            selectedRole = null;
+        } else {
+            System.out.println("Invalid selection.");
             return;
         }
-        Role selectedRole = roles.get(choice - 1);
 
         boolean isOverride = false;
         if (!manager.isEmployeeAvailableForShift(emp, shift)) {
@@ -825,8 +941,7 @@ public class ManagerView {
             }
             manager.assignShiftManagerToShift(id, selectedRole, shift, isOverride);
             System.out.println("New Shift Manager selected and assigned successfully.");
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             System.out.println("Replacement failed: " + e.getMessage());
         }
     }
@@ -853,7 +968,9 @@ public class ManagerView {
             boolean Assignments = false;
             for (ShiftAssignment shiftAssignment : manager.getAssignments()) {
                 if (shiftAssignment.getShift().equals(shift)) {
-                    System.out.println(shiftAssignment.getRole().getRoleName() + ": " + shiftAssignment.getEmployee().getName()+ " (ID: " + shiftAssignment.getEmployee().getId() + ")");
+                    System.out.println(
+                            shiftAssignment.getRole().getRoleName() + ": " + shiftAssignment.getEmployee().getName()
+                                    + " (ID: " + shiftAssignment.getEmployee().getId() + ")");
                     Assignments = true;
                 }
             }
@@ -875,8 +992,7 @@ public class ManagerView {
         List<Availability> availabilities = employee.getAvailabilities();
         if (availabilities.isEmpty()) {
             System.out.println("No availability submitted for " + employee.getName());
-        }
-        else {
+        } else {
             System.out.println("Availability for " + employee.getName() + ":");
             for (Availability availability : availabilities) {
                 System.out.println("- Day: " + availability.getDay() + " | Shift: " + availability.getShiftType());
@@ -895,11 +1011,9 @@ public class ManagerView {
 
             manager.updateDeadline(deadlineDate);
             System.out.println("Deadline updated successfully to: " + dateString);
-        }
-        catch (java.text.ParseException e) {
+        } catch (java.text.ParseException e) {
             System.out.println("Invalid date format. Please use yyyy-MM-dd");
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -927,12 +1041,15 @@ public class ManagerView {
         System.out.println("Select an assignment to edit for " + employee.getName() + ":");
         for (int i = 0; i < empAssignments.size(); i++) {
             ShiftAssignment shiftAssignment = empAssignments.get(i);
-            System.out.println((i + 1) + ". Day: " + shiftAssignment.getShift().getDay() + " | Shift: " + shiftAssignment.getShift().getShiftType() + " | Role: " + shiftAssignment.getRole().getRoleName());
+            System.out.println((i + 1) + ". Day: " + shiftAssignment.getShift().getDay() + " | Shift: "
+                    + shiftAssignment.getShift().getShiftType() + " | Role: "
+                    + shiftAssignment.getRole().getRoleName());
         }
         System.out.println("0. Cancel");
 
         int choice = getValidInt(scanner);
-        if (choice == 0) return;
+        if (choice == 0)
+            return;
         if (choice < 1 || choice > empAssignments.size()) {
             System.out.println("Invalid selection");
             return;
@@ -963,32 +1080,28 @@ public class ManagerView {
                 manager.changeRoleToAssignment(id, oldShift, roles.get(roleChoice - 1));
                 System.out.println("Role updated successfully");
 
-            }
-            else
-                if (action.equals("2")) {
-                    System.out.print("Enter NEW shift day: ");
-                    String newDay = getValidShiftDay(scanner);
-                    System.out.print("Enter NEW shift type (Morning / Evening): ");
-                    String newType = getValidShiftType(scanner);
+            } else if (action.equals("2")) {
+                System.out.print("Enter NEW shift day: ");
+                String newDay = getValidShiftDay(scanner);
+                System.out.print("Enter NEW shift type (Morning / Evening): ");
+                String newType = getValidShiftType(scanner);
 
-                    if (newType.equals("double")) {
-                        System.out.println("Error: Move to morning or evening specifically.");
-                        return;
-                    }
-
-                    Shift newShift = manager.searchShift(newDay, newType);
-                    if (newShift == null) {
-                        System.out.println("New shift does not exist. Please create it first.");
-                        return;
-                    }
-                    manager.changeShiftToAssignment(id, oldShift, newShift);
-                    System.out.println("Shift updated successfully");
+                if (newType.equals("double")) {
+                    System.out.println("Error: Move to morning or evening specifically.");
+                    return;
                 }
-                else {
-                    System.out.println("Invalid selection");
+
+                Shift newShift = manager.searchShift(newDay, newType);
+                if (newShift == null) {
+                    System.out.println("New shift does not exist. Please create it first.");
+                    return;
+                }
+                manager.changeShiftToAssignment(id, oldShift, newShift);
+                System.out.println("Shift updated successfully");
+            } else {
+                System.out.println("Invalid selection");
             }
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -999,9 +1112,59 @@ public class ManagerView {
         try {
             manager.addClosedDay(day);
             System.out.println("Closed day added successfully");
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }
+
     }
+
+    private void validateDeliveryShiftRequirements(Scanner scanner) {
+        System.out.println("Enter shift day: ");
+        String shiftDay = scanner.nextLine();
+
+        System.out.println("Enter shift type: ");
+        String shiftType = scanner.nextLine();
+
+        Shift shift = manager.searchShift(shiftDay, shiftType);
+        if (shift == null) {
+            System.out.println("Shift does not exist");
+            return;
+        }
+
+        if (!manager.hasDeliveryInShift(shift)) {
+            System.out.println("There is no delivery in this shift");
+            return;
+        }
+
+        boolean valid = true;
+
+        if (!manager.hasAssignedDriverForDelivery(shift)) {
+            System.out.println("Driver is missing, not assigned, or does not have a suitable license");
+            valid = false;
+        }
+
+        if (!manager.isWarehouseAssignedToShift(shift)) {
+            System.out.println("Warehouse employee is missing");
+            valid = false;
+        }
+
+        if (valid) {
+            System.out.println("Delivery shift requirements are satisfied.");
+        }
+    }
+
+    public void updateDriverLicenseType(Scanner scanner, String id) {
+        System.out.println("Enter new license type: ");
+        String licenseType = scanner.nextLine();
+
+        try {
+            manager.updateLicenseType(id, licenseType);
+            System.out.println("Driver license type was updated successfully.");
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
+
 }

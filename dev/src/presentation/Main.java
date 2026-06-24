@@ -1,5 +1,6 @@
 package presentation;
 
+import dataAccess.Database.DataBase;
 import domain.*;
 
 import java.util.Date;
@@ -9,7 +10,24 @@ public class Main {
     private static boolean isMockDataLoaded = false;
 
     public static void main(String[] args) {
+
+        try {
+            DataBase.getConnection();
+            System.out.println("Database connection established successfully.");
+        } catch (Exception e) {
+            System.out.println("Database initialization failed: " + e.getMessage());
+        }
+
         Manager manager = new Manager();
+
+        try {
+            if (manager.getEmployees().isEmpty()) {
+                initMockData(manager);
+                System.out.println("Initial mock data loaded automatically.");
+            }
+        } catch (Exception e) {
+            System.out.println("Could not load initial mock data: " + e.getMessage());
+        }
 
         ManagerView managerView = new ManagerView(manager);
         EmployeeView employeeView = new EmployeeView(manager);
@@ -23,7 +41,8 @@ public class Main {
             System.out.println("1. HR Manager");
             System.out.println("2. Employee");
             System.out.println("3. Load mock data");
-            System.out.println("4. Exit");
+            System.out.println("4. Reset system (Delete all data)");
+            System.out.println("5. Exit");
 
             String choice = scanner.nextLine();
 
@@ -37,13 +56,24 @@ public class Main {
                 case "3":
                     try {
                         initMockData(manager);
-                    }
-                    catch (IllegalArgumentException e) {
-                        System.out.println("\nFailed to load mock data: " + e.getMessage());
-                        System.out.println("Notice: It is recommended to load mock data right at the start!");
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Mock data was not loaded because the database already contains data.");
+                        System.out.println("To reload the initial sample data, first choose 'Reset system' and then choose 'Load mock data'.");
                     }
                     break;
                 case "4":
+                    System.out.println(
+                            "\nWARNING: This action will permanently delete all employees, shifts, and assignments!");
+                    System.out.print("Are you sure you want to perform a hard reset? (yes/no): ");
+                    String confirmation = scanner.nextLine().trim();
+                    if (confirmation.equalsIgnoreCase("yes")) {
+                        manager.resetSystem();
+                        System.out.println("System reset successful. All tables have been cleared.");
+                    } else {
+                        System.out.println("Reset operation cancelled.");
+                    }
+                    break;
+                case "5":
                     running = false;
                     break;
                 default:
@@ -55,51 +85,62 @@ public class Main {
 
     private static void initMockData(Manager m) {
 
-        if (isMockDataLoaded) {
-            System.out.println("Mock data has already been loaded!");
-            return;
-        }
+        // if (m.searchEmployee("111") != null) {
+        // return;
+        // }
+
         Date today = new Date();
 
-        Employee e1 = new Employee("Michael Brown", "111", "123456", new EmploymentConditions("Full-time", "Global", 12000, today, 10));
-        e1.setShiftManager(true);
+        Employee e1 = new ShiftManager("Michael Brown", "111", "123456",
+                new EmploymentConditions("Full-time", "Global", 12000, today, 10));
         e1.addRole(m.searchRole("Cashier"));
         m.addEmployee(e1);
 
-        Employee e2 = new Employee("Bob Hill", "222", "333454", new EmploymentConditions("Part-time", "Hourly", 45, today, 8));
+        Employee e2 = new Employee("Bob Hill", "222", "333454",
+                new EmploymentConditions("Part-time", "Hourly", 45, today, 8));
         e2.addRole(m.searchRole("Warehouse"));
         m.addEmployee(e2);
 
-        Employee e3 = new Employee("Lola White", "333", "789789", new EmploymentConditions("Full-time", "Global", 8500, today, 12));
-        e3.setShiftManager(true);
+        Employee e3 = new ShiftManager("Lola White", "333", "789789",
+                new EmploymentConditions("Full-time", "Global", 8500, today, 12));
         e3.addRole(m.searchRole("Warehouse"));
         e3.addRole(m.searchRole("Cashier"));
         m.addEmployee(e3);
 
-        Employee e4 = new Employee("Diana walker", "444", "656747", new EmploymentConditions("Part-time", "Hourly", 50, today, 8));
+        Employee e4 = new Employee("Diana walker", "444", "656747",
+                new EmploymentConditions("Part-time", "Hourly", 50, today, 8));
         e4.addRole(m.searchRole("Cashier"));
         m.addEmployee(e4);
 
-        Employee e5 = new Employee("Ben Smith", "555", "012888", new EmploymentConditions("Full-time", "Hourly", 40, today, 7));
+        Employee e5 = new ShiftManager("Ben Smith", "555", "012888",
+                new EmploymentConditions("Full-time", "Hourly", 40, today, 7));
         e5.addRole(m.searchRole("Warehouse"));
-        e5.setShiftManager(true);
         m.addEmployee(e5);
 
-        Employee e6 = new Employee("Emily Sue", "666", "112244", new EmploymentConditions("Full-time", "Global", 11000, today, 5));
+        Employee e6 = new Employee("Emily Sue", "666", "112244",
+                new EmploymentConditions("Full-time", "Global", 11000, today, 5));
         e6.addRole(m.searchRole("Warehouse"));
         m.addEmployee(e6);
 
-        Employee e7 = new Employee("Mia Wilson", "777", "909033", new EmploymentConditions("Part-time", "Global", 10000, today, 10));
+        Employee e7 = new Employee("Mia Wilson", "777", "909033",
+                new EmploymentConditions("Part-time", "Global", 10000, today, 10));
         e7.addRole(m.searchRole("Cashier"));
         m.addEmployee(e7);
 
-        Employee e8 = new Employee("Johny Lee", "888", "585877", new EmploymentConditions("part-time", "Hourly", 36, today, 16));
+        Employee e8 = new Employee("Johny Lee", "888", "585877",
+                new EmploymentConditions("part-time", "Hourly", 36, today, 16));
         e8.addRole(m.searchRole("Cashier"));
         m.addEmployee(e8);
 
-        Employee e9 = new Employee("New worker", "999", "80009", new EmploymentConditions("part-time", "Hourly", 30, today, 9));
+        Employee e9 = new Employee("New worker", "999", "80009",
+                new EmploymentConditions("part-time", "Hourly", 30, today, 9));
         e9.addRole(m.searchRole("Warehouse"));
         m.addEmployee(e9);
+
+        Employee e10 = new Driver("Dan Driver", "1010", "456789",
+                new EmploymentConditions("Full-time", "Hourly", 55, today, 10), "B");
+        e10.addRole(m.searchRole("Driver"));
+        m.addEmployee(e10);
 
         m.submitAvailability("111", new Availability("sunday", "morning"));
         m.submitAvailability("111", new Availability("monday", "morning"));
@@ -156,9 +197,19 @@ public class Main {
         m.submitAvailability("888", new Availability("friday", "morning"));
         m.submitAvailability("888", new Availability("friday", "evening"));
 
+        m.submitAvailability("1010", new Availability("sunday", "morning"));
+        m.submitAvailability("1010", new Availability("monday", "morning"));
+        m.submitAvailability("1010", new Availability("tuesday", "morning"));
+
+        // Shift s1 = new Shift("morning", "sunday");
+        // s1.addRoleRequirement(m.searchRole("Cashier"), 2);
+        // s1.addRoleRequirement(m.searchRole("Warehouse"), 2);
+        // m.addShift(s1);
+
         Shift s1 = new Shift("morning", "sunday");
         s1.addRoleRequirement(m.searchRole("Cashier"), 2);
         s1.addRoleRequirement(m.searchRole("Warehouse"), 2);
+        s1.addRoleRequirement(m.searchRole("Driver"), 1);
         m.addShift(s1);
 
         Shift s2morning = new Shift("morning", "monday");
@@ -205,6 +256,7 @@ public class Main {
         m.assignEmployeeToShift("333", m.searchRole("Warehouse"), s1, false);
         m.assignEmployeeToShift("777", m.searchRole("Cashier"), s1, false);
         m.assignEmployeeToShift("555", m.searchRole("Warehouse"), s1, false);
+        m.assignEmployeeToShift("1010", m.searchRole("Driver"), s1, false);
 
         m.assignShiftManagerToShift("333", m.searchRole("Warehouse"), s2morning, false);
         m.assignEmployeeToShift("111", m.searchRole("Cashier"), s2morning, false);

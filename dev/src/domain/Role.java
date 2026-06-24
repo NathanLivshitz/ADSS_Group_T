@@ -1,11 +1,15 @@
 package domain;
 
+// import java.util.List;
+
+// import javax.imageio.plugins.tiff.TIFFDirectory;
+
 public class Role {
 
     private String roleName;
 
     public Role(String roleName) {
-          if (roleName == null || roleName.trim().isEmpty()) {
+        if (roleName == null || roleName.trim().isEmpty()) {
             throw new IllegalArgumentException("role name cannot be null or empty");
         }
         this.roleName = roleName.trim();
@@ -29,3 +33,4 @@ public class Role {
     }
 
 }
+

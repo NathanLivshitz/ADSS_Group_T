@@ -12,7 +12,8 @@ public class Employee {
     private List<Role> roles;
     private List<Availability> availabilities;
     private boolean active;
-    private boolean isShiftManager;
+    private Branch branch;
+
 
     public Employee(String name, String id, String bankAccount, EmploymentConditions employmentConditions) {
         this.name = name;
@@ -22,7 +23,7 @@ public class Employee {
         this.availabilities = new LinkedList<Availability>();
         this.roles = new LinkedList<Role>();
         this.active = true;
-        this.isShiftManager = false;
+        this.branch = null;
     }
 
     public String getName() {
@@ -71,14 +72,6 @@ public class Employee {
         getAvailabilities().add(availability);
     }
 
-    public boolean isShiftManager() {
-        return isShiftManager;
-    }
-
-    public void setShiftManager(boolean shiftManager) {
-        this.isShiftManager = shiftManager;
-    }
-
     public boolean containsRole(Role role) {
         return roles.contains(role);
     }
@@ -117,6 +110,14 @@ public class Employee {
             throw new IllegalArgumentException("role does not exist");
         }
         roles.remove(role);
+    }
+
+    public Branch getBranch() {
+        return branch;
+    }
+
+    public void setBranch(Branch branch) {
+        this.branch = branch;
     }
 
     public boolean equals(Object obj) {

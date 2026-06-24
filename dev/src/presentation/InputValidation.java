@@ -6,6 +6,8 @@ public class InputValidation {
     public static String getValidEmploymentType(Scanner scanner) {
         while (true) {
             String input = scanner.nextLine().trim();
+            if (input.equals("0"))
+                return "0";
             if (input.equalsIgnoreCase("Full-time"))
                 return "Full-time";
             if (input.equalsIgnoreCase("Part-time"))
@@ -17,6 +19,9 @@ public class InputValidation {
     public static String getValidSalaryType(Scanner scanner) {
         while (true) {
             String input = scanner.nextLine().trim();
+            if (input.equals("0")) {
+                return "0";
+            }
             if (input.equalsIgnoreCase("Hourly"))
                 return "Hourly";
             if (input.equalsIgnoreCase("Global"))
@@ -29,7 +34,9 @@ public class InputValidation {
         while (true) {
             try {
                 double value = Double.parseDouble(scanner.nextLine().trim());
-                if (value >= 0)
+                if (value == 0)
+                    return 0;
+                if (value > 0)
                     return value;
                 System.out.print("Value cannot be negative. Try again: ");
             }
@@ -43,7 +50,9 @@ public class InputValidation {
         while (true) {
             try {
                 int value = Integer.parseInt(scanner.nextLine().trim());
-                if (value >= 0)
+                if (value == 0)
+                    return 0;
+                if (value > 0)
                     return value;
                 System.out.print("Value cannot be negative. Try again: ");
             }
@@ -56,6 +65,8 @@ public class InputValidation {
     public static String getValidNumericString(Scanner scanner) {
         while (true) {
             String input = scanner.nextLine().trim();
+            if (input.equals("0"))
+                return "0";
             if (input.matches("\\d+"))
                 return input;
             System.out.print("Invalid input. Please enter numbers only: ");
@@ -65,6 +76,9 @@ public class InputValidation {
     public static String getValidShiftType(Scanner scanner) {
         while (true) {
             String input = scanner.nextLine().trim().toLowerCase();
+            if (input.equals("0"))
+                return "0";
+
             if (input.equals("morning") || input.equals("evening") || input.equals("double"))
                 return input;
             System.out.print("Invalid input. Please enter exactly 'Morning', 'Evening', or 'Double': ");
@@ -74,6 +88,8 @@ public class InputValidation {
     public static String getValidShiftDay(Scanner scanner) {
         while (true) {
             String input = scanner.nextLine().trim().toLowerCase();
+            if (input.equals("0"))
+                return "0";
             if (input.equals("sunday") || input.equals("monday") || input.equals("tuesday") || input.equals("wednesday") || input.equals("thursday") || input.equals("friday") || input.equals("saturday")) {
                 return input;
             }
