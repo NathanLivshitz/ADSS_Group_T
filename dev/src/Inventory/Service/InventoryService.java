@@ -39,6 +39,24 @@ public class InventoryService {
         this.supplierService = supplierService != null ? supplierService : new SupplierService();
     }
 
+    // Seeds the in-memory supplier mock with demo data so the shortage (UC-f) and periodic
+    // (UC-e) order use cases are demonstrable. Called from Main. Suppliers are a mock with no
+    // DB, so this demo data is wired here rather than loaded from the database.
+    // Agreements assume the standard preloaded catalog (specIds 1-5); spec 5 (Bissli) is the
+    // low-stock item and is supplied by two suppliers at different prices.
+    public void seedDefaultSuppliers() {
+        supplierService.addSupplier(1, "ACME Supplies");
+        supplierService.addSupplier(2, "Global Foods");
+        supplierService.addAgreement(new SupplyAgreementDTO(1, 1, 10, 5.00));
+        supplierService.addAgreement(new SupplyAgreementDTO(2, 1, 5, 8.50));
+        supplierService.addAgreement(new SupplyAgreementDTO(3, 1, 20, 3.00));
+        supplierService.addAgreement(new SupplyAgreementDTO(4, 2, 30, 2.40));
+        supplierService.addAgreement(new SupplyAgreementDTO(5, 1, 12, 3.50));
+        supplierService.addAgreement(new SupplyAgreementDTO(5, 2, 12, 3.20));
+        supplierService.addSchedule(1, "WEDNESDAY");
+        supplierService.addSchedule(2, "MONDAY");
+    }
+
     // ── Catalog ──────────────────────────────────────────────
 
     public int addProduct(ProductDTO dto) {

@@ -49,6 +49,7 @@ public class Main {
             defectiveRepo
         );
         InventoryService service = new InventoryService(controller);
+        service.seedDefaultSuppliers();
         new PeriodicOrderScheduler(service, new SchedulerConfig()).start();
         PreloadData preloadData  = new PreloadData(controller);
 

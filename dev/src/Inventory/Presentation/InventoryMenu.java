@@ -46,7 +46,7 @@ public class InventoryMenu {
                     case "0":  running = false; break;
                     default:   System.out.println("Invalid option."); break;
                 }
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException | IllegalStateException e) {
                 System.out.println("Error: " + e.getMessage());
             } catch (DateTimeParseException e) {
                 System.out.println("Error: invalid date format, expected YYYY-MM-DD.");

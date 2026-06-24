@@ -72,6 +72,14 @@ public class InventoryController {
         if (spec == null)
             throw new IllegalArgumentException("No product with specId " + dto.specId());
         Area area = Area.valueOf(dto.area().toUpperCase());
+        // if this location already holds stock, add to it instead of inserting a duplicate row
+        for (StockItem existing : stockItemRepo.findBySpec(spec)) {
+            if (existing.getArea() == area && existing.getShelfNumber() == dto.shelf()
+                    && existing.getRowNumber() == dto.row()) {
+                updateQuantity(dto.specId(), dto.area(), dto.shelf(), dto.row(), dto.quantity());
+                return;
+            }
+        }
         LocalDate expiry = (dto.expiryDate() != null && !dto.expiryDate().isEmpty())
                 ? LocalDate.parse(dto.expiryDate()) : null;
         List<Integer> productIds = new ArrayList<>();
