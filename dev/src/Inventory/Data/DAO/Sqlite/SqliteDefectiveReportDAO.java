@@ -14,6 +14,16 @@ import java.util.List;
 public class SqliteDefectiveReportDAO implements IDefectiveReportDAO {
 
     @Override
+    public void deleteAll() {
+        try (Connection conn = DatabaseConnection.get();
+             PreparedStatement ps = conn.prepareStatement("DELETE FROM defective_reports")) {
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("SqliteDefectiveReportDAO.deleteAll failed", e);
+        }
+    }
+
+    @Override
     public void insert(DefectiveReportDTO dto) {
         String sql = "INSERT INTO defective_reports (product_id, quantity, reason, report_date) VALUES (?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.get();

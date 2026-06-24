@@ -31,6 +31,7 @@ public class PromotionRepository implements IPromotionRepository {
     @Override
     public void clear() {
         promotions.clear();
+        dao.deleteAll();
     }
 
     // specRepo and categoryRepo must be hydrated first

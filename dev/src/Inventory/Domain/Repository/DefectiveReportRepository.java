@@ -39,6 +39,7 @@ public class DefectiveReportRepository implements IDefectiveReportRepository {
     @Override
     public void clear() {
         reports.clear();
+        dao.deleteAll();
     }
 
     public void hydrate() {

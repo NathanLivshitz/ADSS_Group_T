@@ -15,6 +15,16 @@ import java.util.List;
 public class SqlitePromotionDAO implements IPromotionDAO {
 
     @Override
+    public void deleteAll() {
+        try (Connection conn = DatabaseConnection.get();
+             PreparedStatement ps = conn.prepareStatement("DELETE FROM promotions")) {
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("SqlitePromotionDAO.deleteAll failed", e);
+        }
+    }
+
+    @Override
     public void insert(PromotionDTO dto) {
         String sql = "INSERT INTO promotions " +
                 "(discount_percent, start_date, end_date, " +
