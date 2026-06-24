@@ -4,7 +4,7 @@ import Inventory.DTO.ProductDTO;
 import java.util.List;
 
 /**
- * DAO for the product_specs table — one row per spec.
+ * DAO for the product_specs table - one row per spec.
  * ProductDTO is still used as the transfer object but productId is ignored
  * (product instances live in the products table, managed by IProductInstanceDAO).
  */

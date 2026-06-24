@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class SupplierService {
     private final SupplierController supplierSystem;
 
-    /** No-arg constructor — creates its own SupplierController. */
+    /** No-arg constructor - creates its own SupplierController. */
     public SupplierService() {
         this.supplierSystem = new SupplierController();
     }
@@ -80,7 +80,7 @@ public class SupplierService {
 
     // ── AGREEMENTS & SCHEDULES ───────────────────────────────
 
-    /** Add a supply agreement via DTO — no Suppliers.Domain types cross the boundary. */
+    /** Add a supply agreement via DTO - no Suppliers.Domain types cross the boundary. */
     public void addAgreement(SupplyAgreementDTO dto) {
         Supplier s = findSupplierById(dto.supplierId());
         if (s == null) throw new IllegalArgumentException("Supplier not found: " + dto.supplierId());

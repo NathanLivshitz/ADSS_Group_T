@@ -16,7 +16,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// Integration tests for the new schema — verifies that products table,
+// Integration tests for the new schema - verifies that products table,
 // stock_item_products mapping table, and product_specs table are all
 // correctly written to and read from SQLite.
 class SchemaPersistenceTest {
@@ -24,7 +24,7 @@ class SchemaPersistenceTest {
     private InventoryController controller;
     private InventoryService service;
 
-    // DAOs — kept for direct DB assertions
+    // DAOs - kept for direct DB assertions
     private SqliteProductDAO specDAO;
     private SqliteProductInstanceDAO instanceDAO;
     private SqliteStockItemDAO stockDAO;
@@ -252,7 +252,7 @@ class SchemaPersistenceTest {
         assertEquals(15, rows.get(0).quantity(), "stock_items quantity reflects -5 delta");
     }
 
-    // ── 11. No spec duplication — one row per spec in product_specs ─
+    // ── 11. No spec duplication - one row per spec in product_specs ─
 
     @Test
     void noSpecDuplication_oneRowPerSpec() {
@@ -267,7 +267,7 @@ class SchemaPersistenceTest {
         service.addStockItem(new StockItemDTO(spec2, "STORE", 2, 1, 4, null));
 
         List<ProductDTO> allSpecs = specDAO.findAll();
-        assertEquals(2, allSpecs.size(), "product_specs has exactly 2 rows — no duplication");
+        assertEquals(2, allSpecs.size(), "product_specs has exactly 2 rows - no duplication");
     }
 
     // ── 12. product_specs totalQuantity updated via updateShortageReport ─
@@ -284,7 +284,7 @@ class SchemaPersistenceTest {
         ProductDTO afterAdd = specDAO.findById(specId);
         assertEquals(5, afterAdd.totalQuantity(), "totalQuantity = 5 after addStockItem");
 
-        // Order 10 more — updateShortageReport also persists
+        // Order 10 more - updateShortageReport also persists
         service.updateShortageReport(specId, 10, 3.5);
 
         ProductDTO afterOrder = specDAO.findById(specId);

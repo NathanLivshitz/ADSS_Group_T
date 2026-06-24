@@ -29,7 +29,7 @@ class PeriodicOrderSchedulerTest {
     private InventoryController controller;
     private InventoryService service;
 
-    // DAOs — kept for post-test DB assertions
+    // DAOs - kept for post-test DB assertions
     private SqliteProductDAO productDAO;
 
     @BeforeEach
@@ -76,7 +76,7 @@ class PeriodicOrderSchedulerTest {
         service.addStockItem(new StockItemDTO(milkSpecId, "STORE", 2, 1, 3, null));
         service.addStockItem(new StockItemDTO(chipsSpecId, "STORE", 4, 3, 25, null));
 
-        // Supplier agreement: ACME supplies milk (seed via controller — SupplierService is DTO-only)
+        // Supplier agreement: ACME supplies milk (seed via controller - SupplierService is DTO-only)
         sc.addAgreement(new SupplyAgreement(acme, milkSpecId, 10, 5.00));
     }
 
@@ -109,7 +109,7 @@ class PeriodicOrderSchedulerTest {
         // Simulate what the scheduler does: update shortage report
         service.updateShortageReport(specId, 20, 4.0);
 
-        // Read directly from DB — NOT from in-memory repo
+        // Read directly from DB - NOT from in-memory repo
         ProductDTO after = findBySpecId(specId);
         assertNotNull(after);
 

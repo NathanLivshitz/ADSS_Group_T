@@ -17,16 +17,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Scanner;
 
-/**
- * Full write + read battery covering all 17 menu options.
- *
- * Convention:
- *   _write tests: send input that mutates state, assert the confirmation message.
- *   _read  tests: first mutate state (write path), then read it back via menu, assert the data.
- *
- * All tests use in-memory stub DAOs — fast, no disk I/O.
- */
-class MenuBatteryTest {
+// Menu-driven tests covering all 17 options via simulated stdin.
+class MenuOptionsTest {
 
     // ── test harness ────────────────────────────────────────────────────────
 

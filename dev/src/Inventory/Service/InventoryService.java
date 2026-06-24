@@ -17,7 +17,7 @@ import java.util.List;
  * All public methods accept and return only DTOs.
  *
  * Uses SupplierService (imported) for cross-module calls.
- * SupplierService returns DTOs — InventoryService never touches Suppliers domain types.
+ * SupplierService returns DTOs - InventoryService never touches Suppliers domain types.
  */
 public class InventoryService {
 
@@ -31,7 +31,7 @@ public class InventoryService {
         this.supplierService = new SupplierService();
     }
 
-    /** Two-arg constructor for testing — allows injecting a pre-seeded SupplierService. */
+    /** Two-arg constructor for testing - allows injecting a pre-seeded SupplierService. */
     public InventoryService(InventoryController controller, SupplierService supplierService) {
         if (controller == null)
             throw new IllegalArgumentException("controller cannot be null");
@@ -160,7 +160,7 @@ public class InventoryService {
 
     /**
      * Order shortage items from the best available supplier.
-     * Uses SupplierService which returns DTOs — no domain types touch this layer.
+     * Uses SupplierService which returns DTOs - no domain types touch this layer.
      */
     public List<ProductDTO> orderShortageFromSupplier() {
         List<ProductDTO> lowStock = controller.getLowStockProducts();

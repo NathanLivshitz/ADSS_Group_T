@@ -9,8 +9,8 @@ import java.util.Properties;
  * or working directory. Falls back to built-in defaults if the file is absent.
  *
  * Properties:
- *   intervalSeconds  — how often the scheduler polls (default 86400 = once per day)
- *   leadDays         — place order when delivery is within this many days (default 2)
+ *   intervalSeconds  - how often the scheduler polls (default 86400 = once per day)
+ *   leadDays         - place order when delivery is within this many days (default 2)
  */
 public class SchedulerConfig {
 
@@ -33,7 +33,7 @@ public class SchedulerConfig {
         this.leadDays        = parseInt (props, "leadDays",        DEFAULT_LEAD);
     }
 
-    /** Override constructor for tests — skips file loading. */
+    /** Override constructor for tests - skips file loading. */
     public SchedulerConfig(long intervalSeconds, int leadDays) {
         if (intervalSeconds <= 0) throw new IllegalArgumentException("intervalSeconds must be > 0");
         if (leadDays < 0)         throw new IllegalArgumentException("leadDays cannot be negative");

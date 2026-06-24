@@ -6,7 +6,7 @@ import java.util.List;
 public interface IProductRepository {
 
     /**
-     * Returns the next available product ID (peek — does not consume).
+     * Returns the next available product ID (peek - does not consume).
      * Call add() to advance the counter.
      */
     int nextId();
