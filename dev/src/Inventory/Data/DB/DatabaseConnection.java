@@ -8,7 +8,7 @@ import java.sql.Statement;
 // SQLite connection factory. get() opens a fresh connection; caller must close.
 public class DatabaseConnection {
 
-    private static final String DB_URL = "jdbc:sqlite:inventory.db";
+    private static final String DB_URL = "jdbc:sqlite:superLee.db";
     private static boolean initialized = false;
 
     public static synchronized Connection get() throws SQLException {

@@ -83,7 +83,7 @@ public class Main {
         scanner.close();
     }
 
-    private static void initMockData(Manager m) {
+    public static void initMockData(Manager m) {
 
         // if (m.searchEmployee("111") != null) {
         // return;
