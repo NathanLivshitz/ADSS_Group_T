@@ -49,7 +49,7 @@ public class StockItemRepository implements IStockItemRepository {
     @Override
     public List<StockItem> findBySpec(ProductSpec spec) {
         List<StockItem> result = new ArrayList<>();
-        for (StockItem si : stockItems) {
+        for (StockItem si : new ArrayList<>(stockItems)) {
             if (si.getSpec() == spec) result.add(si);
         }
         return result;
@@ -57,7 +57,7 @@ public class StockItemRepository implements IStockItemRepository {
 
     @Override
     public List<StockItem> findAll() {
-        return Collections.unmodifiableList(stockItems);
+        return new ArrayList<>(stockItems);
     }
 
     @Override
@@ -79,8 +79,11 @@ public class StockItemRepository implements IStockItemRepository {
             // load product IDs from mapping table
             List<Integer> productIds = productsDao.findByLocation(
                 dto.specId(), dto.area(), dto.shelf(), dto.row());
+            int qty = dto.quantity();
+            if (!productIds.isEmpty() && productIds.size() != qty)
+                qty = productIds.size();
             StockItem item = new StockItem(spec, area, dto.shelf(), dto.row(),
-                dto.quantity(), expiry, productIds);
+                qty, expiry, productIds);
             stockItems.add(item);
         }
     }

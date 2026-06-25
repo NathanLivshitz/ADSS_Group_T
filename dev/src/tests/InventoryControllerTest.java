@@ -221,7 +221,7 @@ class InventoryControllerTest {
             specId, 0, null, null));
 
         double price = controller.getEffectivePrice(specId);
-        assertEquals(6.21, price, 0.01); // 6.9 * 0.9
+        assertEquals(6.21, price, 0.01); // 9 * 0.9
     }
 
     @Test
@@ -241,7 +241,7 @@ class InventoryControllerTest {
             0, dairyId, null, null));
 
         double price = controller.getEffectivePrice(specId);
-        assertEquals(5.52, price, 0.01); // 6.9 * 0.8
+        assertEquals(5.52, price, 0.01); // 9 * 0.8
     }
 
     // Report defective + auto reduce

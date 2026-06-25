@@ -22,7 +22,7 @@ public class PersistenceRoundTripTest {
         DatabaseConnection.truncateAll();
     }
 
-    // 1. CategoryDAO: insert + findAll round-trip
+    // CategoryDAO: insert + findAll round-trip
     @Test
     void categoryDaoRoundTrip() {
         SqliteCategoryDAO dao = new SqliteCategoryDAO();
@@ -45,7 +45,7 @@ public class PersistenceRoundTripTest {
         assertEquals(10, second.parentCategoryId());
     }
 
-    // 2. ProductDAO: insert + findById + findAll round-trip
+    // ProductDAO: insert + findById + findAll round-trip
     @Test
     void productDaoRoundTrip() {
         SqliteCategoryDAO catDao = new SqliteCategoryDAO();
@@ -69,7 +69,7 @@ public class PersistenceRoundTripTest {
         assertEquals(1, all.size());
     }
 
-    // 3. StockItemDAO: insert + findBySpecId round-trip (with null expiry)
+    // StockItemDAO: insert + findBySpecId round-trip (with null expiry)
     @Test
     void stockItemNullExpiryRoundTrip() {
         SqliteStockItemDAO dao = new SqliteStockItemDAO();
@@ -87,7 +87,7 @@ public class PersistenceRoundTripTest {
         assertNull(back.expiryDate(), "expiry should round-trip as null");
     }
 
-    // 4. PromotionDAO: insert + findAll round-trip
+    // PromotionDAO: insert + findAll round-trip
     @Test
     void promotionDaoRoundTrip() {
         SqlitePromotionDAO dao = new SqlitePromotionDAO();
@@ -109,7 +109,7 @@ public class PersistenceRoundTripTest {
         assertNull(back.targetCategoryName());
     }
 
-    // 5. DefectiveReportDAO: insert + findAll round-trip
+    // DefectiveReportDAO: insert + findAll round-trip
     @Test
     void defectiveReportDaoRoundTrip() {
         SqliteDefectiveReportDAO dao = new SqliteDefectiveReportDAO();
@@ -125,7 +125,7 @@ public class PersistenceRoundTripTest {
         assertEquals("2025-06-01", back.reportDate());
     }
 
-    // 6. Categories ordered parent-before-child after hydrate
+    // Categories ordered parent-before-child after hydrate
     @Test
     void categoriesParentBeforeChildAfterHydrate() {
         SqliteCategoryDAO dao = new SqliteCategoryDAO();
@@ -149,7 +149,7 @@ public class PersistenceRoundTripTest {
         assertEquals(dairy, milk.getParent());
     }
 
-    // 7. Full cycle: write via controller, hydrate fresh repos, assert state
+    // Full cycle: write via controller, hydrate fresh repos, assert state
     @Test
     void fullCycleControllerHydrate() throws SQLException {
         // -- first set: create via Sqlite DAOs / repositories -----------------
@@ -243,7 +243,7 @@ public class PersistenceRoundTripTest {
         assertEquals(2, defects.get(0).getQuantity());
     }
 
-    // 8. StockItemDAO: item with explicit expiry date round-trips correctly
+    // StockItemDAO: item with explicit expiry date round-trips correctly
     @Test
     void stockItemWithExpiryRoundTrip() {
         SqliteStockItemDAO dao = new SqliteStockItemDAO();

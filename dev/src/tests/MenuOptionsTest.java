@@ -74,7 +74,7 @@ class MenuOptionsTest {
     private static final String ADD_STOCK_BELOW_MIN =
         "2\n1\nSTORE\n1\n1\n5\n\n";
 
-    // MENU 1: Add product
+    // Option 1: Add product
     @Test
     void menu1_write_addProductConfirmed() throws Exception {
         String out = run(ADD_MILK + "0\n");
@@ -96,7 +96,7 @@ class MenuOptionsTest {
         assertTrue(out.contains("Invalid category path."), "invalid path rejected");
     }
 
-    // MENU 2: Add stock
+    // Option 2: Add stock
     @Test
     void menu2_write_addStockConfirmed() throws Exception {
         String out = run(ADD_MILK + ADD_STOCK_ABOVE_MIN + "0\n");
@@ -110,7 +110,7 @@ class MenuOptionsTest {
         assertTrue(out.contains("Warning: added 3 expired"), "expired warning shown");
     }
 
-    // MENU 3: View product stock
+    // Option 3: View product stock
     @Test
     void menu3_read_stockLocationsAndTotals() throws Exception {
         String input = ADD_MILK
@@ -134,7 +134,7 @@ class MenuOptionsTest {
         assertTrue(out.contains("No stock found"), "no stock message shown");
     }
 
-    // MENU 4: Update stock
+    // Option 4: Update stock
     @Test
     void menu4_write_positiveUpdateIncreasesQty() throws Exception {
         String input = ADD_MILK + ADD_STOCK_ABOVE_MIN  // 20 units
@@ -166,7 +166,7 @@ class MenuOptionsTest {
         assertTrue(out.contains("Error:"), "overdraft rejected with error");
     }
 
-    // MENU 5: Low stock alerts
+    // Option 5: Low stock alerts
     @Test
     void menu5_read_lowStockAlertShown() throws Exception {
         String input = ADD_MILK + ADD_STOCK_BELOW_MIN + "5\n0\n"; // 5 units, min=10
@@ -183,7 +183,7 @@ class MenuOptionsTest {
         assertTrue(out.contains("No low stock products"), "no alerts shown");
     }
 
-    // MENU 6: Add category
+    // Option 6: Add category
     @Test
     void menu6_write_rootCategoryAdded() throws Exception {
         String out = run("6\nFrozen\n\n0\n");
@@ -203,7 +203,7 @@ class MenuOptionsTest {
         assertTrue(out.contains("Parent category not found"), "unknown parent rejected");
     }
 
-    // MENU 7: Add promotion
+    // Option 7: Add promotion
     @Test
     void menu7_write_productPromotionAdded() throws Exception {
         String today = LocalDate.now().minusDays(1).toString();
@@ -226,7 +226,7 @@ class MenuOptionsTest {
         assertTrue(out.contains("Promotion added"), "category promotion confirmed");
     }
 
-    // MENU 8: View active promotions
+    // Option 8: View active promotions
     @Test
     void menu8_read_activePromotionShown() throws Exception {
         String today = LocalDate.now().minusDays(1).toString();
@@ -250,7 +250,7 @@ class MenuOptionsTest {
         assertTrue(out.contains("No active promotions"), "expired promo excluded");
     }
 
-    // MENU 9: Check effective price
+    // Option 9: Check effective price
     @Test
     void menu9_read_priceWithoutPromoEqualsSellPrice() throws Exception {
         String out = run(ADD_MILK + "9\n1\n0\n");
@@ -269,7 +269,7 @@ class MenuOptionsTest {
         assertTrue(out.contains("Effective price: 6.21"), "10% discount applied: 6.9*0.9=6.21");
     }
 
-    // MENU 10: Report defective
+    // Option 10: Report defective
     @Test
     void menu10_write_defectiveReducesStock() throws Exception {
         String input = ADD_MILK + ADD_STOCK_ABOVE_MIN  // 20 units
@@ -288,7 +288,7 @@ class MenuOptionsTest {
         assertTrue(out.contains("Error:"), "error shown when no stock to remove");
     }
 
-    // MENU 11: Remove expired stock
+    // Option 11: Remove expired stock
     @Test
     void menu11_write_expiredStockRemoved() throws Exception {
         String input = ADD_MILK
@@ -305,7 +305,7 @@ class MenuOptionsTest {
         assertTrue(out.contains("No expired stock found"), "zero expired message");
     }
 
-    // MENU 12: Locate defective items
+    // Option 12: Locate defective items
     @Test
     void menu12_read_defectiveItemLocationShown() throws Exception {
         String input = ADD_MILK + ADD_STOCK_ABOVE_MIN
@@ -335,7 +335,7 @@ class MenuOptionsTest {
         assertTrue(out.contains("No defective items found"), "empty message shown");
     }
 
-    // MENU 13: Defective report by dates
+    // Option 13: Defective report by dates
     @Test
     void menu13_read_reportInRange() throws Exception {
         LocalDate yesterday = LocalDate.now().minusDays(1);
@@ -362,7 +362,7 @@ class MenuOptionsTest {
         assertTrue(out.contains("No defective reports"), "out-of-range returns empty");
     }
 
-    // MENU 14: Generate inventory report
+    // Option 14: Generate inventory report
     @Test
     void menu14_read_allProductsNoFilter() throws Exception {
         String input = ADD_MILK
@@ -400,7 +400,7 @@ class MenuOptionsTest {
         assertTrue(out.contains("[LOW]"), "LOW status shown");
     }
 
-    // MENU 15: Load test data
+    // Option 15: Load test data
     @Test
     void menu15_write_testDataLoaded() throws Exception {
         String out = run("15\n14\nn\n0\n");
@@ -416,7 +416,7 @@ class MenuOptionsTest {
         assertTrue(out.contains("(5 items)"), "still 5 products after double load");
     }
 
-    // MENU 16: Order due to shortage
+    // Option 16: Order due to shortage
     @Test
     void menu16_write_orderPlacedAndConfirmed() throws Exception {
         InventoryController ctrl = freshController();
@@ -450,7 +450,7 @@ class MenuOptionsTest {
         assertTrue(out.contains("No low-stock products"), "early return when stock ok");
     }
 
-    // MENU 17: Periodic order from supplier
+    // Option 17: Periodic order from supplier
     @Test
     void menu17_write_periodicOrderPreviewAndSend() throws Exception {
         InventoryController ctrl = freshController();

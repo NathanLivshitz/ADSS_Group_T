@@ -8,10 +8,9 @@ import Inventory.Presentation.InventoryMenu;
 
 import java.util.Scanner;
 
-// Unified entry point for the whole Super-Lee system.
-// Logs in by employee ID and routes by role: every employee gets the employee menu,
-// shift managers also get the management menu, and warehouse workers (or managers) get
-// the inventory menu. Both modules share one SQLite database (superLee.db).
+// Entry point for the whole Super-Lee system. Logs in by employee ID and shows the
+// menus for that employee: the employee menu for everyone, the management menu for
+// shift managers, and the inventory menu for warehouse workers. One shared database.
 public class SystemMain {
 
     public static void main(String[] args) {
@@ -98,7 +97,7 @@ public class SystemMain {
                 System.out.println(managerOption + ". Employee and shift management menu");
                 next++;
             }
-            if (isWarehouse || isManager) {
+            if (isWarehouse) {
                 inventoryOption = next;
                 System.out.println(inventoryOption + ". Inventory management menu");
                 next++;

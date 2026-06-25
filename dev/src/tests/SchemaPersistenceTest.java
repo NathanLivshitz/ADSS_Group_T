@@ -56,7 +56,7 @@ class SchemaPersistenceTest {
         service = new InventoryService(controller);
     }
 
-    // 1. addStockItem persists to products table
+    // addStockItem persists to products table
     @Test
     void addStockItem_createsProductRowsInProductsTable() {
         int catId = service.addCategory("Dairy", 0);
@@ -82,7 +82,7 @@ class SchemaPersistenceTest {
         }
     }
 
-    // 2. addStockItem persists to stock_item_products mapping
+    // addStockItem persists to stock_item_products mapping
     @Test
     void addStockItem_createsMappingRowsInStockItemProductsTable() {
         int catId = service.addCategory("Dairy", 0);
@@ -96,7 +96,7 @@ class SchemaPersistenceTest {
         assertEquals(5, mappedIds.size(), "mapping table has one row per product-in-location");
     }
 
-    // 3. addStockItem persists spec to product_specs table
+    // addStockItem persists spec to product_specs table
     @Test
     void addProduct_persistsSpecToProductSpecsTable() {
         int catId = service.addCategory("Dairy", 0);
@@ -112,7 +112,7 @@ class SchemaPersistenceTest {
         assertEquals(10, fromDb.minStockThreshold());
     }
 
-    // 4. updateQuantity(+delta) adds new product rows
+    // updateQuantity(+delta) adds new product rows
     @Test
     void updateQuantityPositive_addsProductRowsAndMapping() {
         int catId = service.addCategory("Dairy", 0);
@@ -131,7 +131,7 @@ class SchemaPersistenceTest {
             "mapping also grows to 5");
     }
 
-    // 5. updateQuantity(-delta) removes product IDs from mapping
+    // updateQuantity(-delta) removes product IDs from mapping
     @Test
     void updateQuantityNegative_removesProductIdsFromMapping() {
         int catId = service.addCategory("Dairy", 0);
@@ -148,7 +148,7 @@ class SchemaPersistenceTest {
             "mapping shrinks to 3 after -2");
     }
 
-    // 6. reportDefective removes product IDs from mapping
+    // reportDefective removes product IDs from mapping
     @Test
     void reportDefective_removesProductIdsFromMapping() {
         int catId = service.addCategory("Dairy", 0);
@@ -165,7 +165,7 @@ class SchemaPersistenceTest {
             "mapping shrinks after defective removal");
     }
 
-    // 7. updateShortageReport persists spec update + product rows
+    // updateShortageReport persists spec update + product rows
     @Test
     void updateShortageReport_persistsSpecAndProductRows() {
         int catId = service.addCategory("Dairy", 0);
@@ -189,7 +189,7 @@ class SchemaPersistenceTest {
             "products table grew by ordered quantity");
     }
 
-    // 8. Multiple stock locations each get their own mapping
+    // Multiple stock locations each get their own mapping
     @Test
     void multipleLocations_separateMappingEntries() {
         int catId = service.addCategory("Dairy", 0);
@@ -211,7 +211,7 @@ class SchemaPersistenceTest {
         assertEquals(3, storeIds.size(), "no overlap between location mappings");
     }
 
-    // 9. stock_items table has correct quantity
+    // stock_items table has correct quantity
     @Test
     void stockItemsTable_hasCorrectQuantity() {
         int catId = service.addCategory("Dairy", 0);
@@ -228,7 +228,7 @@ class SchemaPersistenceTest {
         assertEquals(1, rows.get(0).row());
     }
 
-    // 10. stock_items quantity updated after updateQuantity
+    // stock_items quantity updated after updateQuantity
     @Test
     void stockItemsTable_quantityUpdatedAfterDelta() {
         int catId = service.addCategory("Dairy", 0);
@@ -242,7 +242,7 @@ class SchemaPersistenceTest {
         assertEquals(15, rows.get(0).quantity(), "stock_items quantity reflects -5 delta");
     }
 
-    // 11. No spec duplication - one row per spec in product_specs
+    // No spec duplication - one row per spec in product_specs
     @Test
     void noSpecDuplication_oneRowPerSpec() {
         int catId = service.addCategory("Dairy", 0);
@@ -259,7 +259,7 @@ class SchemaPersistenceTest {
         assertEquals(2, allSpecs.size(), "product_specs has exactly 2 rows - no duplication");
     }
 
-    // 12. product_specs totalQuantity updated via updateShortageReport
+    // product_specs totalQuantity updated via updateShortageReport
     @Test
     void productSpecs_totalQuantityUpdated() {
         int catId = service.addCategory("Dairy", 0);

@@ -10,9 +10,7 @@ import Inventory.Data.PreloadData;
 import Inventory.Presentation.InventoryMenu;
 import java.util.Scanner;
 
-// Wires the inventory module against the shared SQLite database and returns a ready
-// InventoryMenu. Used by the unified SystemMain so the inventory side runs with real
-// persistence (the same wiring Inventory.Main uses standalone).
+// Builds the inventory menu wired to the shared database, for the unified SystemMain.
 public class InventoryBootstrap {
 
     public static InventoryMenu buildMenu(Scanner scanner) {

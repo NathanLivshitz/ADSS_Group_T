@@ -40,7 +40,7 @@ java -cp out:lib/junit-platform-console-standalone.jar:lib/sqlite-jdbc-3.46.1.3.
 
 ## בסיס הנתונים
 
-הנתונים נשמרים מקומית בקובץ `inventory.db` (SQLite) שנוצר אוטומטית בהרצה הראשונה בתיקיית העבודה. הטבלאות:
+הנתונים נשמרים מקומית בקובץ `superLee.db` (SQLite) שנוצר אוטומטית בהרצה הראשונה בתיקיית העבודה. הטבלאות:
 
 | טבלה | תפקיד |
 |------|-------|
@@ -52,7 +52,7 @@ java -cp out:lib/junit-platform-console-standalone.jar:lib/sqlite-jdbc-3.46.1.3.
 | `promotions` | מבצעים (אחוז הנחה, טווח תאריכים, יעד מוצר או קטגוריה) |
 | `defective_reports` | דיווחי פגמים (מזהה מוצר, כמות, סיבה, תאריך) |
 
-הקובץ `inventory.db` אינו נשמר ב-git (הוא נוצר מחדש בכל הרצה).
+הקובץ `superLee.db` אינו נשמר ב-git (הוא נוצר מחדש בכל הרצה).
 
 ## נתוני דוגמה
 
