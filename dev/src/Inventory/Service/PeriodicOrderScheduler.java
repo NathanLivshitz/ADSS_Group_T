@@ -14,20 +14,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * Daemon thread that places periodic supplier orders automatically.
  *
- * On every tick it checks each supplier with a fixed delivery schedule:
- * if the next delivery falls within {@code config.leadDays} from today,
- * it calls {@link InventoryService#checkAndPlacePeriodicOrders} for all
+ * On every tick it checks each supplier with a fixed delivery schedule.
+ * If the next delivery falls within config.leadDays from today,
+ * it calls InventoryService.checkAndPlacePeriodicOrders for all
  * low-stock products covered by that supplier's agreements.
- *
- * Wire-up in Main:
- * <pre>
- *   SchedulerConfig config = new SchedulerConfig()
- *       .intervalSeconds(10)   // demo; use 86400 for production
- *       .leadDays(2);
- *
- *   PeriodicOrderScheduler scheduler = new PeriodicOrderScheduler(service, config);
- *   scheduler.start();
- * </pre>
  */
 public class PeriodicOrderScheduler implements Runnable {
 
@@ -35,7 +25,7 @@ public class PeriodicOrderScheduler implements Runnable {
     private final SchedulerConfig  config;
     private volatile boolean running = true;
 
-    // supplierId → delivery date for which we already placed an order this window.
+    // supplierId -> delivery date for which we already placed an order this window.
     // Cleared implicitly when nextDeliveryDate() advances past the recorded date.
     private final Map<Integer, LocalDate> lastOrderedDelivery = new HashMap<>();
 
@@ -86,7 +76,7 @@ public class PeriodicOrderScheduler implements Runnable {
                 lastOrderedDelivery.put(supplier.supplierId(), next);
                 for (OrderSummaryDTO o : placed) {
                     System.out.printf(
-                        "[Scheduler] Auto-order #%d → supplier %d (%s), delivery %s, total %.2f%n",
+                        "[Scheduler] Auto-order #%d -> supplier %d (%s), delivery %s, total %.2f%n",
                         o.orderId(), o.supplierId(), supplier.name(),
                         o.expectedDeliveryDate(), o.totalPrice());
                 }

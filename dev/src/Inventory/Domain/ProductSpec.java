@@ -8,10 +8,10 @@ public class ProductSpec {
     private double sellPrice;
     private final int minStockThreshold;
 
-    // ── IDENTITY ───────────────────
+    // Identity
     private int specId;          // surrogate key - assigned by repository after add()
 
-    // ── QUANTITY CACHE ────────────────────────────────
+    // Quantity cache
     private int totalQuantity;   // kept current by InventoryController after every stock mutation
 
     public ProductSpec(String name, String manufacturer,
@@ -66,12 +66,7 @@ public class ProductSpec {
         this.costPrice = costPrice;
     }
 
-    // ── IDENTITY ──────────────────────────────────────────────
-
-    /**
-     * Surrogate key for ProductSpec.
-     * Called by repository immediately after the spec is registered.
-     */
+    // Returns the surrogate key for this spec.
     public int getSpecId() {
         return specId;
     }
@@ -81,23 +76,15 @@ public class ProductSpec {
         this.specId = specId;
     }
 
-    // ── QUANTITY CACHE ────────────────────────────────────────
-
-    /**
-     * Total units across all StockItems for this spec.
-     * InventoryController calls adjustQuantity() after every stock mutation
-     * so this value is always current - no repo lookup needed.
-     */
+    // Returns the total units across all StockItems for this spec.
+    // InventoryController calls adjustQuantity() after every stock mutation
+    // so this value is always current.
     public int getTotalQuantity() {
         return totalQuantity;
     }
 
-    /**
-     * Called by InventoryController after: addStockItem, updateQuantity,
-     * reportDefective, removeExpiredStock.
-     * delta positive = stock added, negative = stock removed.
-     * Throws if the result would go below zero.
-     */
+    // Adjusts the quantity cache by delta (positive = added, negative = removed).
+    // Throws if the result would go below zero.
     public void adjustQuantity(int delta) {
         if (totalQuantity + delta < 0)
             throw new IllegalArgumentException("Stock would go negative: current=" + totalQuantity + " delta=" + delta);

@@ -66,8 +66,7 @@ public class MenuIntegrationTest {
         return new SupplierService(sc);
     }
 
-    // ── Add product + stock + view ─────────────────────────────────────────
-
+    // Add product + stock + view
     @Test
     void testAddProductAndViewStock() throws Exception {
         String input = String.join("\n",
@@ -86,8 +85,7 @@ public class MenuIntegrationTest {
         assertTrue(out.contains("Total: 20"),                 "total shown");
     }
 
-    // ── Low stock alert ────────────────────────────────────────────────────
-
+    // Low stock alert
     @Test
     void testLowStockAlert() throws Exception {
         String input = String.join("\n",
@@ -104,8 +102,7 @@ public class MenuIntegrationTest {
         assertTrue(out.contains("min=10"),     "min threshold shown");
     }
 
-    // ── Order due to shortage (UC-f) ───────────────────────────────────────
-
+    // Order due to shortage
     @Test
     void testOrderDueToShortage() throws Exception {
         // specId=1 is assigned to the first product added with a fresh stub DAO
@@ -113,9 +110,9 @@ public class MenuIntegrationTest {
         InventoryService service = new InventoryService(controller, seededSupplierService(1));
 
         String input = String.join("\n",
-            "1",          // add product → specId=1, min=10
+            "1",          // add product -> specId=1, min=10
             "Milk", "Tnuva", "Dairy", "3.0", "6.0", "10",
-            "2",          // add stock qty=5 (below min → low stock)
+            "2",          // add stock qty=5 (below min -> low stock)
             "1", "STORE", "1", "1", "5", "",
             "16",         // order due to shortage
             "1",          // enter specId=1
@@ -129,8 +126,7 @@ public class MenuIntegrationTest {
         assertTrue(out.contains("sent"),      "order sent");
     }
 
-    // ── Periodic order (UC-e) ──────────────────────────────────────────────
-
+    // Periodic order
     @Test
     void testPeriodicOrder() throws Exception {
         // specId=1 is assigned to the first product added with a fresh stub DAO
@@ -138,9 +134,9 @@ public class MenuIntegrationTest {
         InventoryService service = new InventoryService(controller, seededSupplierService(1));
 
         String input = String.join("\n",
-            "1",          // add product → specId=1, min=10
+            "1",          // add product -> specId=1, min=10
             "Milk", "Tnuva", "Dairy", "3.0", "6.0", "10",
-            "2",          // add stock qty=5 (below min → low stock)
+            "2",          // add stock qty=5 (below min -> low stock)
             "1", "STORE", "1", "1", "5", "",
             "17",         // periodic order
             "y",          // confirm
@@ -151,8 +147,7 @@ public class MenuIntegrationTest {
         assertTrue(out.contains("periodic order(s) sent"),   "order(s) sent");
     }
 
-    // ── Expired stock auto-detected in option 12 ───────────────────────────
-
+    // Expired stock auto-detected in option 12
     @Test
     void testExpiredStockDetectedWithoutOption11() throws Exception {
         String input = String.join("\n",
@@ -182,8 +177,7 @@ public class MenuIntegrationTest {
         assertTrue(out.contains("Warning: added 3 expired items for OldMilk"), "expired warning shown");
     }
 
-    // ── Category add ──────────────────────────────────────────────────────
-
+    // Category add
     @Test
     void testAddCategory() throws Exception {
         String input = String.join("\n",
@@ -195,8 +189,7 @@ public class MenuIntegrationTest {
         assertTrue(out.contains("Category added with ID"), "category added");
     }
 
-    // ── No low stock when stock is sufficient ─────────────────────────────
-
+    // No low stock when stock is sufficient
     @Test
     void testNoLowStockWhenSufficient() throws Exception {
         String input = String.join("\n",

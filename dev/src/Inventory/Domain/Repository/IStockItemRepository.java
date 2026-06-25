@@ -6,34 +6,19 @@ import java.util.List;
 
 public interface IStockItemRepository {
 
-    /**
-     * Persists a new stock item.
-     * Called by InventoryController.addStockItem().
-     */
+    // Persists a new stock item.
     void add(StockItem item);
 
-    /**
-     * Persists the current quantity of an existing stock item.
-     * Called by InventoryController.updateQuantity().
-     */
+    // Persists the current quantity of an existing stock item.
     void updateQuantity(StockItem item);
 
-    /**
-     * Returns all StockItems whose spec reference matches the given spec.
-     * Identity comparison (==), not equals() - one spec object per product.
-     * Called by InventoryController.getStockForProduct() and removeStock().
-     */
+    // Returns all StockItems whose spec reference matches the given spec.
+    // Uses identity comparison (==), not equals().
     List<StockItem> findBySpec(ProductSpec spec);
 
-    /**
-     * Returns all stock items across all products.
-     * Called by InventoryController.removeExpiredStock().
-     */
+    // Returns all stock items across all products.
     List<StockItem> findAll();
 
-    /**
-     * Clears all stock items.
-     * Called by InventoryController.reset().
-     */
+    // Clears all stock items.
     void clear();
 }

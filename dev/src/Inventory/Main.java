@@ -14,7 +14,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        // ── Wire Sqlite DAOs ─────────────────────────────────
+        // Wire Sqlite DAOs
         SqliteCategoryDAO categoryDAO = new SqliteCategoryDAO();
         SqliteProductDAO productDAO = new SqliteProductDAO();
         SqliteProductInstanceDAO productInstanceDAO = new SqliteProductInstanceDAO();
@@ -23,7 +23,7 @@ public class Main {
         SqlitePromotionDAO promotionDAO = new SqlitePromotionDAO();
         SqliteDefectiveReportDAO defectiveReportDAO = new SqliteDefectiveReportDAO();
 
-        // ── Build repositories ───────────────────────────────
+        // Build repositories
         ProductSpecRepository productSpecRepo = new ProductSpecRepository(productDAO);
         ProductRepository productRepo = new ProductRepository(productInstanceDAO, productDAO);
         StockItemRepository stockItemRepo = new StockItemRepository(stockItemDAO, stockItemProductsDAO);
@@ -31,7 +31,7 @@ public class Main {
         PromotionRepository promotionRepo = new PromotionRepository(promotionDAO);
         DefectiveReportRepository defectiveRepo = new DefectiveReportRepository(defectiveReportDAO);
 
-        // ── Hydrate in dependency order ──────────────────────
+        // Hydrate in dependency order
         categoryRepo.hydrate();
         productSpecRepo.hydrate(categoryDAO, categoryRepo.getAllCategoriesMap());
         productRepo.hydrate(productSpecRepo);
@@ -39,7 +39,7 @@ public class Main {
         promotionRepo.hydrate(productSpecRepo, categoryRepo);
         defectiveRepo.hydrate();
 
-        // ── Controller + Service ─────────────────────────────
+        // Controller + Service
         InventoryController controller = new InventoryController(
             productSpecRepo,
             productRepo,
@@ -53,7 +53,7 @@ public class Main {
         new PeriodicOrderScheduler(service, new SchedulerConfig()).start();
         PreloadData preloadData  = new PreloadData(controller);
 
-        // ── First-run seed check ─────────────────────────────
+        // First-run seed check
         boolean dbEmpty = productDAO.findAll().isEmpty();
         if (dbEmpty) {
             System.out.print("No data found. Load preloaded test data? (y/n): ");

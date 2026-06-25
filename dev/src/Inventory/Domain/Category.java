@@ -9,7 +9,7 @@ public class Category {
     private List<Category> subCategories;
     private List<ProductSpec> products;
 
-    // ── IDENTITY ───────────────────
+    // Identity
     private int categoryId;     // surrogate key - assigned by repository after add()
 
     public Category(String name) {
@@ -25,7 +25,7 @@ public class Category {
         this.parent = parent;
         this.subCategories = new ArrayList<>();
         this.products = new ArrayList<>();
-        
+
         // Automatically add to parent's subcategories if parent exists
         if (parent != null) {
             parent.subCategories.add(this);
@@ -44,14 +44,6 @@ public class Category {
         products.add(product);
     }
 
-    // ── IDENTITY ──────────────────────────────────────────────
-
-    /**
-     * Surrogate key for Category.
-     * Called by repository immediately after the category is registered.
-     * Load order rule: categories must be inserted/loaded in ascending categoryId
-     * order so that parentCategoryId is always resolvable in a single forward pass.
-     */
     public int getCategoryId() {
         return categoryId;
     }
@@ -61,8 +53,6 @@ public class Category {
         this.categoryId = categoryId;
     }
 
-    // ── TREE ──────────────────────────────────────────────────
-
     public List<ProductSpec> getAllProducts() {
         List<ProductSpec> all = new ArrayList<>(products);
         for (Category sub : subCategories) {
@@ -71,4 +61,3 @@ public class Category {
         return all;
     }
 }
-

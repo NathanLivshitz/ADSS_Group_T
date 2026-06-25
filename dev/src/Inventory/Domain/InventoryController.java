@@ -38,8 +38,7 @@ public class InventoryController {
         defectiveRepo.clear();
     }
 
-    // ── CATALOG ──────────────────────────────────────────────
-
+    // CATALOG
     public int addProduct(ProductDTO dto) {
         Category category = categoryRepo.findById(dto.categoryId());
         if (category == null)
@@ -65,8 +64,7 @@ public class InventoryController {
         return result;
     }
 
-    // ── STOCK ────────────────────────────────────────────────
-
+    // STOCK
     public void addStockItem(StockItemDTO dto) {
         ProductSpec spec = productSpecRepo.findById(dto.specId());
         if (spec == null)
@@ -135,8 +133,7 @@ public class InventoryController {
         productRepo.persistUpdate(spec.getSpecId(), spec.getCostPrice(), spec.getTotalQuantity());
     }
 
-    // ── CATEGORIES ───────────────────────────────────────────
-
+    // CATEGORIES
     public int addCategory(String name, int parentCategoryId) {
         Category parent = null;
         if (parentCategoryId != 0) {
@@ -159,8 +156,7 @@ public class InventoryController {
         return c != null ? toCategoryDTO(c) : null;
     }
 
-    // ── PROMOTIONS ───────────────────────────────────────────
-
+    // PROMOTIONS
     public void addPromotion(PromotionDTO dto) {
         ProductSpec targetSpec = null;
         Category targetCat = null;
@@ -204,8 +200,7 @@ public class InventoryController {
         return bestPrice;
     }
 
-    // ── DEFECTIVES ───────────────────────────────────────────
-
+    // DEFECTIVES
     public void reportDefective(int productId, int quantity, String reason) {
         if (productSpecRepo.findById(productId) == null)
             throw new IllegalArgumentException("Product spec ID " + productId + " not found");
@@ -245,8 +240,7 @@ public class InventoryController {
         return result;
     }
 
-    // ── REPORTS ──────────────────────────────────────────────
-
+    // REPORTS
     public List<ProductDTO> generateInventoryReport(List<Integer> categoryIds) {
         List<ProductSpec> specs;
         if (categoryIds == null || categoryIds.isEmpty()) {
@@ -269,8 +263,7 @@ public class InventoryController {
         return result;
     }
 
-    // ── STOCK MANAGEMENT ─────────────────────────────────────
-
+    // STOCK MANAGEMENT
     public int removeExpiredStock() {
         int totalRemoved = 0;
         LocalDate today = LocalDate.now();
@@ -332,8 +325,7 @@ public class InventoryController {
         }
     }
 
-    // ── CROSS-MODULE SUPPORT ─────────────────────────────────
-
+    // CROSS-MODULE SUPPORT
     /**
      * Looks up a product by its specId. Used by InventoryService.selectProduct()
      * to resolve a specId (from the low-stock list) into a full ProductDTO
@@ -345,8 +337,7 @@ public class InventoryController {
         return spec != null ? toProductDTO(spec) : null;
     }
 
-    // ── PRIVATE HELPERS ──────────────────────────────────────
-
+    // PRIVATE HELPERS
     private Product findProductBySpecId(int specId) {
         ProductSpec spec = productSpecRepo.findById(specId);
         return spec != null ? new Product(specId, spec) : null;

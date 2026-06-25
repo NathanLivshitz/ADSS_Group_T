@@ -45,8 +45,7 @@ class InventoryControllerTest {
             new ProductDTO(0, 0, "Tnuva 3% 1L", "Tnuva", bySizeId, 4.5, 6.9, 15, 0));
     }
 
-    // ── INV-1: Maintain product catalog ──────────────────────
-
+    // Maintain product catalog
     @Test
     void addProductToController() {
         int specId = addMilk();
@@ -62,8 +61,7 @@ class InventoryControllerTest {
             controller.addProduct(new ProductDTO(0, 0, "Other", "Mfg", 9999, 1.0, 2.0, 5, 0)));
     }
 
-    // ── INV-2: Track quantities by exact location ────────────
-
+    // Track quantities by exact location
     @Test
     void addStockItemAndRetrieveForProduct() {
         int specId = addMilk();
@@ -97,8 +95,7 @@ class InventoryControllerTest {
         assertEquals(50, warehouseQty);
     }
 
-    // ── INV-10: Update stock (sale/delivery) ─────────────────
-
+    // Update stock (sale/delivery)
     @Test
     void updateQuantityPositiveDelta() {
         int specId = addMilk();
@@ -142,8 +139,7 @@ class InventoryControllerTest {
             () -> controller.updateQuantity(specId, "WAREHOUSE", 9, 9, 5));
     }
 
-    // ── INV-3: Proactive stock alerts ────────────────────────
-
+    // Proactive stock alerts
     @Test
     void getLowStockProductsBelowThreshold() {
         int specId = addMilk(); // minStock = 15
@@ -172,8 +168,7 @@ class InventoryControllerTest {
         assertTrue(controller.getLowStockProducts().isEmpty());
     }
 
-    // ── INV-4: Hierarchical categories ───────────────────────
-
+    // Hierarchical categories
     @Test
     void addCategoryAndRetrieveRoots() {
         // dairyId already added in setUp; verify it appears as a root
@@ -194,8 +189,7 @@ class InventoryControllerTest {
         assertTrue(hasSnacks);
     }
 
-    // ── INV-5: Promotions ────────────────────────────────────
-
+    // Promotions
     @Test
     void addPromotionAndGetActive() {
         int specId = addMilk();
@@ -250,8 +244,7 @@ class InventoryControllerTest {
         assertEquals(5.52, price, 0.01); // 6.9 * 0.8
     }
 
-    // ── INV-7,11: Report defective + auto reduce ─────────────
-
+    // Report defective + auto reduce
     @Test
     void reportDefectiveCreatesReportAndReducesStock() {
         int specId = addMilk();
@@ -300,8 +293,7 @@ class InventoryControllerTest {
             () -> controller.reportDefective(specId, 10, "DEFECTIVE"));
     }
 
-    // ── INV-8: Periodic defect reports ───────────────────────
-
+    // Periodic defect reports
     @Test
     void getDefectiveReportsFilteredByDateRange() {
         int specId = addMilk();
@@ -318,8 +310,7 @@ class InventoryControllerTest {
         assertTrue(outOfRange.isEmpty());
     }
 
-    // ── INV-7: Locate defective items ────────────────────────
-
+    // Locate defective items
     @Test
     void getDefectiveItemsWithLocationsReturnsStockForDefectiveProducts() {
         int specId = addMilk();
@@ -334,8 +325,7 @@ class InventoryControllerTest {
         assertEquals(17, result.get(specId).get(0).quantity());
     }
 
-    // ── INV-6: Inventory reports by categories ───────────────
-
+    // Inventory reports by categories
     @Test
     void generateInventoryReportNoFilterReturnsAll() {
         int milkSpecId = addMilk();
@@ -374,8 +364,7 @@ class InventoryControllerTest {
         assertEquals(2, report.size());
     }
 
-    // ── RESET ───────────────────────────────────────────────
-
+    // RESET
     @Test
     void resetClearsCatalog() {
         int specId = addMilk();
@@ -433,8 +422,7 @@ class InventoryControllerTest {
         assertEquals("Tnuva 3% 1L", controller.getProduct(newSpecId).name());
     }
 
-    // ── EMPTY DATA OPERATIONS ───────────────────────────────
-
+    // EMPTY DATA OPERATIONS
     @Test
     void lowStockOnEmptyCatalogReturnsEmpty() {
         controller.reset();
