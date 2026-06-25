@@ -8,14 +8,14 @@
 -- defective_reports: reports of defective/expired product instances
 -- categories:    hierarchical category tree
 
--- ── CATEGORIES ───────────────────────────────────────────────
+-- Categories
 CREATE TABLE IF NOT EXISTS categories (
     category_id        INTEGER PRIMARY KEY,
     category_name      TEXT    NOT NULL,
     parent_category_id INTEGER NOT NULL DEFAULT 0
 );
 
--- ── PRODUCT SPECS ────────────────────────────────────────────
+-- Product specs
 CREATE TABLE IF NOT EXISTS product_specs (
     spec_id             INTEGER PRIMARY KEY,
     name                TEXT    NOT NULL,
@@ -27,13 +27,13 @@ CREATE TABLE IF NOT EXISTS product_specs (
     total_quantity      INTEGER NOT NULL DEFAULT 0
 );
 
--- ── PRODUCTS (physical instances) ────────────────────────────
+-- Products (physical instances)
 CREATE TABLE IF NOT EXISTS products (
     product_id INTEGER PRIMARY KEY,
     spec_id    INTEGER NOT NULL REFERENCES product_specs(spec_id)
 );
 
--- ── STOCK ITEMS (location batches) ───────────────────────────
+-- Stock items (location batches)
 CREATE TABLE IF NOT EXISTS stock_items (
     spec_id     INTEGER NOT NULL REFERENCES product_specs(spec_id),
     area        TEXT    NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS stock_items (
     PRIMARY KEY (spec_id, area, shelf, row)
 );
 
--- ── STOCK ITEM → PRODUCT INSTANCE MAPPING ────────────────────
+-- Stock item -> product instance mapping
 CREATE TABLE IF NOT EXISTS stock_item_products (
     spec_id  INTEGER NOT NULL,
     area     TEXT    NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS stock_item_products (
     FOREIGN KEY (spec_id, area, shelf, row) REFERENCES stock_items(spec_id, area, shelf, row)
 );
 
--- ── PROMOTIONS ───────────────────────────────────────────────
+-- Promotions
 CREATE TABLE IF NOT EXISTS promotions (
     discount_percent     REAL    NOT NULL,
     start_date           TEXT    NOT NULL,
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS promotions (
     target_category_name TEXT
 );
 
--- ── DEFECTIVE REPORTS ────────────────────────────────────────
+-- Defective reports
 CREATE TABLE IF NOT EXISTS defective_reports (
     product_id  INTEGER NOT NULL,
     quantity    INTEGER NOT NULL,

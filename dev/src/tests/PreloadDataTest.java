@@ -29,8 +29,7 @@ class PreloadDataTest {
         new PreloadData(controller).load();
     }
 
-    // ── CATALOG ─────────────────────────────────────────────
-
+    // CATALOG
     @Test
     void loadCreates5Products() {
         assertNotNull(controller.getProduct(1));
@@ -60,8 +59,7 @@ class PreloadDataTest {
         assertEquals(20, p.minStockThreshold());
     }
 
-    // ── STOCK ───────────────────────────────────────────────
-
+    // STOCK
     @Test
     void eachProductHas2StockItems() {
         for (int id = 1; id <= 5; id++) {
@@ -99,8 +97,7 @@ class PreloadDataTest {
         assertEquals(17, store.quantity());
     }
 
-    // ── CATEGORIES ──────────────────────────────────────────
-
+    // CATEGORIES
     @Test
     void loadCreates3RootCategories() {
         List<CategoryDTO> roots = controller.getRootCategories();
@@ -135,8 +132,7 @@ class PreloadDataTest {
         assertTrue(hasBissli);
     }
 
-    // ── PROMOTIONS ──────────────────────────────────────────
-
+    // PROMOTIONS
     @Test
     void dairyPromotionIsActive() {
         List<PromotionDTO> active = controller.getActivePromotions();
@@ -158,8 +154,7 @@ class PreloadDataTest {
         assertEquals(14.9, price, 0.01);
     }
 
-    // ── LOW STOCK ───────────────────────────────────────────
-
+    // LOW STOCK
     @Test
     void bissliIsLowStock() {
         List<ProductDTO> low = controller.getLowStockProducts();
@@ -182,8 +177,7 @@ class PreloadDataTest {
         }
     }
 
-    // ── DEFECTIVE REPORTS ───────────────────────────────────
-
+    // DEFECTIVE REPORTS
     @Test
     void defectiveReportExistsForMilk1L() {
         List<DefectiveReportDTO> reports = controller.getDefectiveReports(
@@ -194,8 +188,7 @@ class PreloadDataTest {
         assertEquals("EXPIRED", reports.get(0).reason());
     }
 
-    // ── DOUBLE LOAD (reset + reload) ───────────────────────
-
+    // DOUBLE LOAD (reset + reload)
     @Test
     void doubleLoadProducesSameProductCount() {
         // setUp already called load() once
@@ -224,8 +217,7 @@ class PreloadDataTest {
         assertEquals(2, stock.size());
     }
 
-    // ── HELPERS ─────────────────────────────────────────────
-
+    // HELPERS
     private CategoryDTO findRootCategory(String name) {
         for (CategoryDTO root : controller.getRootCategories()) {
             if (root.categoryName().equals(name)) return root;

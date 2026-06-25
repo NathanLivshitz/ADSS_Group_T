@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// Supplier selection logic for the shortage / periodic order flows (UC-f / UC-e).
+// Supplier selection logic for the shortage and periodic order flows.
 public class SupplierLogicTest {
 
     @Test

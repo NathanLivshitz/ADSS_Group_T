@@ -39,26 +39,29 @@ public class InventoryService {
         this.supplierService = supplierService != null ? supplierService : new SupplierService();
     }
 
-    // Seeds the in-memory supplier mock with demo data so the shortage (UC-f) and periodic
-    // (UC-e) order use cases are demonstrable. Called from Main. Suppliers are a mock with no
-    // DB, so this demo data is wired here rather than loaded from the database.
+    // Seeds the in-memory supplier mock with demo data for the shortage and periodic
+    // order flows. Called from Main. Suppliers are in-memory only (no DB),
+    // so this demo data is wired here rather than loaded from the database.
     // Agreements assume the standard preloaded catalog (specIds 1-5); spec 5 (Bissli) is the
-    // low-stock item and is supplied by two suppliers at different prices.
+    // low-stock item and is supplied by three suppliers at different prices.
     public void seedDefaultSuppliers() {
         supplierService.addSupplier(1, "ACME Supplies");
         supplierService.addSupplier(2, "Global Foods");
+        supplierService.addSupplier(3, "Fresh Market");
         supplierService.addAgreement(new SupplyAgreementDTO(1, 1, 10, 5.00));
         supplierService.addAgreement(new SupplyAgreementDTO(2, 1, 5, 8.50));
         supplierService.addAgreement(new SupplyAgreementDTO(3, 1, 20, 3.00));
         supplierService.addAgreement(new SupplyAgreementDTO(4, 2, 30, 2.40));
+        supplierService.addAgreement(new SupplyAgreementDTO(4, 3, 30, 2.30));
         supplierService.addAgreement(new SupplyAgreementDTO(5, 1, 12, 3.50));
         supplierService.addAgreement(new SupplyAgreementDTO(5, 2, 12, 3.20));
+        supplierService.addAgreement(new SupplyAgreementDTO(5, 3, 12, 3.35));
         supplierService.addSchedule(1, "WEDNESDAY");
         supplierService.addSchedule(2, "MONDAY");
+        supplierService.addSchedule(3, "THURSDAY");
     }
 
-    // ── Catalog ──────────────────────────────────────────────
-
+    // Catalog
     public int addProduct(ProductDTO dto) {
         return controller.addProduct(dto);
     }
@@ -71,8 +74,7 @@ public class InventoryService {
         return controller.getLowStockProducts();
     }
 
-    // ── Stock ────────────────────────────────────────────────
-
+    // Stock
     public void addStockItem(StockItemDTO dto) {
         controller.addStockItem(dto);
     }
@@ -85,8 +87,7 @@ public class InventoryService {
         controller.updateQuantity(specId, area, shelf, row, delta);
     }
 
-    // ── Categories ───────────────────────────────────────────
-
+    // Categories
     public int addCategory(String name, int parentCategoryId) {
         return controller.addCategory(name, parentCategoryId);
     }
@@ -99,8 +100,7 @@ public class InventoryService {
         return controller.findCategoryByName(name);
     }
 
-    // ── Promotions ───────────────────────────────────────────
-
+    // Promotions
     public void addPromotion(PromotionDTO dto) {
         controller.addPromotion(dto);
     }
@@ -113,8 +113,7 @@ public class InventoryService {
         return controller.getEffectivePrice(productId);
     }
 
-    // ── Defectives ───────────────────────────────────────────
-
+    // Defectives
     public void reportDefective(int productId, int quantity, String reason) {
         controller.reportDefective(productId, quantity, reason);
     }
@@ -136,8 +135,7 @@ public class InventoryService {
         return result;
     }
 
-    // ── Reports ──────────────────────────────────────────────
-
+    // Reports
     public List<DefectiveReportDTO> getDefectiveReports(LocalDate from, LocalDate to) {
         return controller.getDefectiveReports(from, to);
     }
@@ -156,8 +154,7 @@ public class InventoryService {
         controller.updateShortageReport(specId, orderedQty, unitPrice);
     }
 
-    // ── Cross-module: Ordering ───────────────────────────────
-
+    // Cross-module: Ordering
     /**
      * Order shortage items from the best available supplier.
      * Uses SupplierService which returns DTOs - no domain types touch this layer.
@@ -226,8 +223,7 @@ public class InventoryService {
         return supplierService.getSuppliersWithSchedules();
     }
 
-    // ── Periodic Ordering ────────────────────────────────────
-
+    // Periodic Ordering
     /**
      * Describe periodic orders that would be placed today.
      * Iterates supplier schedules (DTOs), matches agreements (DTOs), builds preview.
@@ -322,8 +318,7 @@ public class InventoryService {
         return result;
     }
 
-    // ── Helpers ──────────────────────────────────────────────
-
+    // Helpers
     /**
      * Calculate the next delivery date from a list of day-of-week names.
      */

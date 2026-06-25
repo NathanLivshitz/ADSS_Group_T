@@ -77,7 +77,6 @@ public class InventoryMenu {
         System.out.print("Choose: ");
     }
 
-    // INV-1
     private void addProduct() {
         System.out.print("Name: ");
         String name = scanner.nextLine().trim();
@@ -103,7 +102,6 @@ public class InventoryMenu {
             System.out.printf("Warning: sell price %.2f is below cost price %.2f.%n", sellPrice, costPrice);
     }
 
-    // INV-2
     private void addStockItem() {
         System.out.print("Product spec ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
@@ -130,7 +128,6 @@ public class InventoryMenu {
         }
     }
 
-    // INV-2
     private void viewProductStock() {
         System.out.print("Product spec ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
@@ -153,7 +150,6 @@ public class InventoryMenu {
                 storeQty, warehouseQty, storeQty + warehouseQty);
     }
 
-    // INV-10
     private void updateStock() {
         System.out.print("Product spec ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
@@ -170,7 +166,6 @@ public class InventoryMenu {
         System.out.println("Stock updated.");
     }
 
-    // INV-3
     private void lowStockAlerts() {
         List<ProductDTO> low = service.getLowStockProducts();
         if (low.isEmpty()) {
@@ -184,7 +179,6 @@ public class InventoryMenu {
         }
     }
 
-    // INV-4
     private void addCategory() {
         System.out.print("Category name: ");
         String name = scanner.nextLine().trim();
@@ -205,7 +199,6 @@ public class InventoryMenu {
         System.out.println("Category added with ID: " + assignedId);
     }
 
-    // INV-5
     private void addPromotion() {
         System.out.print("Discount percent: ");
         double discount = Double.parseDouble(scanner.nextLine().trim());
@@ -243,7 +236,6 @@ public class InventoryMenu {
         System.out.println("Promotion added.");
     }
 
-    // INV-5
     private void viewActivePromotions() {
         List<PromotionDTO> active = service.getActivePromotions();
         if (active.isEmpty()) {
@@ -259,7 +251,6 @@ public class InventoryMenu {
         }
     }
 
-    // INV-5, INV-9
     private void checkEffectivePrice() {
         System.out.print("Product spec ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
@@ -267,7 +258,6 @@ public class InventoryMenu {
         System.out.printf("Effective price: %.2f%n", price);
     }
 
-    // INV-7, INV-11
     private void reportDefective() {
         System.out.print("Product spec ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
@@ -275,14 +265,12 @@ public class InventoryMenu {
         System.out.println("Defective item reported and stock reduced by 1.");
     }
 
-    // INV-11
     private void removeExpiredStock() {
         int removed = service.removeExpiredStock();
         if (removed == 0) System.out.println("No expired stock found.");
         else System.out.println(removed + " expired items removed from stock.");
     }
 
-    // INV-7
     private void locateDefectiveItems() {
         List<DefectiveLocationDTO> defectives = service.getDefectiveItemsWithLocations();
         if (defectives.isEmpty()) {
@@ -298,7 +286,6 @@ public class InventoryMenu {
         }
     }
 
-    // INV-8
     private void defectiveReportByDates() {
         System.out.print("From date (YYYY-MM-DD): ");
         LocalDate from = LocalDate.parse(scanner.nextLine().trim());
@@ -316,7 +303,6 @@ public class InventoryMenu {
         }
     }
 
-    // INV-6
     private void generateInventoryReport() {
         System.out.print("Filter by categories? (y/n): ");
         String filterChoice = scanner.nextLine().trim().toLowerCase();
@@ -351,11 +337,10 @@ public class InventoryMenu {
     }
 
     private void loadTestData() {
-        preloadData.load();
+        preloadData.loadFresh();
         System.out.println("Test data loaded (previous data cleared).");
     }
 
-    // UC-f
     private void orderDueToShortage() {
         List<ProductDTO> shortage = service.getLowStockProducts();
         if (shortage.isEmpty()) { System.out.println("No low-stock products."); return; }
@@ -375,7 +360,6 @@ public class InventoryMenu {
         System.out.printf("Order #%d sent. Total: %.2f%n", order.orderId(), order.totalPrice());
     }
 
-    // UC-e
     private void orderOnTimePeriod() {
         List<SupplierScheduleDTO> scheduled = service.getSuppliersWithSchedules();
         if (scheduled.isEmpty()) { System.out.println("No suppliers with fixed delivery schedules."); return; }
@@ -392,8 +376,7 @@ public class InventoryMenu {
                     o.orderId(), o.supplierId(), o.expectedDeliveryDate(), o.totalPrice());
     }
 
-    // ── HELPERS ──────────────────────────────────────────────
-
+    // HELPERS
     private ProductDTO findProduct(int productId) {
         try {
             return service.getProduct(productId);

@@ -6,28 +6,15 @@ import java.util.List;
 
 public interface IDefectiveReportRepository {
 
-    /**
-     * Persists a new defective/expired report.
-     * Called by InventoryController.reportDefective() and removeExpiredStock().
-     */
+    // Persists a new defective/expired report.
     void add(DefectiveReport report);
 
-    /**
-     * Returns all defective reports.
-     * Called by InventoryController.getDefectiveItemsWithLocations().
-     */
+    // Returns all defective reports.
     List<DefectiveReport> findAll();
 
-    /**
-     * Returns reports whose reportDate falls within [from, to] inclusive.
-     * Date filtering happens here - DAO will mirror this with a WHERE clause.
-     * Called by InventoryController.getDefectiveReports(from, to).
-     */
+    // Returns reports whose reportDate falls within [from, to] inclusive.
     List<DefectiveReport> findByDateRange(LocalDate from, LocalDate to);
 
-    /**
-     * Clears all defective reports.
-     * Called by InventoryController.reset().
-     */
+    // Clears all defective reports.
     void clear();
 }

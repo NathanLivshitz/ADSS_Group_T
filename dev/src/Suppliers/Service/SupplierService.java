@@ -28,8 +28,7 @@ public class SupplierService {
         this.supplierSystem = supplierSystem;
     }
 
-    // ── ORDER PROPOSALS ──────────────────────────────────────
-
+    // ORDER PROPOSALS
     /** Create an order proposal; returns DTO. */
     public OrderProposalDTO createOrderProposal(int productSpecId, int requiredQty) {
         OrderProposal proposal = supplierSystem.createOrderProposal(productSpecId, requiredQty);
@@ -42,8 +41,7 @@ public class SupplierService {
         return proposal != null ? toOrderProposalDTO(proposal) : null;
     }
 
-    // ── ORDERS ───────────────────────────────────────────────
-
+    // ORDERS
     /** Create an order from a proposal; returns DTO. */
     public OrderSummaryDTO createOrder(int proposalId) {
         OrderProposal proposal = supplierSystem.getOrderProposal(proposalId);
@@ -63,8 +61,7 @@ public class SupplierService {
         return toOrderSummaryDTO(registered);
     }
 
-    // ── SUPPLIERS ────────────────────────────────────────────
-
+    // SUPPLIERS
     /** Get all suppliers; returns DTOs. */
     public List<SupplierScheduleDTO> getSuppliers() {
         return supplierSystem.getSuppliers().stream()
@@ -78,8 +75,7 @@ public class SupplierService {
         return s.getSupplierID();
     }
 
-    // ── AGREEMENTS & SCHEDULES ───────────────────────────────
-
+    // AGREEMENTS & SCHEDULES
     /** Add a supply agreement via DTO - no Suppliers.Domain types cross the boundary. */
     public void addAgreement(SupplyAgreementDTO dto) {
         Supplier s = findSupplierById(dto.supplierId());
@@ -112,8 +108,7 @@ public class SupplierService {
                 .collect(Collectors.toList());
     }
 
-    // ── DTO CONVERSION HELPERS ───────────────────────────────
-
+    // DTO CONVERSION HELPERS
     private OrderProposalDTO toOrderProposalDTO(OrderProposal p) {
         return new OrderProposalDTO(
             p.getOrderProposalId(),

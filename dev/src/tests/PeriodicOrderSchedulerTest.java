@@ -88,8 +88,7 @@ class PeriodicOrderSchedulerTest {
         return null;
     }
 
-    // ── TESTS ──────────────────────────────────────────────
-
+    // TESTS
     @Test
     void checkAndPlacePeriodicOrders_returnsOrdersWhenTriggerDayMatches() {
         List<OrderSummaryDTO> placed = service.checkAndPlacePeriodicOrders(1);

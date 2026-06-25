@@ -8,8 +8,7 @@ import java.time.LocalDate;
 
 class DomainEdgeCaseTest {
 
-    // ── ProductSpec ─────────────────────────────────────────
-
+    // ProductSpec
     @Test
     void productSpecNullNameThrows() {
         Category cat = new Category("Test");
@@ -144,15 +143,13 @@ class DomainEdgeCaseTest {
         assertNull(spec.getCategory());
     }
 
-    // ── Product ─────────────────────────────────────────────
-
+    // Product
     @Test
     void productNullSpecThrows() {
         assertThrows(IllegalArgumentException.class, () -> new Product(1, null));
     }
 
-    // ── StockItem ───────────────────────────────────────────
-
+    // StockItem
     @Test
     void stockItemNullSpecThrows() {
         assertThrows(IllegalArgumentException.class,
@@ -224,8 +221,7 @@ class DomainEdgeCaseTest {
         assertEquals(0, item.getQuantity());
     }
 
-    // ── Category ────────────────────────────────────────────
-
+    // Category
     @Test
     void categoryNullNameThrows() {
         assertThrows(IllegalArgumentException.class, () -> new Category(null));
@@ -254,8 +250,7 @@ class DomainEdgeCaseTest {
         assertTrue(root.getAllProducts().isEmpty());
     }
 
-    // ── Promotion ───────────────────────────────────────────
-
+    // Promotion
     @Test
     void promotionZeroDiscountThrows() {
         Category cat = new Category("Test");
@@ -362,8 +357,7 @@ class DomainEdgeCaseTest {
         assertFalse(promo.appliesTo(spec));
     }
 
-    // ── DefectiveReport ─────────────────────────────────────
-
+    // DefectiveReport
     @Test
     void defectiveReportZeroProductIdThrows() {
         assertThrows(IllegalArgumentException.class,
@@ -424,8 +418,7 @@ class DomainEdgeCaseTest {
         assertEquals("DEFECTIVE", r.getReason());
     }
 
-    // ── InventoryReport ─────────────────────────────────────
-
+    // InventoryReport
     @Test
     void inventoryReportNullDateThrows() {
         assertThrows(IllegalArgumentException.class,
