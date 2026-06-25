@@ -351,7 +351,7 @@ public class InventoryMenu {
     }
 
     private void loadTestData() {
-        preloadData.load();
+        preloadData.loadFresh();
         System.out.println("Test data loaded (previous data cleared).");
     }
 
