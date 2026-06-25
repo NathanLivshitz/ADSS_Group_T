@@ -2,7 +2,10 @@ package Inventory.Domain.Repository;
 
 import Inventory.Data.DAO.IPromotionDAO;
 import Inventory.DTO.PromotionDTO;
+import Inventory.Domain.Category;
+import Inventory.Domain.ProductSpec;
 import Inventory.Domain.Promotion;
+import java.time.LocalDate;
 import java.util.*;
 
 public class PromotionRepository implements IPromotionRepository {
@@ -28,6 +31,26 @@ public class PromotionRepository implements IPromotionRepository {
     @Override
     public void clear() {
         promotions.clear();
+        dao.deleteAll();
+    }
+
+    // specRepo and categoryRepo must be hydrated first
+    public void hydrate(IProductSpecRepository specRepo, ICategoryRepository categoryRepo) {
+        List<PromotionDTO> dtos = dao.findAll();
+        for (PromotionDTO dto : dtos) {
+            ProductSpec targetSpec = (dto.targetSpecId() != 0)
+                ? specRepo.findById(dto.targetSpecId()) : null;
+            Category targetCat = (dto.targetCategoryId() != 0)
+                ? categoryRepo.findById(dto.targetCategoryId()) : null;
+            Promotion promo = new Promotion(
+                dto.discountPercent(),
+                LocalDate.parse(dto.startDate()),
+                LocalDate.parse(dto.endDate()),
+                targetSpec,
+                targetCat
+            );
+            promotions.add(promo);
+        }
     }
 
     private PromotionDTO toDTO(Promotion p) {

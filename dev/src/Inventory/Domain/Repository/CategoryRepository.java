@@ -15,6 +15,26 @@ public class CategoryRepository implements ICategoryRepository {
         this.dao = dao;
     }
 
+    // rebuilds in-memory state; findAll() returns rows ASC so parents arrive first
+    public void hydrate() {
+        List<CategoryDTO> dtos = dao.findAll();
+        int maxId = 0;
+        for (CategoryDTO dto : dtos) {
+            Category parent = (dto.parentCategoryId() > 0)
+                ? categories.get(dto.parentCategoryId())
+                : null;
+            Category cat = new Category(dto.categoryName(), parent);
+            cat.setCategoryId(dto.categoryId());
+            categories.put(dto.categoryId(), cat);
+            if (dto.categoryId() > maxId) maxId = dto.categoryId();
+        }
+        if (maxId > 0) nextCategoryId = maxId + 1;
+    }
+
+    public Map<Integer, Category> getAllCategoriesMap() {
+        return Collections.unmodifiableMap(categories);
+    }
+
     @Override
     public int add(Category category) {
         int id = nextCategoryId++;

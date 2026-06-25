@@ -7,4 +7,5 @@ import java.util.*;
 public class StubPromotionDAO implements IPromotionDAO {
     @Override public void insert(PromotionDTO dto) {}
     @Override public List<PromotionDTO> findAll() { return Collections.emptyList(); }
+    @Override public void deleteAll() {}
 }

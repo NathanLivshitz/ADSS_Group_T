@@ -39,6 +39,20 @@ public class DefectiveReportRepository implements IDefectiveReportRepository {
     @Override
     public void clear() {
         reports.clear();
+        dao.deleteAll();
+    }
+
+    public void hydrate() {
+        List<DefectiveReportDTO> dtos = dao.findAll();
+        for (DefectiveReportDTO dto : dtos) {
+            DefectiveReport r = new DefectiveReport(
+                dto.specId(),
+                dto.quantity(),
+                dto.reason(),
+                LocalDate.parse(dto.reportDate())
+            );
+            reports.add(r);
+        }
     }
 
     private DefectiveReportDTO toDTO(DefectiveReport r) {

@@ -38,8 +38,7 @@ public class InventoryController {
         defectiveRepo.clear();
     }
 
-    // ── CATALOG ──────────────────────────────────────────────
-
+    // CATALOG
     public int addProduct(ProductDTO dto) {
         Category category = categoryRepo.findById(dto.categoryId());
         if (category == null)
@@ -65,13 +64,20 @@ public class InventoryController {
         return result;
     }
 
-    // ── STOCK ────────────────────────────────────────────────
-
+    // STOCK
     public void addStockItem(StockItemDTO dto) {
         ProductSpec spec = productSpecRepo.findById(dto.specId());
         if (spec == null)
             throw new IllegalArgumentException("No product with specId " + dto.specId());
         Area area = Area.valueOf(dto.area().toUpperCase());
+        // if this location already holds stock, add to it instead of inserting a duplicate row
+        for (StockItem existing : stockItemRepo.findBySpec(spec)) {
+            if (existing.getArea() == area && existing.getShelfNumber() == dto.shelf()
+                    && existing.getRowNumber() == dto.row()) {
+                updateQuantity(dto.specId(), dto.area(), dto.shelf(), dto.row(), dto.quantity());
+                return;
+            }
+        }
         LocalDate expiry = (dto.expiryDate() != null && !dto.expiryDate().isEmpty())
                 ? LocalDate.parse(dto.expiryDate()) : null;
         List<Integer> productIds = new ArrayList<>();
@@ -83,6 +89,8 @@ public class InventoryController {
         StockItem item = new StockItem(spec, area, dto.shelf(), dto.row(), dto.quantity(), expiry, productIds);
         stockItemRepo.add(item);
         spec.adjustQuantity(dto.quantity());
+        // persist totalQuantity to database
+        productRepo.persistUpdate(spec.getSpecId(), spec.getCostPrice(), spec.getTotalQuantity());
     }
 
     public List<StockItemDTO> getStockForProduct(int specId) {
@@ -120,10 +128,12 @@ public class InventoryController {
             found.removeProductIds(-delta);
         }
         spec.adjustQuantity(delta);
+        stockItemRepo.updateQuantity(found);
+        // persist totalQuantity to database
+        productRepo.persistUpdate(spec.getSpecId(), spec.getCostPrice(), spec.getTotalQuantity());
     }
 
-    // ── CATEGORIES ───────────────────────────────────────────
-
+    // CATEGORIES
     public int addCategory(String name, int parentCategoryId) {
         Category parent = null;
         if (parentCategoryId != 0) {
@@ -146,8 +156,7 @@ public class InventoryController {
         return c != null ? toCategoryDTO(c) : null;
     }
 
-    // ── PROMOTIONS ───────────────────────────────────────────
-
+    // PROMOTIONS
     public void addPromotion(PromotionDTO dto) {
         ProductSpec targetSpec = null;
         Category targetCat = null;
@@ -191,13 +200,15 @@ public class InventoryController {
         return bestPrice;
     }
 
-    // ── DEFECTIVES ───────────────────────────────────────────
-
+    // DEFECTIVES
     public void reportDefective(int productId, int quantity, String reason) {
         if (productSpecRepo.findById(productId) == null)
             throw new IllegalArgumentException("Product spec ID " + productId + " not found");
         defectiveRepo.add(new DefectiveReport(productId, quantity, reason, LocalDate.now()));
         removeStockInternal(productId, quantity);
+        // persist totalQuantity to database
+        ProductSpec spec = productSpecRepo.findById(productId);
+        productRepo.persistUpdate(productId, spec.getCostPrice(), spec.getTotalQuantity());
     }
 
     public Map<Integer, List<StockItemDTO>> getDefectiveItemsWithLocations() {
@@ -229,15 +240,11 @@ public class InventoryController {
         return result;
     }
 
-    // ── REPORTS ──────────────────────────────────────────────
-
+    // REPORTS
     public List<ProductDTO> generateInventoryReport(List<Integer> categoryIds) {
-        List<Product> items;
+        List<ProductSpec> specs;
         if (categoryIds == null || categoryIds.isEmpty()) {
-            items = new ArrayList<>();
-            for (ProductSpec spec : productSpecRepo.findAll()) {
-                items.add(new Product(spec.getSpecId(), spec));
-            }
+            specs = productSpecRepo.findAll();
         } else {
             Set<ProductSpec> specSet = new HashSet<>();
             for (int catId : categoryIds) {
@@ -246,22 +253,23 @@ public class InventoryController {
                     throw new IllegalArgumentException("Category not found: " + catId);
                 specSet.addAll(cat.getAllProducts());
             }
-            items = new ArrayList<>();
+            specs = new ArrayList<>();
             for (ProductSpec spec : productSpecRepo.findAll()) {
-                if (specSet.contains(spec)) items.add(new Product(spec.getSpecId(), spec));
+                if (specSet.contains(spec)) specs.add(spec);
             }
         }
         List<ProductDTO> result = new ArrayList<>();
-        for (Product p : items) result.add(toProductDTO(p));
+        for (ProductSpec spec : specs) result.add(toProductDTO(spec));
         return result;
     }
 
-    // ── STOCK MANAGEMENT ─────────────────────────────────────
-
+    // STOCK MANAGEMENT
     public int removeExpiredStock() {
         int totalRemoved = 0;
         LocalDate today = LocalDate.now();
         List<StockItem> toRemove = new ArrayList<>();
+        // track which specs were affected for persistence
+        Set<Integer> affectedSpecIds = new HashSet<>();
         for (StockItem si : stockItemRepo.findAll()) {
             if (si.getExpiryDate() != null && si.getExpiryDate().isBefore(today) && si.getQuantity() > 0) {
                 int qty = si.getQuantity();
@@ -270,30 +278,54 @@ public class InventoryController {
                     defectiveRepo.add(new DefectiveReport(productId, qty, "EXPIRED", today));
                     si.getSpec().adjustQuantity(-qty);
                     totalRemoved += qty;
+                    affectedSpecIds.add(si.getSpec().getSpecId());
                 }
                 toRemove.add(si);
             }
         }
-        for (StockItem si : toRemove) si.setQuantity(0);
+        for (StockItem si : toRemove) {
+            si.setQuantity(0);
+            stockItemRepo.updateQuantity(si);
+        }
+        // persist totalQuantity for each affected spec
+        for (int specId : affectedSpecIds) {
+            ProductSpec spec = productSpecRepo.findById(specId);
+            productRepo.persistUpdate(specId, spec.getCostPrice(), spec.getTotalQuantity());
+        }
         return totalRemoved;
     }
 
     public void updateShortageReport(int specId, int orderedQty, double unitPrice) {
         ProductSpec spec = productSpecRepo.findById(specId);
-        if (spec != null) {
-                spec.setCostPrice(unitPrice);
-                for (int i = 0; i < orderedQty; i++) {
-                    int productId = productRepo.nextId();
-                    productRepo.add(new Product(productId, spec));
-                }
-                spec.adjustQuantity(orderedQty);
-                return;
+        if (spec == null)
+            throw new IllegalArgumentException("No product found with specId " + specId);
+
+        spec.setCostPrice(unitPrice);
+        List<Integer> newProductIds = new ArrayList<>();
+        for (int i = 0; i < orderedQty; i++) {
+            int productId = productRepo.nextId();
+            productRepo.add(new Product(productId, spec));
+            newProductIds.add(productId);
         }
-        throw new IllegalArgumentException("No product found with specId " + specId);
+        spec.adjustQuantity(orderedQty);
+        productRepo.persistUpdate(specId, spec.getCostPrice(), spec.getTotalQuantity());
+
+        // Place arriving stock into a WAREHOUSE location so getStockForProduct() reflects it.
+        // Reuse an existing WAREHOUSE StockItem if one exists; otherwise create a receiving bay.
+        StockItem receiving = null;
+        for (StockItem si : stockItemRepo.findBySpec(spec)) {
+            if (si.getArea() == Area.WAREHOUSE) { receiving = si; break; }
+        }
+        if (receiving != null) {
+            for (int pid : newProductIds) receiving.addProductId(pid);
+            stockItemRepo.updateQuantity(receiving);
+        } else {
+            StockItem newItem = new StockItem(spec, Area.WAREHOUSE, 1, 1, orderedQty, null, newProductIds);
+            stockItemRepo.add(newItem);
+        }
     }
 
-    // ── CROSS-MODULE SUPPORT ─────────────────────────────────
-
+    // CROSS-MODULE SUPPORT
     /**
      * Looks up a product by its specId. Used by InventoryService.selectProduct()
      * to resolve a specId (from the low-stock list) into a full ProductDTO
@@ -305,8 +337,7 @@ public class InventoryController {
         return spec != null ? toProductDTO(spec) : null;
     }
 
-    // ── PRIVATE HELPERS ──────────────────────────────────────
-
+    // PRIVATE HELPERS
     private Product findProductBySpecId(int specId) {
         ProductSpec spec = productSpecRepo.findById(specId);
         return spec != null ? new Product(specId, spec) : null;
@@ -332,6 +363,7 @@ public class InventoryController {
             int take = Math.min(si.getQuantity(), remaining);
             si.removeProductIds(take);
             si.getSpec().adjustQuantity(-take);
+            stockItemRepo.updateQuantity(si);
             remaining -= take;
         }
         if (remaining > 0)
@@ -340,13 +372,22 @@ public class InventoryController {
 
     private ProductDTO toProductDTO(Product p) {
         ProductSpec s = p.getSpec();
-        return toProductDTO(s);
+        int catId = s.getCategory() != null ? s.getCategory().getCategoryId() : 0;
+        return new ProductDTO(p.getId(), s.getSpecId(), s.getName(), s.getManufacturer(),
+                catId, s.getCostPrice(), s.getSellPrice(), s.getMinStockThreshold(), s.getTotalQuantity());
     }
 
     private ProductDTO toProductDTO(ProductSpec s) {
         int catId = s.getCategory() != null ? s.getCategory().getCategoryId() : 0;
-        return new ProductDTO(0, s.getSpecId(), s.getName(), s.getManufacturer(),
+        return new ProductDTO(findRepresentativeProductId(s), s.getSpecId(), s.getName(), s.getManufacturer(),
                 catId, s.getCostPrice(), s.getSellPrice(), s.getMinStockThreshold(), s.getTotalQuantity());
+    }
+
+    private int findRepresentativeProductId(ProductSpec spec) {
+        for (Product p : productRepo.findAll()) {
+            if (p.getSpec() == spec) return p.getId();
+        }
+        return 0;
     }
 
     private StockItemDTO toStockItemDTO(StockItem si) {

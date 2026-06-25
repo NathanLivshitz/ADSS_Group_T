@@ -5,33 +5,21 @@ import java.util.List;
 
 public interface IProductRepository {
 
-    /**
-     * Returns the next available product ID without consuming it.
-     * Called by InventoryController before constructing a Product (id is final).
-     */
+    // Returns the next available product ID (peek - does not consume).
     int nextId();
 
-    /**
-     * Persists a new product. The product must already carry the ID returned by nextId().
-     * Called by InventoryController.addProduct().
-     */
+    // Persists a new product. The product must already carry the ID returned by nextId().
     void add(Product product);
 
-    /**
-     * Looks up a product by its ID.
-     * Returns null if not found — caller is responsible for null check.
-     */
+    // Looks up a product by its ID. Returns null if not found.
     Product findById(int id);
 
-    /**
-     * GAP-4: Returns all products.
-     * Required by InventoryController.generateInventoryReport().
-     */
+    // Returns all products.
     List<Product> findAll();
 
-    /**
-     * Clears all products from the repository.
-     * Called by InventoryController.reset().
-     */
+    // Clears all products from the repository.
     void clear();
+
+    // Persists updated costPrice and totalQuantity for a product spec to the database.
+    void persistUpdate(int specId, double costPrice, int totalQuantity);
 }

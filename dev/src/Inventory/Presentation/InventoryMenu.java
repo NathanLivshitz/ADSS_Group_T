@@ -5,6 +5,7 @@ import Inventory.Data.PreloadData;
 import Inventory.Service.InventoryService;
 import Shared.DTO.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 public class InventoryMenu {
@@ -45,8 +46,10 @@ public class InventoryMenu {
                     case "0":  running = false; break;
                     default:   System.out.println("Invalid option."); break;
                 }
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException | IllegalStateException e) {
                 System.out.println("Error: " + e.getMessage());
+            } catch (DateTimeParseException e) {
+                System.out.println("Error: invalid date format, expected YYYY-MM-DD.");
             }
         }
     }
@@ -74,7 +77,6 @@ public class InventoryMenu {
         System.out.print("Choose: ");
     }
 
-    // INV-1
     private void addProduct() {
         System.out.print("Name: ");
         String name = scanner.nextLine().trim();
@@ -96,9 +98,10 @@ public class InventoryMenu {
 
         int assignedId = service.addProduct(new ProductDTO(0, 0, name, manufacturer, catId, costPrice, sellPrice, minStock, 0));
         System.out.println("Product spec added with ID: " + assignedId);
+        if (sellPrice < costPrice)
+            System.out.printf("Warning: sell price %.2f is below cost price %.2f.%n", sellPrice, costPrice);
     }
 
-    // INV-2
     private void addStockItem() {
         System.out.print("Product spec ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
@@ -125,7 +128,6 @@ public class InventoryMenu {
         }
     }
 
-    // INV-2
     private void viewProductStock() {
         System.out.print("Product spec ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
@@ -148,7 +150,6 @@ public class InventoryMenu {
                 storeQty, warehouseQty, storeQty + warehouseQty);
     }
 
-    // INV-10
     private void updateStock() {
         System.out.print("Product spec ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
@@ -165,7 +166,6 @@ public class InventoryMenu {
         System.out.println("Stock updated.");
     }
 
-    // INV-3
     private void lowStockAlerts() {
         List<ProductDTO> low = service.getLowStockProducts();
         if (low.isEmpty()) {
@@ -173,13 +173,12 @@ public class InventoryMenu {
             return;
         }
         for (ProductDTO p : low) {
-            System.out.printf("  [specId=%d] %s (%s) — total=%d, min=%d%n",
+            System.out.printf("  [specId=%d] %s (%s) - total=%d, min=%d%n",
                     p.specId(), p.name(), p.manufacturer(),
                     p.totalQuantity(), p.minStockThreshold());
         }
     }
 
-    // INV-4
     private void addCategory() {
         System.out.print("Category name: ");
         String name = scanner.nextLine().trim();
@@ -200,7 +199,6 @@ public class InventoryMenu {
         System.out.println("Category added with ID: " + assignedId);
     }
 
-    // INV-5
     private void addPromotion() {
         System.out.print("Discount percent: ");
         double discount = Double.parseDouble(scanner.nextLine().trim());
@@ -238,7 +236,6 @@ public class InventoryMenu {
         System.out.println("Promotion added.");
     }
 
-    // INV-5
     private void viewActivePromotions() {
         List<PromotionDTO> active = service.getActivePromotions();
         if (active.isEmpty()) {
@@ -249,12 +246,11 @@ public class InventoryMenu {
             String target = p.targetSpecId() != 0
                     ? "Product: " + p.targetProductName()
                     : "Category: " + p.targetCategoryName();
-            System.out.printf("  %.0f%% off — %s to %s — %s%n",
+            System.out.printf("  %.0f%% off - %s to %s - %s%n",
                     p.discountPercent(), p.startDate(), p.endDate(), target);
         }
     }
 
-    // INV-5, INV-9
     private void checkEffectivePrice() {
         System.out.print("Product spec ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
@@ -262,7 +258,6 @@ public class InventoryMenu {
         System.out.printf("Effective price: %.2f%n", price);
     }
 
-    // INV-7, INV-11
     private void reportDefective() {
         System.out.print("Product spec ID: ");
         int productId = Integer.parseInt(scanner.nextLine().trim());
@@ -270,14 +265,12 @@ public class InventoryMenu {
         System.out.println("Defective item reported and stock reduced by 1.");
     }
 
-    // INV-11
     private void removeExpiredStock() {
         int removed = service.removeExpiredStock();
         if (removed == 0) System.out.println("No expired stock found.");
         else System.out.println(removed + " expired items removed from stock.");
     }
 
-    // INV-7
     private void locateDefectiveItems() {
         List<DefectiveLocationDTO> defectives = service.getDefectiveItemsWithLocations();
         if (defectives.isEmpty()) {
@@ -285,7 +278,7 @@ public class InventoryMenu {
             return;
         }
         for (DefectiveLocationDTO entry : defectives) {
-            System.out.printf("  Product spec ID %d:%n", entry.productId());
+            System.out.printf("  Product spec ID %d:%n", entry.specId());
             for (StockItemDTO si : entry.locations()) {
                 System.out.printf("    %s shelf=%d row=%d qty=%d%n",
                         si.area(), si.shelf(), si.row(), si.quantity());
@@ -293,7 +286,6 @@ public class InventoryMenu {
         }
     }
 
-    // INV-8
     private void defectiveReportByDates() {
         System.out.print("From date (YYYY-MM-DD): ");
         LocalDate from = LocalDate.parse(scanner.nextLine().trim());
@@ -307,11 +299,10 @@ public class InventoryMenu {
         }
         for (DefectiveReportDTO r : reports) {
             System.out.printf("  Product spec ID=%d qty=%d reason=%s date=%s%n",
-                    r.productId(), r.quantity(), r.reason(), r.reportDate());
+                    r.specId(), r.quantity(), r.reason(), r.reportDate());
         }
     }
 
-    // INV-6
     private void generateInventoryReport() {
         System.out.print("Filter by categories? (y/n): ");
         String filterChoice = scanner.nextLine().trim().toLowerCase();
@@ -330,7 +321,7 @@ public class InventoryMenu {
         }
 
         List<ProductDTO> items = service.generateInventoryReport(categoryIds);
-        System.out.printf("Inventory Report — %s (%d items)%n", LocalDate.now(), items.size());
+        System.out.printf("Inventory Report - %s (%d items)%n", LocalDate.now(), items.size());
         for (ProductDTO p : items) {
             List<StockItemDTO> stock = service.getStockForProduct(p.specId());
             int storeQty = 0, warehouseQty = 0;
@@ -340,23 +331,22 @@ public class InventoryMenu {
             }
             int total = storeQty + warehouseQty;
             String status = total == 0 ? "OUT" : total < p.minStockThreshold() ? "LOW" : "OK";
-            System.out.printf("  [specId=%d] %s (%s) — store=%d warehouse=%d total=%d [%s]%n",
+            System.out.printf("  [specId=%d] %s (%s) - store=%d warehouse=%d total=%d [%s]%n",
                     p.specId(), p.name(), p.manufacturer(), storeQty, warehouseQty, total, status);
         }
     }
 
     private void loadTestData() {
-        preloadData.load();
+        preloadData.loadFresh();
         System.out.println("Test data loaded (previous data cleared).");
     }
 
-    // UC-f
     private void orderDueToShortage() {
-        List<ProductDTO> shortage = service.orderShortageFromSupplier();
+        List<ProductDTO> shortage = service.getLowStockProducts();
         if (shortage.isEmpty()) { System.out.println("No low-stock products."); return; }
         System.out.println("Low-stock products:");
         for (ProductDTO p : shortage)
-            System.out.printf("  [specId=%d] %s — qty=%d, min=%d%n",
+            System.out.printf("  [specId=%d] %s - qty=%d, min=%d%n",
                     p.specId(), p.name(), p.totalQuantity(), p.minStockThreshold());
         System.out.print("Enter specId to order: ");
         int specId = Integer.parseInt(scanner.nextLine().trim());
@@ -370,7 +360,6 @@ public class InventoryMenu {
         System.out.printf("Order #%d sent. Total: %.2f%n", order.orderId(), order.totalPrice());
     }
 
-    // UC-e
     private void orderOnTimePeriod() {
         List<SupplierScheduleDTO> scheduled = service.getSuppliersWithSchedules();
         if (scheduled.isEmpty()) { System.out.println("No suppliers with fixed delivery schedules."); return; }
@@ -383,12 +372,11 @@ public class InventoryMenu {
         List<OrderSummaryDTO> placed = service.submitAllPeriodicOrders();
         System.out.printf("%d periodic order(s) sent.%n", placed.size());
         for (OrderSummaryDTO o : placed)
-            System.out.printf("  Order #%d → supplier %d, delivery %s, total %.2f%n",
+            System.out.printf("  Order #%d -> supplier %d, delivery %s, total %.2f%n",
                     o.orderId(), o.supplierId(), o.expectedDeliveryDate(), o.totalPrice());
     }
 
-    // ── HELPERS ──────────────────────────────────────────────
-
+    // HELPERS
     private ProductDTO findProduct(int productId) {
         try {
             return service.getProduct(productId);

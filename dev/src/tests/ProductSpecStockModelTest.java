@@ -13,12 +13,12 @@ public class ProductSpecStockModelTest {
 
     @Test
     void addProductRegistersSpecAndAddStockCreatesRealProducts() {
-        ProductRepository productRepo = new ProductRepository(new StubProductDAO());
-        StockItemRepository stockRepo = new StockItemRepository(new StubStockItemDAO());
+        ProductRepository productRepo = new ProductRepository(new StubProductInstanceDAO(), new StubProductDAO());
+        StockItemRepository stockRepo = new StockItemRepository(new StubStockItemDAO(), new StubStockItemProductsDAO());
         CategoryRepository categoryRepo = new CategoryRepository(new StubCategoryDAO());
 
         InventoryController controller = new InventoryController(
-                new ProductSpecRepository(),
+                new ProductSpecRepository(new StubProductDAO()),
                 productRepo,
                 stockRepo,
                 categoryRepo,

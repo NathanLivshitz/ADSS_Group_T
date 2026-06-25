@@ -1,8 +1,7 @@
 package Inventory.Domain.Repository;
 
 import Inventory.Data.DAO.IProductDAO;
-import Inventory.DTO.ProductDTO;
-import Inventory.Domain.Category;
+import Inventory.Data.DAO.IProductInstanceDAO;
 import Inventory.Domain.Product;
 import Inventory.Domain.ProductSpec;
 import java.util.*;
@@ -11,21 +10,24 @@ public class ProductRepository implements IProductRepository {
 
     private final Map<Integer, Product> catalog = new HashMap<>();
     private int nextProductId = 1;
-    private final IProductDAO dao;
+    private final IProductInstanceDAO instanceDao;
+    private final IProductDAO specDao;
 
-    public ProductRepository(IProductDAO dao) {
-        this.dao = dao;
+    public ProductRepository(IProductInstanceDAO instanceDao, IProductDAO specDao) {
+        this.instanceDao = instanceDao;
+        this.specDao = specDao;
     }
 
     @Override
     public int nextId() {
-        return nextProductId++;
+        return nextProductId;
     }
 
     @Override
     public void add(Product product) {
         catalog.put(product.getId(), product);
-        dao.insert(toDTO(product));
+        instanceDao.insert(product.getId(), product.getSpec().getSpecId());
+        if (product.getId() >= nextProductId) nextProductId = product.getId() + 1;
     }
 
     @Override
@@ -44,10 +46,22 @@ public class ProductRepository implements IProductRepository {
         nextProductId = 1;
     }
 
-    private ProductDTO toDTO(Product p) {
-        ProductSpec s = p.getSpec();
-        int catId = s.getCategory() != null ? s.getCategory().getCategoryId() : 0;
-        return new ProductDTO(p.getId(), s.getSpecId(), s.getName(), s.getManufacturer(),
-                catId, s.getCostPrice(), s.getSellPrice(), s.getMinStockThreshold(), s.getTotalQuantity());
+    @Override
+    public void persistUpdate(int specId, double costPrice, int totalQuantity) {
+        specDao.updateSpec(specId, costPrice, totalQuantity);
+    }
+
+    // specRepo must be hydrated first
+    public void hydrate(IProductSpecRepository specRepo) {
+        for (ProductSpec spec : specRepo.findAll()) {
+            List<Integer> productIds = instanceDao.findAllBySpecId(spec.getSpecId());
+            for (Integer productId : productIds) {
+                Product product = new Product(productId, spec);
+                catalog.put(productId, product);
+                if (productId >= nextProductId) {
+                    nextProductId = productId + 1;
+                }
+            }
+        }
     }
 }

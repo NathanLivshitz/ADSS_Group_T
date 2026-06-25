@@ -9,8 +9,8 @@ public class Category {
     private List<Category> subCategories;
     private List<ProductSpec> products;
 
-    // ── IDENTITY (GAP-3 diagram amendment) ───────────────────
-    private int categoryId;     // surrogate key — assigned by repository after add()
+    // Identity
+    private int categoryId;     // surrogate key - assigned by repository after add()
 
     public Category(String name) {
         this(name, null);
@@ -25,7 +25,7 @@ public class Category {
         this.parent = parent;
         this.subCategories = new ArrayList<>();
         this.products = new ArrayList<>();
-        
+
         // Automatically add to parent's subcategories if parent exists
         if (parent != null) {
             parent.subCategories.add(this);
@@ -44,16 +44,7 @@ public class Category {
         products.add(product);
     }
 
-    // ── IDENTITY ──────────────────────────────────────────────
-
-    /**
-     * GAP-3: Surrogate key for Category.
-     * Called by repository immediately after the category is registered.
-     * Load order rule: categories must be inserted/loaded in ascending categoryId
-     * order so that parentCategoryId is always resolvable in a single forward pass.
-     */
     public int getCategoryId() {
-        // TODO: return categoryId
         return categoryId;
     }
 
@@ -61,8 +52,6 @@ public class Category {
         if (categoryId <= 0) throw new IllegalArgumentException("categoryId must be > 0");
         this.categoryId = categoryId;
     }
-
-    // ── TREE ──────────────────────────────────────────────────
 
     public List<ProductSpec> getAllProducts() {
         List<ProductSpec> all = new ArrayList<>(products);
@@ -72,4 +61,3 @@ public class Category {
         return all;
     }
 }
-
